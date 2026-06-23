@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cine Demo</title>
+
+<style>
+body{
+margin:0;
+background:#0d0d0d;
+font-family:Arial,sans-serif;
+color:white;
+}
+
+.header{
+padding:15px;
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.logo{
+color:#ffb300;
+font-size:28px;
+font-weight:bold;
+}
+
+.search{
+flex:1;
+padding:12px;
+border:none;
+border-radius:25px;
+background:#1f1f1f;
+color:white;
+}
+
+.banner{
+margin:15px;
+position:relative;
+}
+
+.banner img{
+width:100%;
+height:260px;
+object-fit:cover;
+border-radius:15px;
+}
+
+.banner-info{
+position:absolute;
+bottom:20px;
+left:20px;
+}
+
+.banner-info h1{
+margin:0;
+font-size:32px;
+}
+
+.banner-info p{
+margin:10px 0;
+max-width:250px;
+}
+
+.btn{
+background:#ffb300;
+color:black;
+padding:12px 20px;
+border:none;
+border-radius:30px;
+font-weight:bold;
+}
+
+.section{
+padding:15px;
+}
+
+.section h2{
+margin-top:0;
+}
+
+/* 🔥 BLOQUE +18 */
+.age-warning{
+margin:15px;
+background:#b30000;
+padding:15px;
+border-radius:12px;
+text-align:center;
+font-weight:bold;
+}
+
+.carousel{
+display:flex;
+overflow-x:auto;
+gap:12px;
+padding-bottom:10px;
+}
+
+.card{
+min-width:160px;
+background:#1a1a1a;
+border-radius:12px;
+overflow:hidden;
+}
+
+.card img{
+width:100%;
+height:220px;
+object-fit:cover;
+}
+
+.card-content{
+padding:10px;
+}
+
+.card h3{
+margin:0;
+font-size:16px;
+}
+
+.card p{
+font-size:13px;
+color:#ccc;
+}
+
+.card button{
+width:100%;
+margin-top:8px;
+background:#ffb300;
+border:none;
+padding:10px;
+border-radius:8px;
+font-weight:bold;
+}
+
+.vip{
+margin:15px;
+background:linear-gradient(90deg,#ffb300,#ff8800);
+padding:15px;
+border-radius:15px;
+color:black;
+font-weight:bold;
+text-align:center;
+}
+
+.bottom{
+position:fixed;
+bottom:0;
+left:0;
+right:0;
+background:#111;
+display:flex;
+justify-content:space-around;
+padding:12px;
+border-top:1px solid #333;
+}
+
+.bottom div{
+text-align:center;
+font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<div class="logo">🎬 CineDemo</div>
+<input class="search" placeholder="Buscar...">
+</div>
+
+<div class="banner">
+<img src="https://picsum.photos/800/400?random=1">
+<div class="banner-info">
+<h1>Película Destacada</h1>
+<p>Contenido de demostración para tu futura plataforma.</p>
+<button class="btn">Ver ahora</button>
+</div>
+</div>
+
+<!-- 🔞 BLOQUE +18 -->
+<div class="age-warning">
+🔞 +18 CONTENIDO DE PRUEBA
+</div>
+
+<div class="section">
+<h2>Películas</h2>
+
+<div class="carousel">
+
+<div class="card">
+<img src="https://picsum.photos/300/450?random=2">
+<div class="card-content">
+<h3>Acción Total</h3>
+<p>Demo de catálogo.</p>
+<button>📺 Ver con anuncio</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://picsum.photos/300/450?random=3">
+<div class="card-content">
+<h3>Terror Nocturno</h3>
+<p>Demo de catálogo.</p>
+<button>📺 Ver con anuncio</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://picsum.photos/300/450?random=4">
+<div class="card-content">
+<h3>Comedia Extrema</h3>
+<p>Demo de catálogo.</p>
+<button>📺 Ver con anuncio</button>
+</div>
+</div>
+
+<div class="card">
+<img src="https://picsum.photos/300/450?random=5">
+<div class="card-content">
+<h3>Aventura Final</h3>
+<p>Demo de catálogo.</p>
+<button>📺 Ver con anuncio</button>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="vip">
+💎 VIP - Acceso Premium
+</div>
+
+<div style="height:90px"></div>
+
+<div class="bottom">
+<div>🏠<br>Inicio</div>
+<div>👤<br>Perfil</div>
+<div>💎<br>Premium</div>
+</div>
+
+</body>
+</html>
