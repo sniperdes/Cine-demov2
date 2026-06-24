@@ -194,7 +194,14 @@ font-size:14px;
 <div class="card-content">
 <h3>Acción Total</h3>
 <p>Demo de catálogo.</p>
-<button>📺 Ver con anuncio</button>
+
+<button onclick="abrirFicha(
+'Acción Total',
+'Un ex agente debe regresar a la acción para detener una amenaza global.',
+'https://picsum.photos/600/900?random=2'
+)">
+📖 Ver detalles
+</button>
 </div>
 </div>
 
@@ -239,6 +246,68 @@ font-size:14px;
 <div>👤<br>Perfil</div>
 <div>💎<br>Premium</div>
 </div>
+<div id="ficha" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0d0d0d;
+overflow:auto;
+z-index:9999;
+padding:20px;
+box-sizing:border-box;
+">
 
+<h1 id="tituloFicha"></h1>
+
+<img id="imagenFicha"
+style="
+width:100%;
+border-radius:15px;
+max-height:300px;
+object-fit:cover;
+">
+
+<p id="descripcionFicha"></p>
+
+<button class="btn">📺 Ver con anuncio</button>
+
+<button class="btn" style="margin-top:10px;">
+💎 VIP
+</button>
+
+<button
+class="btn"
+onclick="cerrarFicha()"
+style="margin-top:10px;background:#555;color:white;">
+⬅ Volver
+</button>
+
+</div>
+
+<script>
+
+function abrirFicha(titulo, descripcion, imagen){
+
+document.getElementById("tituloFicha").innerText=titulo;
+
+document.getElementById("descripcionFicha").innerText=descripcion;
+
+document.getElementById("imagenFicha").src=imagen;
+
+document.getElementById("ficha").style.display="block";
+
+}
+
+function cerrarFicha(){
+
+document.getElementById("ficha").style.display="none";
+
+}
+
+</script>
+  
 </body>
 </html>
