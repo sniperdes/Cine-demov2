@@ -319,11 +319,85 @@ document.getElementById("ficha").style.display="block";
 
 function cerrarFicha(){
 
+ function mostrarAnuncio(){
+
+document.getElementById("anuncio").style.display="block";
+
+let tiempo = 5;
+
+document.getElementById("contador").innerText=tiempo;
+
+document.getElementById("btnDesbloqueado").style.display="none";
+
+let intervalo = setInterval(function(){
+
+tiempo--;
+
+document.getElementById("contador").innerText=tiempo;
+
+if(tiempo<=0){
+
+clearInterval(intervalo);
+
+document.getElementById("contador").innerHTML=
+"✅ Acceso desbloqueado";
+
+document.getElementById("btnDesbloqueado").style.display="block";
+
+}
+
+},1000);
+
+}
+
+function cerrarAnuncio(){
+
+document.getElementById("anuncio").style.display="none";
+
+} 
+  
 document.getElementById("ficha").style.display="none";
 
 }
 
 </script>
+
+ <div id="anuncio" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#0d0d0d;
+z-index:10000;
+padding:20px;
+box-sizing:border-box;
+text-align:center;
+">
+
+<h1>📺 Ver anuncio</h1>
+
+<p>
+Para continuar debes esperar unos segundos.
+</p>
+
+<h2 id="contador">5</h2>
+
+<button id="btnDesbloqueado"
+class="btn"
+style="display:none;">
+✅ Ver contenido
+</button>
+
+<button
+class="btn"
+onclick="cerrarAnuncio()"
+style="margin-top:10px;background:#555;color:white;">
+❌ Cancelar
+</button>
+
+ </div> 
   
 </body>
 </html>
