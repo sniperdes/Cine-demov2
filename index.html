@@ -1,511 +1,330 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cine Bot</title>
+    <meta charset="UTF-8">
+    <!-- Corregido: Evita zooms e interacciones accidentales en celulares -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cine Bot</title>
 
-<style>
-body{
-margin:0;
-font-family:Arial;
-background:#0b0b0b;
-color:white;
-}
+    <!-- SDK Oficial de Telegram Mini Apps -->
+    <script src="https://telegram.org"></script>
 
-/* HEADER */
-.header{
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:15px;
-background:#111;
-position:sticky;
-top:0;
-}
+    <style>
+        :root {
+            /* Variables globales integradas con los colores del Telegram del usuario */
+            --bg-color: var(--tg-theme-bg-color, #0b0b0b);
+            --text-color: var(--tg-theme-text-color, #ffffff);
+            --hint-color: var(--tg-theme-hint-color, #aaaaaa);
+            --button-bg: var(--tg-theme-button-color, #1f1f1f);
+            --button-text: var(--tg-theme-button-text-color, #ffffff);
+        }
 
-.logo{
-color:#e50914;
-font-size:22px;
-font-weight:bold;
-}
-  
-/* MENU */
-.menu{
-display:flex;
-gap:10px;
-overflow-x:auto;
-padding:10px;
-background:#0b0b0b;
-}
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            -webkit-user-select: none; /* Evita que el usuario seleccione texto por error al tocar la pantalla */
+            user-select: none;
+        }
 
-.menu button{
-background:#1f1f1f;
-border:none;
-color:white;
-padding:10px 14px;
-border-radius:20px;
-white-space:nowrap;
-}
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #111;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
 
-/* HOME */
-.section{
-padding:15px;
-}
+        .logo {
+            color: #e50914;
+            font-size: 22px;
+            font-weight: bold;
+        }
+          
+        /* MENU */
+        .menu {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px;
+            background: #0b0b0b;
+            scrollbar-width: none; /* Oculta barra de scroll en Firefox */
+        }
+        .menu::-webkit-scrollbar {
+            display: none; /* Oculta barra de scroll en Chrome/Safari (móviles) */
+        }
 
-.title{
-font-size:18px;
-margin:10px 0;
-color:#e5e5e5;
-}
+        .menu button {
+            background: var(--button-bg);
+            border: none;
+            color: var(--button-text);
+            padding: 10px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-/* CARDS */
-.row{
-display:flex;
-gap:10px;
-overflow-x:auto;
-padding-bottom:10px;
-}
+        /* HOME */
+        .section {
+            padding: 15px;
+        }
 
-.card{
-min-width:140px;
-background:#1a1a1a;
-border-radius:10px;
-overflow:hidden;
-cursor:pointer;
-transition:0.2s;
-}
-.card:hover{
-transform:scale(1.03);
-  }
+        .title {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #e5e5e5;
+        }
 
-.card img{
-width:100%;
-height:200px;
-object-fit:cover;
-}
+        /* CARDS */
+        .row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
 
-.card p{
-margin:5px;
-font-size:13px;
-}
+        .card {
+            min-width: 140px;
+            max-width: 140px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .card:active {
+            transform: scale(0.97); /* Efecto feedback táctil nativo al presionar en celular */
+        }
 
-/* VISTAS */
-.view{
-display:none;
-padding:15px;
-}
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
 
-.active{
-display:block;
-}
-  .modal{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.8);
-justify-content:center;
-align-items:center;
-}
+        .card p {
+            margin: 5px;
+            font-size: 13px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Evita que títulos largos rompan la tarjeta */
+        }
 
-.modal-content{
-background:#111;
-padding:15px;
-width:90%;
-max-width:400px;
-border-radius:12px;
-position:relative;
-}
+        /* VISTAS */
+        .view {
+            display: none;
+            padding: 15px;
+        }
 
-.close{
-position:absolute;
-right:10px;
-top:10px;
-cursor:pointer;
-font-size:20px;
-}
+        .active {
+            display: block;
+        }
 
-.vip{
-background:gold;
-color:black;
-margin-top:10px;
-}
-  .banner-slider{
-width:100%;
-margin-bottom:15px;
-}
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
 
-.banner-slider img{
-width:100%;
-height:220px;
-object-fit:cover;
-border-radius:12px;
-}
-  .banner-dots{
-display:flex;
-justify-content:center;
-gap:8px;
-margin-top:10px;
-margin-bottom:15px;
-}
+        .modal-content {
+            background: #111;
+            padding: 20px;
+            width: 85%;
+            max-width: 400px;
+            border-radius: 12px;
+            position: relative;
+            text-align: center;
+        }
 
-.dot{
-width:10px;
-height:10px;
-border-radius:50%;
-background:#666;
-}
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #aaa;
+        }
 
-.active-dot{
-background:white;
-}
-  .search-box{
-padding:10px;
-background:#111;
-}
+        .btn {
+            display: block;
+            width: 100%;
+            background: #222;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
 
-.search-box input{
-width:100%;
-padding:12px;
-border:none;
-border-radius:8px;
-background:#222;
-color:white;
-font-size:16px;
-box-sizing:border-box;
-}
-</style>
+        .vip {
+            background: gold;
+            color: black;
+        }
+        
+        .btn-volver {
+            background: #333;
+        }
+
+        .banner-slider {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .banner-slider img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .banner-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .active-dot {
+            background: white;
+        }
+
+        /* SEARCH BOX */
+        .search-box {
+            padding: 10px 15px;
+            background: #0b0b0b;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #1a1a1a;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+    </style>
 </head>
 
 <body>
-  <!-- MODAL FICHA -->
-<div id="modal" class="modal">
 
-  <div class="modal-content">
+    <!-- MODAL FICHA -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="cerrarModal()">✖</span>
+            <h2 id="modal-title">Título</h2>
+            <img id="modal-img" src="" style="width:100%; height: 220px; object-fit: cover; border-radius:10px;">
+            <p id="modal-info" style="color: gold; font-weight: bold;">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
+            <p id="modal-desc">Descripción de la película</p>
+            <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
+            <button class="btn vip" onclick="activarVip()">💎 VIP</button>
+            <button class="btn btn-volver" onclick="cerrarModal()">⬅ Volver</button>
+        </div>
+    </div>
 
-    <span class="close" onclick="cerrarModal()">✖</span>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">CINE DEMO</div>
+    </div>
 
-    <h2 id="modal-title">Título</h2>
+    <!-- BUSCADOR -->
+    <div class="search-box">
+        <input type="text" id="buscar" placeholder="🔍 Buscar película..." onkeyup="buscarPelicula()">
+    </div>
 
-<img id="modal-img" src="" style="width:100%; border-radius:10px;">
+    <!-- MENU -->
+    <div class="menu">
+        <button onclick="show('home')">🏠 Inicio</button>
+        <button onclick="show('peliculas')">🎬 Películas</button>
+        <button onclick="show('series')">📺 Series</button>
+        <button onclick="show('anime')">🎌 Anime</button>
+        <button onclick="show('adulto')">🔞 +18</button>
+    </div>
 
-<p id="modal-info">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
+    <!-- HOME -->
+    <div id="home" class="view active">
+        <div class="section">
+            <div class="title">🔥 Destacadas</div>
+            <div class="banner-slider">
+                <img id="banner-img" src="https://picsum.photos/800/400?20">
+            </div>
+            <div class="banner-dots">
+                <span class="dot active-dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            
+            <div class="title">Tendencias</div>
+            <div class="row">
+                <div class="card pelicula" onclick="abrirModal('Acción Total', 'https://picsum.photos/200/300?1', '⭐ 8.5 | 🎭 Acción | 🕒 120 min', 'Película de acción explosiva llena de adrenalina.')">
+                    <img src="https://picsum.photos/200/300?1">
+                    <p>Acción Total</p>
+                </div>
+                <div class="card pelicula" onclick="abrirModal('Terror Nocturno', 'https://picsum.photos/200/300?2', '⭐ 7.2 | 🎭 Terror | 🕒 95 min', 'Una noche aterradora que nadie podrá olvidar.')">
+                    <img src="https://picsum.photos/200/300?2">
+                    <p>Terror Nocturno</p>
+                </div>
+                <div class="card pelicula" onclick="abrirModal('Aventura Final', 'https://picsum.photos/200/300?3', '⭐ 9.0 | 🎭 Aventura | 🕒 145 min', 'Una aventura épica alrededor del mundo.')">
+                    <img src="https://picsum.photos/200/300?3">
+                    <p>Aventura Final</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<p id="modal-desc">Descripción de la película</p>
-    <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
-    <button class="btn vip">💎 VIP</button>
-    <button class="btn" onclick="cerrarModal()">⬅ Volver</button>
+    <!-- GÉNEROS PRINCIPALES -->
+    <div id="peliculas" class="view">
+        <div class="title">🎬 Géneros</div>
+        <div class="row">
+            <div class="card" onclick="show('accion')">
+                <img src="https://picsum.photos/200/300?10">
+                <p>Acción</p>
+            </div>
+            <div class="card" onclick="show('terror')">
+                <img src="https://picsum.photos/200/300?11">
+                <p>Terror</p>
+            </div>
+            <div class="card" onclick="show('romance')">
+                <img src="https://picsum.photos/200/300?12">
+                <p>Romance</p>
+            </div>
+            <div class="card" onclick="show('aventura')">
+                <img src="https://picsum.photos/200/300?13">
+                <p>Aventura</p>
+            </div>
+        </div>
+    </div>
 
-  </div>
-
-</div>
-
-<div class="header">
-<div class="logo">CINE DEMO</div>
-</div>
-<div class="search-box">
-  <input
-    type="text"
-    id="buscar"
-    placeholder="🔍 Buscar película..."
-    onkeyup="buscarPelicula()">
-</div>
-<!-- MENU -->
-<div class="menu">
-<button onclick="show('home')">🏠 Inicio</button>
-<button onclick="show('peliculas')">🎬 Películas</button>
-<button onclick="show('series')">📺 Series</button>
-<button onclick="show('anime')">🎌 Anime</button>
-<button onclick="show('adulto')">🔞 +18</button>
-</div>
-
-<!-- HOME -->
-<div id="home" class="view active">
-<div class="section">
-
-<div class="title">🔥 Destacadas</div>
   
-  <div class="banner-slider">
-  <img id="banner-img" src="https://picsum.photos/800/400?20">
-  </div>
-<div class="banner-dots">
-<span class="dot active-dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-<span class="dot"></span>
-</div>
-<div class="row">
-
-<div class="card"
-onclick="abrirModal(
-'Acción Total',
-'https://picsum.photos/200/300?1',
-'⭐ 8.5 | 🎭 Acción | 🕒 120 min',
-'Película de acción explosiva llena de adrenalina.'
-)">
-<img src="https://picsum.photos/200/300?1">
-<p>Acción Total</p>
-</div>
-
-<div class="card" onclick="abrirModal('Terror Nocturno','https://picsum.photos/200/300?2','Una noche aterradora que nadie podrá olvidar.')">
-<img src="https://picsum.photos/200/300?2">
-<p>Terror Nocturno</p>
-</div>
-
-<div class="card" onclick="abrirModal('Aventura Final','https://picsum.photos/200/300?3','Una aventura épica alrededor del mundo.')">
-<img src="https://picsum.photos/200/300?3">
-<p>Aventura Final</p>
-</div>
-
-</div>
-
-</div>
-</div>
-
-<!-- PELICULAS -->
-<div id="peliculas" class="view">
-
-<div class="title">🎬 Géneros</div>
-
-<div class="row">
-
-<div class="card" onclick="show('accion')">
-<img src="https://picsum.photos/200/300?10">
-<p>Acción</p>
-</div>
-
-<div class="card" onclick="show('terror')">
-<img src="https://picsum.photos/200/300?11">
-<p>Terror</p>
-</div>
-
-<div class="card" onclick="show('romance')">
-<img src="https://picsum.photos/200/300?12">
-<p>Romance</p>
-</div>
-
-<div class="card" onclick="show('aventura')">
-<img src="https://picsum.photos/200/300?13">
-<p>aventura</p>
-</div>
-</div>
-</div>
-<div id="accion" class="view"><button onclick="show('peliculas')">⬅ Volver</button> 
-<div class="card pelicula"
-onclick="abrirModal(
-'John Wick',
-'https://picsum.photos/200/300?30',
-'⭐ 8.5 | 🎭 Acción | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?30">
-  <p>John Wick</p>
-</div>
-
-<div class="card pelicula"
-onclick="abrirModal(
-'mad-max',
-'https://picsum.photos/200/300?31',
-'⭐ 8.5 | 🎭 Acción | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?31">
-  <p>mad-max</p>
-</div>
-</div>
-</div>
-<div id="terror" class="view"><button onclick="show('peliculas')">⬅ Volver</button> 
-<div class="card pelicula"
-onclick="abrirModal(
-'La momia',
-'https://picsum.photos/200/300?34',
-'⭐ 8.5 | 🎭 Terror | 🕒 101 min',
-'Un asesino legendario.'
-)">
-  <img src="https://picsum.photos/200/300?34">
-  <p>La momia</p>
-</div>
-
-<div class="card pelicula"
-onclick="abrirModal(
-'IT',
-'https://picsum.photos/200/300?35',
-'⭐ 8.5 | 🎭 Terror | 🕒 101 min',
-'vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?35">
-  <p>IT</p>
-</div>  
-</div>
-</div>
- <div id="romance" class="view"><button onclick="show('peliculas')">⬅ Volver</button> 
-<div class="card pelicula"
-onclick="abrirModal(
-'mi ultimo regalo',
-'https://picsum.photos/200/300?36',
-'⭐ 8.5 | 🎭 Romance | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?36">
-  <p>mi ultimo regalo</p>
-</div>
-
-<div class="card pelicula"
-onclick="abrirModal(
-'Cuando te encuentre',
-'https://picsum.photos/200/300?37',
-'⭐ 8.5 | 🎭 Romance | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?37">
-  <p>Cuando ye encuentre</p>
-</div>
-</div>
-</div>
-<div id="aventura" class="view"><button onclick="show('peliculas')">⬅ Volver</button> 
-<div class="card pelicula"
-onclick="abrirModal(
-'liberen a wily',
-'https://picsum.photos/200/300?38',
-'⭐ 8.5 | 🎭 aventura | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?38">
-  <p>liberen a wily</p>
-</div>
-
-<div class="card pelicula"
-onclick="abrirModal(
-'El oso',
-'https://picsum.photos/200/300?39',
-'⭐ 8.5 | 🎭 aventura | 🕒 101 min',
-'Un asesino legendario vuelve al combate.'
-)">
-  <img src="https://picsum.photos/200/300?39">
-  <p>El oso</p>
-</div>
-</div>
-</div>
-<!-- SERIES -->
-<div id="series" class="view">
-<div class="title">📺 Series</div>
-</div>
-
-<!-- ANIME -->
-<div id="anime" class="view">
-<div class="title">🎌 Anime</div>
-</div>
-
-<!-- +18 -->
-<div id="adulto" class="view">
-<div class="title">🔞 Contenido +18</div>
-</div>
-
-<script>
-function show(id){
-
-document.querySelectorAll('.view')
-.forEach(v => v.classList.remove('active'));
-
-document.getElementById(id).classList.add('active');
-
-}
-  function abrirModal(titulo, img, info, desc){
-
-document.getElementById("modal-title").innerText = titulo;
-document.getElementById("modal-img").src = img;
-document.getElementById("modal-info").innerText = info;
-document.getElementById("modal-desc").innerText = desc;
-
-document.getElementById("modal").style.display = "flex";
-
-}
-function cerrarModal(){
-document.getElementById("modal").style.display = "none";
-}
-
-function verAnuncio(){
-alert("📺 Simulando anuncio...");
-}
-  
-  const banners = [
-"https://picsum.photos/800/400?20",
-"https://picsum.photos/800/400?21",
-"https://picsum.photos/800/400?22",
-"https://picsum.photos/800/400?23",
-"https://picsum.photos/800/400?24",
-"https://picsum.photos/800/400?25",
-"https://picsum.photos/800/400?26",
-"https://picsum.photos/800/400?27"
-];
-
-let bannerActual = 0;
-
-function actualizarBanner(){
-
-document.getElementById("banner-img").src =
-banners[bannerActual];
-
-const dots = document.querySelectorAll('.dot');
-
-dots.forEach(dot =>
-dot.classList.remove('active-dot')
-);
-
-dots[bannerActual].classList.add('active-dot');
-
-}
-
-function cambiarBanner(direccion){
-
-bannerActual += direccion;
-
-if(bannerActual >= banners.length){
-bannerActual = 0;
-}
-
-if(bannerActual < 0){
-bannerActual = banners.length - 1;
-}
-
-actualizarBanner();
-
-}
-
-let startX = 0;
-
-const banner = document.getElementById("banner-img");
-
-banner.addEventListener("touchstart", (e) => {
-startX = e.touches[0].clientX;
-});
-
-banner.addEventListener("touchend", (e) => {
-
-let endX = e.changedTouches[0].clientX;
-
-if(startX - endX > 50){
-cambiarBanner(1);
-}
-
-if(endX - startX > 50){
-cambiarBanner(-1);
-}
-
-});
-
-setInterval(() => {
-cambiarBanner(1);
-}, 4000);
-  
-</script>
-
-</body>
-</html>
