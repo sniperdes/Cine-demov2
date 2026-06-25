@@ -327,4 +327,145 @@
         </div>
     </div>
 
-  
+      <!-- SUB-VISTA: ACCIÓN -->
+    <div id="accion" class="view">
+        <button class="btn btn-volver" onclick="show('peliculas')" style="background:#333; color:white; border:none; padding:8px 16px; border-radius:8px; margin-bottom:15px; cursor:pointer;">⬅ Volver</button> 
+        <div class="row">
+            <div class="card pelicula" onclick="abrirModal('John Wick', 'https://picsum.photos', '⭐ 8.5 | 🎭 Acción | 🕒 101 min', 'Un asesino legendario vuelve al combate.')">
+                <img src="https://picsum.photos">
+                <p>John Wick</p>
+            </div>
+            <div class="card pelicula" onclick="abrirModal('Mad Max', 'https://picsum.photos', '⭐ 8.8 | 🎭 Acción | 🕒 120 min', 'Persecuciones brutales en un mundo apocalíptico.')">
+                <img src="https://picsum.photos">
+                <p>Mad Max</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUB-VISTA: TERROR -->
+    <div id="terror" class="view">
+        <button class="btn btn-volver" onclick="show('peliculas')" style="background:#333; color:white; border:none; padding:8px 16px; border-radius:8px; margin-bottom:15px; cursor:pointer;">⬅ Volver</button> 
+        <div class="row">
+            <div class="card pelicula" onclick="abrirModal('La Momia', 'https://picsum.photos', '⭐ 6.5 | 🎭 Terror | 🕒 110 min', 'Una antigua maldición despierta.')">
+                <img src="https://picsum.photos">
+                <p>La Momia</p>
+            </div>
+            <div class="card pelicula" onclick="abrirModal('IT', 'https://picsum.photos', '⭐ 7.9 | 🎭 Terror | 🕒 135 min', 'El payaso maldito vuelve al ataque.')">
+                <img src="https://picsum.photos">
+                <p>IT</p>
+            </div>  
+        </div>
+    </div>
+
+    <!-- SUB-VISTA: ROMANCE -->
+    <div id="romance" class="view">
+        <button class="btn btn-volver" onclick="show('peliculas')" style="background:#333; color:white; border:none; padding:8px 16px; border-radius:8px; margin-bottom:15px; cursor:pointer;">⬅ Volver</button> 
+        <div class="row">
+            <div class="card pelicula" onclick="abrirModal('Mi Último Regalo', 'https://picsum.photos', '⭐ 7.5 | 🎭 Romance | 🕒 105 min', 'Una emotiva historia de amor verdadero.')">
+                <img src="https://picsum.photos">
+                <p>Mi Último Regalo</p>
+            </div>
+            <div class="card pelicula" onclick="abrirModal('Cuando Te Encuentre', 'https://picsum.photos', '⭐ 7.1 | 🎭 Romance | 🕒 101 min', 'El destino une a dos almas solitarias.')">
+                <img src="https://picsum.photos">
+                <p>Cuando Te Encuentre</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SUB-VISTA: AVENTURA -->
+    <div id="aventura" class="view">
+        <button class="btn btn-volver" onclick="show('peliculas')" style="background:#333; color:white; border:none; padding:8px 16px; border-radius:8px; margin-bottom:15px; cursor:pointer;">⬅ Volver</button> 
+        <div class="row">
+            <div class="card pelicula" onclick="abrirModal('Liberen a Willy', 'https://picsum.photos', '⭐ 6.8 | 🎭 Aventura | 🕒 112 min', 'La gran amistad entre un niño y una orca.')">
+                <img src="https://picsum.photos">
+                <p>Liberen a Willy</p>
+            </div>
+            <div class="card pelicula" onclick="abrirModal('El Oso', 'https://picsum.photos', '⭐ 8.0 | 🎭 Aventura | 🕒 96 min', 'La supervivencia de un oso huérfano en la naturaleza.')">
+                <img src="https://picsum.photos">
+                <p>El Oso</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTRAS SECCIONES DEL MENÚ PRINCIPAL -->
+    <div id="series" class="view"><div class="title">📺 Series Próximamente</div></div>
+    <div id="anime" class="view"><div class="title">🎌 Anime Próximamente</div></div>
+    <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
+
+    <!-- CONTROLADORES JAVASCRIPT -->
+    <script>
+        // Vincular el entorno táctil nativo de Telegram Mini Apps
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand(); // Fuerza la apertura a pantalla completa
+        }
+
+        // Navegación fluida entre pestañas
+        function show(id){
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const targetView = document.getElementById(id);
+            if(targetView) {
+                targetView.classList.add('active');
+            }
+            // Pequeño pulso físico si el usuario está desde el móvil
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
+
+        // Abrir ventana de detalles de película (Modal)
+        function abrirModal(titulo, img, info, desc){
+            document.getElementById("modal-title").innerText = titulo;
+            document.getElementById("modal-img").src = img;
+            document.getElementById("modal-info").innerText = info;
+            document.getElementById("modal-desc").innerText = desc;
+            document.getElementById("modal").style.display = "flex";
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+        }
+
+        // Cerrar ventana de detalles
+        function cerrarModal(){
+            document.getElementById("modal").style.display = "none";
+        }
+
+        // Buscador dinámico en tiempo real
+        function buscarPelicula() {
+            let input = document.getElementById('buscar').value.toLowerCase();
+            let tarjetas = document.querySelectorAll('.card.pelicula');
+            
+            tarjetas.forEach(tarjeta => {
+                let nombre = tarjeta.querySelector('p').innerText.toLowerCase();
+                if (nombre.includes(input)) {
+                    tarjeta.style.display = "block";
+                } else {
+                    tarjeta.style.display = "none";
+                }
+            });
+        }
+
+        // Respuestas nativas de interfaz dentro de Telegram
+        function verAnuncio() {
+            if (tg) {
+                tg.showAlert("▶️ Cargando video publicitario... Tu película comenzará al terminar.");
+            } else {
+                alert("Cargando anuncio...");
+            }
+        }
+
+        function activarVip() {
+            if (tg) {
+                tg.showPopup({
+                    title: 'Suscripción VIP',
+                    message: '¿Quieres desbloquear todo el catálogo sin ningún tipo de anuncios?',
+                    buttons: [
+                        {id: 'vip', type: 'default', text: 'Obtener Cuenta VIP'},
+                        {type: 'cancel', text: 'Quizás más tarde'}
+                    ]
+                });
+            } else {
+                alert("Pase VIP Premium seleccionado.");
+            }
+        }
+    </script>
+</body>
+</html>
+
