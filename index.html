@@ -394,6 +394,45 @@
 
     <!-- CONTROLADORES JAVASCRIPT -->
     <script>
+        // --- LÓGICA DE TU BANNER ORIGINAL ---
+// Lista de imágenes para tu banner original
+const imagenesBanner = [
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos"
+];
+let bannerIndex = 0;
+
+function cambiarBannerAutomatico() {
+    setInterval(() => {
+        bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+        
+        // Cambia la imagen del banner original
+        const imgElement = document.getElementById("banner-img");
+        if(imgElement) {
+            imgElement.src = imagenesBanner[bannerIndex];
+        }
+        
+        // Sincroniza tus 8 puntos originales de abajo
+        const puntos = document.querySelectorAll(".banner-dots .dot");
+        puntos.forEach((punto, idx) => {
+            if (idx === bannerIndex) {
+                punto.classList.add("active-dot");
+            } else {
+                punto.classList.remove("active-dot");
+            }
+        });
+    }, 4000); // Cambia cada 4 segundos
+}
+
+// Ejecuta el cambio automático apenas carga la Mini App
+document.addEventListener("DOMContentLoaded", cambiarBannerAutomatico);
+        
         // Vincular el entorno táctil nativo de Telegram Mini Apps
         const tg = window.Telegram?.WebApp;
         if (tg) {
