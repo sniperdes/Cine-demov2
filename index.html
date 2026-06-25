@@ -8,157 +8,91 @@
 <style>
 body{
 margin:0;
-background:#0d0d0d;
-font-family:Arial,sans-serif;
+font-family:Arial;
+background:#0b0b0b;
 color:white;
 }
 
+/* HEADER */
 .header{
-padding:15px;
 display:flex;
 align-items:center;
-gap:10px;
+justify-content:space-between;
+padding:15px;
+background:#111;
+position:sticky;
+top:0;
 }
 
 .logo{
-color:#ffb300;
-font-size:28px;
+color:#e50914;
+font-size:22px;
 font-weight:bold;
 }
 
-.search{
-flex:1;
-padding:12px;
-border:none;
-border-radius:25px;
+/* MENU */
+.menu{
+display:flex;
+gap:10px;
+overflow-x:auto;
+padding:10px;
+background:#0b0b0b;
+}
+
+.menu button{
 background:#1f1f1f;
-color:white;
-}
-
-.banner{
-margin:15px;
-position:relative;
-}
-
-.banner img{
-width:100%;
-height:260px;
-object-fit:cover;
-border-radius:15px;
-}
-
-.banner-info{
-position:absolute;
-bottom:20px;
-left:20px;
-}
-
-.banner-info h1{
-margin:0;
-font-size:32px;
-}
-
-.banner-info p{
-margin:10px 0;
-max-width:250px;
-}
-
-.btn{
-background:#ffb300;
-color:black;
-padding:12px 20px;
 border:none;
-border-radius:30px;
-font-weight:bold;
+color:white;
+padding:10px 14px;
+border-radius:20px;
+white-space:nowrap;
 }
 
+/* HOME */
 .section{
 padding:15px;
 }
 
-.section h2{
-margin-top:0;
+.title{
+font-size:18px;
+margin:10px 0;
+color:#e5e5e5;
 }
 
-/* 🔥 BLOQUE +18 */
-.age-warning{
-margin:15px;
-background:#b30000;
-padding:15px;
-border-radius:12px;
-text-align:center;
-font-weight:bold;
-}
-
-.carousel{
+/* CARDS */
+.row{
 display:flex;
+gap:10px;
 overflow-x:auto;
-gap:12px;
 padding-bottom:10px;
 }
 
 .card{
-min-width:160px;
+min-width:140px;
 background:#1a1a1a;
-border-radius:12px;
+border-radius:10px;
 overflow:hidden;
 }
 
 .card img{
 width:100%;
-height:220px;
+height:200px;
 object-fit:cover;
 }
 
-.card-content{
-padding:10px;
-}
-
-.card h3{
-margin:0;
-font-size:16px;
-}
-
 .card p{
+margin:5px;
 font-size:13px;
-color:#ccc;
 }
 
-.card button{
-width:100%;
-margin-top:8px;
-background:#ffb300;
-border:none;
-padding:10px;
-border-radius:8px;
-font-weight:bold;
-}
-
-.vip{
-margin:15px;
-background:linear-gradient(90deg,#ffb300,#ff8800);
+/* VISTAS */
+.view{
+display:none;
 padding:15px;
-border-radius:15px;
-color:black;
-font-weight:bold;
-text-align:center;
 }
 
-.bottom{
-position:fixed;
-bottom:0;
-left:0;
-right:0;
-background:#111;
-display:flex;
-justify-content:space-around;
-padding:12px;
-border-top:1px solid #333;
-}
-
-.bottom div{
-text-align:center;
-font-size:14px;
+.active{
+display:block;
 }
 </style>
 </head>
@@ -166,236 +100,86 @@ font-size:14px;
 <body>
 
 <div class="header">
-<div class="logo">🎬 CineDemo</div>
-<input class="search" placeholder="Buscar...">
+<div class="logo">NETFLIX DEMO</div>
 </div>
 
-<div class="banner">
-<img src="https://picsum.photos/800/400?random=1">
-<div class="banner-info">
-<h1>Película Destacada</h1>
-<p>Contenido de demostración para tu futura plataforma.</p>
-<button class="btn">Ver ahora</button>
-</div>
-</div>
-
-<!-- 🔞 BLOQUE +18 -->
-<div class="age-warning">
-🔞 +18 CONTENIDO DE PRUEBA
+<!-- MENU -->
+<div class="menu">
+<button onclick="show('home')">🏠 Inicio</button>
+<button onclick="show('peliculas')">🎬 Películas</button>
+<button onclick="show('series')">📺 Series</button>
+<button onclick="show('anime')">🎌 Anime</button>
+<button onclick="show('adulto')">🔞 +18</button>
 </div>
 
+<!-- HOME -->
+<div id="home" class="view active">
 <div class="section">
-<h2>Películas</h2>
 
-<div class="carousel">
+<div class="title">🔥 Destacadas</div>
 
-<div class="card"
-onclick="abrirFicha(
-'Acción Total',
-'Un ex agente debe regresar a la acción para detener una amenaza global.',
-'https://picsum.photos/600/900?random=2'
-)"
-style="cursor:pointer;">
-
-<img src="https://picsum.photos/300/450?random=2">
-<div class="card-content">
-<h3>Acción Total</h3>
-<p>Demo de catálogo.</p>
-
-<button onclick="abrirFicha(
-'Acción Total',
-'Un ex agente debe regresar a la acción para detener una amenaza global.',
-'https://picsum.photos/600/900?random=2'
-)">
-📖 Ver detalles
-</button>
-</div>
-</div>
-
-<div class="card"
-onclick="abrirFicha(
-'Terror Nocturno',
-'Una extraña presencia comienza a aparecer cada medianoche.',
-'https://picsum.photos/600/900?random=3'
-)"
-style="cursor:pointer;">
-
-<img src="https://picsum.photos/300/450?random=3">
-<div class="card-content">
-<h3>Terror Nocturno</h3>
-<p>Demo de catálogo.</p>
-<button>📺 Ver con anuncio</button>
-</div>
+<div class="row">
+<div class="card">
+<img src="https://picsum.photos/200/300?1">
+<p>Acción Total</p>
 </div>
 
 <div class="card">
-<img src="https://picsum.photos/300/450?random=4">
-<div class="card-content">
-<h3>Comedia Extrema</h3>
-<p>Demo de catálogo.</p>
-<button>📺 Ver con anuncio</button>
-</div>
+<img src="https://picsum.photos/200/300?2">
+<p>Terror Nocturno</p>
 </div>
 
 <div class="card">
-<img src="https://picsum.photos/300/450?random=5">
-<div class="card-content">
-<h3>Aventura Final</h3>
-<p>Demo de catálogo.</p>
-<button>📺 Ver con anuncio</button>
+<img src="https://picsum.photos/200/300?3">
+<p>Aventura Final</p>
 </div>
 </div>
 
 </div>
 </div>
 
-<div class="vip">
-💎 VIP - Acceso Premium
+<!-- PELICULAS -->
+<div id="peliculas" class="view">
+<div class="title">🎬 Películas</div>
+
+<div class="row">
+<div class="card">
+<img src="https://picsum.photos/200/300?4">
+<p>Acción</p>
 </div>
 
-<div style="height:90px"></div>
-
-<div class="bottom">
-<div>🏠<br>Inicio</div>
-<div>👤<br>Perfil</div>
-<div>💎<br>Premium</div>
+<div class="card">
+<img src="https://picsum.photos/200/300?5">
+<p>Terror</p>
 </div>
-<div id="ficha" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#0d0d0d;
-overflow:auto;
-z-index:9999;
-padding:20px;
-box-sizing:border-box;
-">
+</div>
+</div>
 
-<h1 id="tituloFicha"></h1>
+<!-- SERIES -->
+<div id="series" class="view">
+<div class="title">📺 Series</div>
+</div>
 
-<img id="imagenFicha"
-style="
-width:100%;
-border-radius:15px;
-max-height:300px;
-object-fit:cover;
-">
+<!-- ANIME -->
+<div id="anime" class="view">
+<div class="title">🎌 Anime</div>
+</div>
 
-<p id="descripcionFicha"></p>
-
-<button class="btn" onclick="mostrarAnuncio()">
-📺 Ver con anuncio
-</button>
-
-<button class="btn" style="margin-top:10px;">
-💎 VIP
-</button>
-
-<button
-class="btn"
-onclick="cerrarFicha()"
-style="margin-top:10px;background:#555;color:white;">
-⬅ Volver
-</button>
-
+<!-- +18 -->
+<div id="adulto" class="view">
+<div class="title">🔞 Contenido +18</div>
 </div>
 
 <script>
+function show(id){
 
-function abrirFicha(titulo, descripcion, imagen){
+document.querySelectorAll('.view')
+.forEach(v => v.classList.remove('active'));
 
-document.getElementById("tituloFicha").innerText=titulo;
-
-document.getElementById("descripcionFicha").innerText=descripcion;
-
-document.getElementById("imagenFicha").src=imagen;
-
-document.getElementById("ficha").style.display="block";
-
-}
-
-function cerrarFicha(){
-
-document.getElementById("ficha").style.display="none";
-
-}
-function mostrarAnuncio(){
-
-document.getElementById("anuncio").style.display="block";
-
-let tiempo = 5;
-
-document.getElementById("contador").innerText=tiempo;
-
-document.getElementById("btnDesbloqueado").style.display="none";
-
-let intervalo = setInterval(function(){
-
-tiempo--;
-
-document.getElementById("contador").innerText=tiempo;
-
-if(tiempo<=0){
-
-clearInterval(intervalo);
-
-document.getElementById("contador").innerHTML=
-"✅ Acceso desbloqueado";
-
-document.getElementById("btnDesbloqueado").style.display="block";
-
-}
-
-},1000);
-
-}
-
-function cerrarAnuncio(){
-
-document.getElementById("anuncio").style.display="none";
+document.getElementById(id).classList.add('active');
 
 }
 </script>
 
- <div id="anuncio" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#0d0d0d;
-z-index:10000;
-padding:20px;
-box-sizing:border-box;
-text-align:center;
-">
-
-<h1>📺 Ver anuncio</h1>
-
-<p>
-Para continuar debes esperar unos segundos.
-</p>
-
-<h2 id="contador">5</h2>
-
-<button id="btnDesbloqueado"
-class="btn"
-style="display:none;">
-✅ Ver contenido
-</button>
-
-<button
-class="btn"
-onclick="cerrarAnuncio()"
-style="margin-top:10px;background:#555;color:white;">
-❌ Cancelar
-</button>
-
- </div> 
-  
 </body>
 </html>
