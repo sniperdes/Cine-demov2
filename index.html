@@ -137,6 +137,25 @@ margin-top:10px;
 </head>
 
 <body>
+  <!-- MODAL FICHA -->
+<div id="modal" class="modal">
+
+  <div class="modal-content">
+
+    <span class="close" onclick="cerrarModal()">✖</span>
+
+    <h2 id="modal-title">Título</h2>
+
+    <img id="modal-img" src="" style="width:100%; border-radius:10px;">
+
+    <p id="modal-desc">Descripción de la película</p>
+
+    <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
+    <button class="btn vip">💎 VIP</button>
+
+  </div>
+
+</div>
 
 <div class="header">
 <div class="logo">CINE DEMO</div>
@@ -251,25 +270,8 @@ document.getElementById("modal").style.display = "none";
 function verAnuncio(){
 alert("📺 Simulando anuncio...");
 }
+  
 </script>
-<!-- MODAL FICHA -->
-<div id="modal" class="modal">
 
-  <div class="modal-content">
-
-    <span class="close" onclick="cerrarModal()">✖</span>
-
-    <h2 id="modal-title">Título</h2>
-
-    <img id="modal-img" src="" style="width:100%; border-radius:10px;">
-
-    <p id="modal-desc">Descripción de la película</p>
-
-    <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
-    <button class="btn vip">💎 VIP</button>
-
-  </div>
-
-</div>
 </body>
 </html>
