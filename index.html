@@ -293,6 +293,27 @@ document.getElementById("modal").style.display = "none";
 function verAnuncio(){
 alert("📺 Simulando anuncio...");
 }
+  const banners = [
+"https://picsum.photos/800/400?20",
+"https://picsum.photos/800/400?21",
+"https://picsum.photos/800/400?22",
+"https://picsum.photos/800/400?23"
+];
+
+let bannerActual = 0;
+
+setInterval(() => {
+
+bannerActual++;
+
+if(bannerActual >= banners.length){
+bannerActual = 0;
+}
+
+document.getElementById("banner-img").src =
+banners[bannerActual];
+
+}, 4000);
   
 </script>
 
