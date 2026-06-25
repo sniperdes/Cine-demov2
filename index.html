@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cine Demo</title>
+<title>Cine Bot</title>
 
 <style>
 body{
@@ -29,7 +29,7 @@ color:#e50914;
 font-size:22px;
 font-weight:bold;
 }
-
+  
 /* MENU */
 .menu{
 display:flex;
@@ -162,6 +162,21 @@ background:#666;
 .active-dot{
 background:white;
 }
+  .search-box{
+padding:10px;
+background:#111;
+}
+
+.search-box input{
+width:100%;
+padding:12px;
+border:none;
+border-radius:8px;
+background:#222;
+color:white;
+font-size:16px;
+box-sizing:border-box;
+}
 </style>
 </head>
 
@@ -191,7 +206,13 @@ background:white;
 <div class="header">
 <div class="logo">CINE DEMO</div>
 </div>
-
+<div class="search-box">
+  <input
+    type="text"
+    id="buscar"
+    placeholder="🔍 Buscar película..."
+    onkeyup="buscarPelicula()">
+</div>
 <!-- MENU -->
 <div class="menu">
 <button onclick="show('home')">🏠 Inicio</button>
