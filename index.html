@@ -325,7 +325,38 @@ alert("📺 Simulando anuncio...");
 
 let bannerActual = 0;
 
-  let startX = 0;
+function actualizarBanner(){
+
+document.getElementById("banner-img").src =
+banners[bannerActual];
+
+const dots = document.querySelectorAll('.dot');
+
+dots.forEach(dot =>
+dot.classList.remove('active-dot')
+);
+
+dots[bannerActual].classList.add('active-dot');
+
+}
+
+function cambiarBanner(direccion){
+
+bannerActual += direccion;
+
+if(bannerActual >= banners.length){
+bannerActual = 0;
+}
+
+if(bannerActual < 0){
+bannerActual = banners.length - 1;
+}
+
+actualizarBanner();
+
+}
+
+let startX = 0;
 
 const banner = document.getElementById("banner-img");
 
@@ -348,24 +379,7 @@ cambiarBanner(-1);
 });
 
 setInterval(() => {
-
-bannerActual++;
-
-if(bannerActual >= banners.length){
-bannerActual = 0;
-}
-
-document.getElementById("banner-img").src =
-banners[bannerActual];
-
-const dots = document.querySelectorAll('.dot');
-
-dots.forEach(dot =>
-dot.classList.remove('active-dot')
-);
-
-dots[bannerActual].classList.add('active-dot');
-
+cambiarBanner(1);
 }, 4000);
   
 </script>
