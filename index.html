@@ -336,6 +336,14 @@ bannerActual = 0;
 document.getElementById("banner-img").src =
 banners[bannerActual];
 
+const dots = document.querySelectorAll('.dot');
+
+dots.forEach(dot =>
+dot.classList.remove('active-dot')
+);
+
+dots[bannerActual].classList.add('active-dot');
+
 }, 4000);
   
 </script>
