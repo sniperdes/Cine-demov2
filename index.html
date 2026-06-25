@@ -435,25 +435,6 @@ function verAnuncio(){
 alert("📺 Simulando anuncio...");
 }
   
-function buscarPelicula(){
-
-const texto = document.getElementById("buscar").value.toLowerCase();
-
-const peliculas = document.querySelectorAll(".pelicula");
-
-peliculas.forEach(function(pelicula){
-
-const nombre = pelicula.innerText.toLowerCase();
-
-if(nombre.includes(texto)){
-pelicula.style.display = "block";
-}else{
-pelicula.style.display = "none";
-}
-
-});
-
-  }
   const banners = [
 "https://picsum.photos/800/400?20",
 "https://picsum.photos/800/400?21",
