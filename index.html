@@ -406,32 +406,55 @@ const imagenesBanner = [
     "https://picsum.photos/200/300?67",
     "https://picsum.photos/200/300?68"
 ];
+        
 let bannerIndex = 0;
+let temporizadorBanner;
 
-function cambiarBannerAutomatico() {
-    setInterval(() => {
-        bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
-        
-        // Cambia la imagen del banner original
-        const imgElement = document.getElementById("banner-img");
-        if(imgElement) {
-            imgElement.src = imagenesBanner[bannerIndex];
+function rotarBanner() {
+    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+    
+    // Cambia la imagen
+    const imgElement = document.getElementById("banner-img");
+    if(imgElement) {
+        imgElement.src = imagenesBanner[bannerIndex];
+    }
+    
+    // Sincroniza tus 8 puntos originales
+    const puntos = document.querySelectorAll(".banner-dots .dot");
+    puntos.forEach((punto, idx) => {
+        if (idx === bannerIndex) {
+            punto.classList.add("active-dot");
+        } else {
+            punto.classList.remove("active-dot");
         }
-        
-        // Sincroniza tus 8 puntos originales de abajo
-        const puntos = document.querySelectorAll(".banner-dots .dot");
-        puntos.forEach((punto, idx) => {
-            if (idx === bannerIndex) {
-                punto.classList.add("active-dot");
-            } else {
-                punto.classList.remove("active-dot");
-            }
-        });
-    }, 4000); // Cambia cada 4 segundos
+    });
 }
 
-// Ejecuta el cambio automático apenas carga la Mini App
-document.addEventListener("DOMContentLoaded", cambiarBannerAutomatico);
+function iniciarTemporizador() {
+    // Limpia el anterior para que no se dupliquen los tiempos
+    clearInterval(temporizadorBanner);
+    temporizadorBanner = setInterval(rotarBanner, 4000); // Cambia cada 4 segundos solo
+}
+
+// Configura las acciones cuando carga la Mini App
+document.addEventListener("DOMContentLoaded", () => {
+    iniciarTemporizador();
+
+    // Evento táctil: al tocar la imagen, cambia al instante
+    const bannerElement = document.getElementById("banner-img");
+    if (bannerElement) {
+        bannerElement.style.cursor = "pointer"; // Muestra que es cliqueable
+        bannerElement.addEventListener("click", () => {
+            rotarBanner();          // Cambia de imagen inmediatamente
+            iniciarTemporizador();  // Reinicia los 4 segundos desde cero
+            
+            // Vibración nativa opcional de Telegram al tocar el banner
+            if (window.Telegram?.WebApp?.HapticFeedback) {
+                window.Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            }
+        });
+    }
+});
         
         // Vincular el entorno táctil nativo de Telegram Mini Apps
         const tg = window.Telegram?.WebApp;
