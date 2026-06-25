@@ -255,16 +255,16 @@ document.querySelectorAll('.view')
 document.getElementById(id).classList.add('active');
 
 }
-  function abrirModal(titulo, img, desc){
+  function abrirModal(titulo, img, info, desc){
 
 document.getElementById("modal-title").innerText = titulo;
 document.getElementById("modal-img").src = img;
+document.getElementById("modal-info").innerText = info;
 document.getElementById("modal-desc").innerText = desc;
 
 document.getElementById("modal").style.display = "flex";
 
 }
-
 function cerrarModal(){
 document.getElementById("modal").style.display = "none";
 }
