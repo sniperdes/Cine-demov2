@@ -467,99 +467,196 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert("Pase VIP Premium seleccionado.");
             }
         }
-        // 1. BASE DE DATOS DE PELÍCULAS (Aquí puedes añadir todas las que quieras)
-const baseDeDatosPeliculas = [
-    {
-        titulo: 'John Wick',
-        genero: 'accion',
-        img: 'https://picsum.photos',
-        info: '⭐ 8.5 | 🎭 Acción | 🕒 101 min',
-        desc: 'Un asesino legendario vuelve al combate.'
-    },
-    {
-        titulo: 'Mad Max',
-        genero: 'accion',
-        img: 'https://picsum.photos',
-        info: '⭐ 8.8 | 🎭 Acción | 🕒 120 min',
-        desc: 'Persecuciones brutales en un mundo apocalíptico.'
-    },
-    {
-        titulo: 'La Momia',
-        genero: 'terror',
-        img: 'https://picsum.photos',
-        info: '⭐ 6.5 | 🎭 Terror | 🕒 110 min',
-        desc: 'Una antigua maldición despierta.'
-    },
-    {
-        titulo: 'IT',
-        genero: 'terror',
-        img: 'https://picsum.photos',
-        info: '⭐ 7.9 | 🎭 Terror | 🕒 135 min',
-        desc: 'El payaso maldito vuelve al ataque.'
-    },
-    {
-        titulo: 'Mi Último Regalo',
-        genero: 'romance',
-        img: 'https://picsum.photos',
-        info: '⭐ 7.5 | 🎭 Romance | 🕒 105 min',
-        desc: 'Una emotiva historia de amor verdadero.'
-    },
-    {
-        titulo: 'Cuando Te Encuentre',
-        genero: 'romance',
-        img: 'https://picsum.photos',
-        info: '⭐ 7.1 | 🎭 Romance | 🕒 101 min',
-        desc: 'El destino une a dos almas solitarias.'
-    },
-    {
-        titulo: 'Liberen a Willy',
-        genero: 'aventura',
-        img: 'https://picsum.photos',
-        info: '⭐ 6.8 | 🎭 Aventura | 🕒 112 min',
-        desc: 'La gran amistad entre un niño y una orca.'
-    },
-    {
-        titulo: 'El Oso',
-        genero: 'aventura',
-        img: 'https://picsum.photos',
-        info: '⭐ 8.0 | 🎭 Aventura | 🕒 96 min',
-        desc: 'La supervivencia de un oso huérfano en la naturaleza.'
-    }
-];
 
-// 2. FUNCIÓN QUE GENERA EL HTML DINÁMICAMENTE
-function cargarCatalogo() {
-    baseDeDatosPeliculas.forEach(peli => {
-        // Busca el contenedor correcto basado en el género de la película
-        const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-        
-        if (contenedor) {
-            // Crea la estructura de la tarjeta de forma segura
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'card pelicula';
-            
-            // Le asigna la función de abrir el modal con sus datos
-            tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
-            
-            // Mete la imagen y el título adentro
-            tarjeta.innerHTML = `
-                <img src="${peli.img}">
-                <p>${peli.titulo}</p>
-            `;
-            
-            // Inyecta la tarjeta en la interfaz
-            contenedor.appendChild(tarjeta);
+    // 1. BASE DE DATOS DE PELÍCULAS
+    const baseDeDatosPeliculas = [
+        {
+            titulo: 'John Wick',
+            genero: 'accion',
+            img: 'https://picsum.photos',
+            info: '⭐ 8.5 | 🎭 Acción | 🕒 101 min',
+            desc: 'Un asesino legendario vuelve al combate.'
+        },
+        {
+            titulo: 'Mad Max',
+            genero: 'accion',
+            img: 'https://picsum.photos',
+            info: '⭐ 8.8 | 🎭 Acción | 🕒 120 min',
+            desc: 'Persecuciones brutales en un mundo apocalíptico.'
+        },
+        {
+            titulo: 'La Momia',
+            genero: 'terror',
+            img: 'https://picsum.photos',
+            info: '⭐ 6.5 | 🎭 Terror | 🕒 110 min',
+            desc: 'Una antigua maldición despierta.'
+        },
+        {
+            titulo: 'IT',
+            genero: 'terror',
+            img: 'https://picsum.photos',
+            info: '⭐ 7.9 | 🎭 Terror | 🕒 135 min',
+            desc: 'El payaso maldito vuelve al ataque.'
+        },
+        {
+            titulo: 'Mi Último Regalo',
+            genero: 'romance',
+            img: 'https://picsum.photos',
+            info: '⭐ 7.5 | 🎭 Romance | 🕒 105 min',
+            desc: 'Una emotiva historia de amor verdadero.'
+        },
+        {
+            titulo: 'Cuando Te Encuentre',
+            genero: 'romance',
+            img: 'https://picsum.photos',
+            info: '⭐ 7.1 | 🎭 Romance | 🕒 101 min',
+            desc: 'El destino une a dos almas solitarias.'
+        },
+        {
+            titulo: 'Liberen a Willy',
+            genero: 'aventura',
+            img: 'https://picsum.photos',
+            info: '⭐ 6.8 | 🎭 Aventura | 🕒 112 min',
+            desc: 'La gran amistad entre un niño y una orca.'
+        },
+        {
+            titulo: 'El Oso',
+            genero: 'aventura',
+            img: 'https://picsum.photos',
+            info: '⭐ 8.0 | 🎭 Aventura | 🕒 96 min',
+            desc: 'La supervivencia de un oso huérfano en la naturaleza.'
+        }
+    ];
+
+    // 2. LÓGICA DE TU BANNER ORIGINAL INTERACTIVO
+    const imagenesBanner = [
+        "https://picsum.photos",
+        "https://picsum.photos",
+        "https://picsum.photos",
+        "https://picsum.photos",
+        "https://picsum.photos"
+    ];
+    let bannerIndex = 0;
+    let temporizadorBanner;
+
+    function rotarBanner() {
+        bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+        const imgElement = document.getElementById("banner-img");
+        if(imgElement) {
+            imgElement.src = imagenesBanner[bannerIndex];
+        }
+        const puntos = document.querySelectorAll(".banner-dots .dot");
+        puntos.forEach((punto, idx) => {
+            if (idx === bannerIndex) {
+                punto.classList.add("active-dot");
+            } else {
+                punto.classList.remove("active-dot");
+            }
+        });
+    }
+
+    function iniciarTemporizador() {
+        clearInterval(temporizadorBanner);
+        temporizadorBanner = setInterval(rotarBanner, 4000);
+    }
+
+    // 3. FUNCIÓN QUE GENERA EL CATÁLOGO
+    function cargarCatalogo() {
+        baseDeDatosPeliculas.forEach(peli => {
+            const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+            if (contenedor) {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
+                tarjeta.innerHTML = `
+                    <img src="${peli.img}">
+                    <p>${peli.titulo}</p>
+                `;
+                contenedor.appendChild(tarjeta);
+            }
+        });
+    }
+
+    // 4. INICIALIZACIÓN GENERAL (Previene el error de carga vacía)
+    const tg = window.Telegram?.WebApp;
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        // Ejecutar primero la inyección de películas antes que Telegram
+        cargarCatalogo();
+        iniciarTemporizador();
+
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        // Evento táctil del banner
+        const bannerElement = document.getElementById("banner-img");
+        if (bannerElement) {
+            bannerElement.style.cursor = "pointer";
+            bannerElement.addEventListener("click", () => {
+                rotarBanner();
+                iniciarTemporizador();
+                if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            });
         }
     });
-}
 
-// 3. SE EJECUTA AL CARGAR LA MINI APP
-document.addEventListener("DOMContentLoaded", () => {
-    cargarCatalogo(); // Genera tus películas dinámicamente
-    iniciarTemporizador(); // Mantiene activo tu banner táctil
-});
-        
-    </script>
+    // 5. FUNCIONES DE CONTROL DE VISTAS Y INTERFAZ
+    function show(id){
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        const targetView = document.getElementById(id);
+        if(targetView) {
+            targetView.classList.add('active');
+        }
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function abrirModal(titulo, img, info, desc){
+        document.getElementById("modal-title").innerText = titulo;
+        document.getElementById("modal-img").src = img;
+        document.getElementById("modal-info").innerText = info;
+        document.getElementById("modal-desc").innerText = desc;
+        document.getElementById("modal").style.display = "flex";
+        if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+    }
+
+    function cerrarModal(){
+        document.getElementById("modal").style.display = "none";
+    }
+
+    function buscarPelicula() {
+        let input = document.getElementById('buscar').value.toLowerCase();
+        let tarjetas = document.querySelectorAll('.card.pelicula');
+        tarjetas.forEach(tarjeta => {
+            let nombre = tarjeta.querySelector('p').innerText.toLowerCase();
+            tarjeta.style.display = nombre.includes(input) ? "block" : "none";
+        });
+    }
+
+    function verAnuncio() {
+        if (tg) {
+            tg.showAlert("▶️ Cargando video publicitario... Tu película comenzará al terminar.");
+        } else {
+            alert("Cargando anuncio...");
+        }
+    }
+
+    function activarVip() {
+        if (tg) {
+            tg.showPopup({
+                title: 'Suscripción VIP',
+                message: '¿Quieres desbloquear todo el catálogo sin ningún tipo de anuncios?',
+                buttons: [
+                    {id: 'vip', type: 'default', text: 'Obtener Cuenta VIP'},
+                    {type: 'cancel', text: 'Quizás más tarde'}
+                ]
+            });
+        } else {
+            alert("Pase VIP Premium seleccionado.");
+        }
+    }
+ </script>
 </body>
 </html>
 
