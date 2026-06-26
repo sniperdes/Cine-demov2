@@ -111,7 +111,7 @@
             font-size: 13px;
         }
 
-        /* MODAL */
+     /* MODAL CORREGIDO PARA MÓVILES */
         .modal {
             display: none;
             position: fixed;
@@ -119,9 +119,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Cambiado de center a flex-start para que empiece arriba */
+            overflow-y: auto;        /* Permite scroll general si la pantalla es muy chica */
+            padding: 20px 0;         /* Margen arriba y abajo para que respire */
             z-index: 100;
         }
 
@@ -133,7 +135,9 @@
             border-radius: 12px;
             position: relative;
             text-align: center;
+            margin: auto;            /* Centra la tarjeta horizontalmente */
         }
+
 
         .close {
             position: absolute;
