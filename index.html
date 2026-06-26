@@ -472,7 +472,7 @@
                 if (contenedor) {
                     const tarjeta = document.createElement('div');
                     tarjeta.className = 'card pelicula';
-                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
+                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
                     tarjeta.innerHTML = `
                         <img src="${peli.img}">
                         <p>${peli.titulo}</p>
