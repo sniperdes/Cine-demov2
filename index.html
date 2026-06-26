@@ -227,9 +227,11 @@
             <img id="modal-img" src="" style="width:100%; border-radius:10px;">
             <p id="modal-info">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
             <p id="modal-desc">Descripción de la película</p>
-            <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
-            <button class="btn vip" onclick="activarVip()">💎 VIP</button>
-            <button class="btn" style="background: #333;" onclick="cerrarModal()">⬅ Volver</button>
+            <button class="btn" style="background: #e50914;" onclick="reproducirVideo('pelicula')">📺 Ver Película (Con Anuncios)</button>
+<button class="btn" style="background: #333;" onclick="reproducirVideo('trailer')">▶ Ver Tráiler Oficial</button>
+<button class="btn vip" onclick="activarVip()">💎 VIP Sin Anuncios</button>
+<button class="btn btn-volver" onclick="cerrarModal()">⬅ Volver</button>
+<button class="btn" style="background: #333;" onclick="cerrarModal()">⬅ Volver</button>
         </div>
     </div>
 
