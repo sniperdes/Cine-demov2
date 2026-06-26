@@ -434,52 +434,47 @@ function cargarCatalogo() {
 // FUNCIÓN AUXILIAR: Se ejecuta individualmente por cada película en segundo plano
 async function buscarPortadaEnTMDB(peli, idElementoImg) {
     try {
-        const query = encodeURIComponent(peli.titulo);
-        const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`);
+        // Codifica el título de forma segura para evitar problemas con espacios en Telegram
+        const query = encodeURIComponent(peli.titulo.trim());
+        
+        // CORREGIDO: Dirección oficial completa de la API de TMDB v3
+        const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`, {
+            method: 'GET',
+            headers: {
+                'accept': 'application/json'
+            }
+        });
+        
         const datos = await respuesta.json();
         
-        // CORREGIDO: Verificación estricta del primer resultado del arreglo [0]
         if (datos.results && datos.results.length > 0) {
             const pi = datos.results[0]; 
             
             if (pi.poster_path) {
+                // CORREGIDO: Dirección oficial para descargar imágenes de portada de TMDB
                 peli.img = `https://tmdb.org{pi.poster_path}`;
                 
-                // Actualizamos visualmente la imagen en la tarjeta correspondiente
+                // Reemplaza el texto "Cargando..." por el póster real en tu pantalla
                 const imgHTML = document.getElementById(idElementoImg);
                 if (imgHTML) imgHTML.src = peli.img;
+            } else {
+                const imgHTML = document.getElementById(idElementoImg);
+                if (imgHTML) imgHTML.src = 'https://placeholder.com';
             }
             
-            // Actualizamos la sinopsis oficial para cuando se abra el modal
+            // Guarda la sinopsis oficial de la película para cuando se abra el modal
             if (pi.overview) peli.desc = pi.overview;
+        } else {
+            const imgHTML = document.getElementById(idElementoImg);
+            if (imgHTML) imgHTML.src = 'https://placeholder.com';
         }
     } catch (error) {
-        console.error("Error cargando portada de:", peli.titulo, error);
+        console.error("Fallo de conexión en:", peli.titulo, error);
+        const imgHTML = document.getElementById(idElementoImg);
+        if (imgHTML) imgHTML.src = 'https://placeholder.com';
     }
 }
-
-// 4. INICIALIZADOR GENERAL
-const tg = window.Telegram?.WebApp;
-
-document.addEventListener("DOMContentLoaded", () => {
-    cargarCatalogo();
-    iniciarTemporizador();
-
-    if (tg) {
-        tg.ready();
-        tg.expand();
-    }
-
-    const bannerElement = document.getElementById("banner-img");
-    if (bannerElement) {
-        bannerElement.addEventListener("click", () => {
-            rotarBanner();
-            iniciarTemporizador();
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        });
-    }
-});
-    
+        
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
