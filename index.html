@@ -522,34 +522,47 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-                // Variables globales para guardar los enlaces de la película que se abra (¡Agrega esto!)
-                let trailerActual = "";
+// Variables globales para guardar los enlaces de la película que se abra (¡Agrega esto!)
+        let trailerActual = "";
         let peliculaActual = "";
 
-        function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
-            document.getElementById("modal-title").innerText = titulo;
-            document.getElementById("modal-img").src = img;
-            document.getElementById("modal-info").innerText = info;
-            document.getElementById("modal-desc").innerText = desc;
-            
-            // Aseguramos que el video inicie oculto y la imagen visible al abrir otra película
-            document.getElementById("modal-video").style.display = "none";
-            document.getElementById("modal-video").src = "";
-            document.getElementById("modal-img").style.display = "block";
-            
-            // Convertimos automáticamente el link normal de YouTube a formato incrustado (embed)
-            if (trailerUrl && trailerUrl.includes("watch?v=")) {
-                let videoId = trailerUrl.split("v=")[1].split("&")[0];
-                trailerActual = "https://youtube.com" + videoId + "?autoplay=1";
-            } else {
-                trailerActual = trailerUrl || "";
-            }
-            
-            peliculaActual = peliculaUrl || "";
-            
-            document.getElementById("modal").style.display = "flex";
-            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
+    document.getElementById("modal-title").innerText = titulo;
+    document.getElementById("modal-img").src = img;
+    document.getElementById("modal-info").innerText = info;
+    document.getElementById("modal-desc").innerText = desc;
+    
+    // Aseguramos que el video inicie oculto y la imagen visible
+    document.getElementById("modal-video").style.display = "none";
+    document.getElementById("modal-video").src = "";
+    document.getElementById("modal-img").style.display = "block";
+    
+    // Extractor robusto para CUALQUIER link de YouTube (watch, youtu.be, shorts)
+    let videoId = null;
+    if (trailerUrl) {
+        if (trailerUrl.includes("watch?v=")) {
+            videoId = trailerUrl.split("v=")[1].split("&")[0];
+        } else if (trailerUrl.includes("youtu.be/")) {
+            videoId = trailerUrl.split("youtu.be/")[1].split("?")[0];
+        } else if (trailerUrl.includes("/shorts/")) {
+            videoId = trailerUrl.split("/shorts/")[1].split("?")[0];
         }
+    }
+
+    // Si encontramos el ID, creamos el enlace incrustado (embed) definitivo
+    if (videoId) {
+        trailerActual = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0&modestbranding=1";
+    } else {
+        // Si ya venía en formato embed o es otro tipo de enlace externo
+        trailerActual = trailerUrl || "";
+    }
+    
+    peliculaActual = peliculaUrl || "";
+    
+    document.getElementById("modal").style.display = "flex";
+    if (window.tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
+}
+
 
         function cerrarModal(){
             // Apaga el video al cerrar el modal para que no siga sonando de fondo
