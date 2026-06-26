@@ -512,19 +512,31 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        function abrirModal(titulo, img, info, desc){
+                // Variables globales para guardar los enlaces de la película que se abra (¡Agrega esto!)
+        let trailerActual = "";
+        let peliculaActual = "";
+
+        // REEMPLAZADO: Ahora recibe los dos parámetros de video al final
+        function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
             document.getElementById("modal-title").innerText = titulo;
             document.getElementById("modal-img").src = img;
             document.getElementById("modal-info").innerText = info;
             document.getElementById("modal-desc").innerText = desc;
+            
+            // Guardamos ambos enlaces en las variables globales
+            trailerActual = trailerUrl || "";
+            peliculaActual = peliculaUrl || "";
+            
             document.getElementById("modal").style.display = "flex";
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
+        // SE QUEDA IGUAL (Tu código original)
         function cerrarModal(){
             document.getElementById("modal").style.display = "none";
         }
 
+        // SE QUEDA IGUAL (Tu código original)
         function buscarPelicula() {
             let input = document.getElementById('buscar').value.toLowerCase();
             let tarjetas = document.querySelectorAll('.card.pelicula');
@@ -533,6 +545,26 @@
                 tarjeta.style.display = nombre.includes(input) ? "block" : "none";
             });
         }
+
+        // NUEVO: Agrega esta función inmediatamente abajo para procesar los clics de los botones
+        function reproducirVideo(tipo) {
+            let urlDestino = (tipo === 'pelicula') ? peliculaActual : trailerActual;
+
+            if (urlDestino) {
+                if (tg) {
+                    tg.openLink(urlDestino);
+                } else {
+                    window.open(urlDestino, '_blank');
+                }
+            } else {
+                if (tg) {
+                    tg.showAlert("⚠️ Película próximamente disponible. Estamos subiendo el archivo de video con los anuncios.");
+                } else {
+                    alert("Contenido no disponible todavía.");
+                }
+            }
+        }
+
 
         function verAnuncio() {
             if (tg) tg.showAlert("▶️ Cargando video publicitario...");
