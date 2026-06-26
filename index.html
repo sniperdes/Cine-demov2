@@ -346,256 +346,64 @@
     <script>
 
        // 1. BASE DE DATOS MASIVA (20 películas reales por género)
-        const baseDeDatosPeliculas = [
-            // --- ACCIÓN (20 películas) ---
-            { 
-    titulo: 'John Wick', 
-    genero: 'accion', 
-    img: 'https://media.themoviedb.org/t/p/w220_and_h330_face/wXqWR7dHncNRbxoEGybEy7QTe9h.jpg', 
-    info: '⭐ 75% | 🕒 1h 41m', 
-    desc: 'Ex-hitman John Wick comes out of retirement...',
-    trailer: 'https://youtu.be/6r0s41Ju5XA?si=6qeZTqDMOoMNxfEY',
-    peliculaUrl: 'https://tu-servidor-de-video.com.' },
-
-    { 
-        titulo: 'Mad Max: Fury Road', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.8 | 🕒 2h 00m', 
-        desc: 'Mundo apocalíptico.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Gladiador', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.5 | 🕒 2h 35m', 
-        desc: 'Venganza en Roma.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Misión Imposible', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 7.8 | 🕒 1h 50m', 
-        desc: 'Acción y espionaje.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Terminator 2', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.6 | 🕒 2h 17m', 
-        desc: 'El juicio final.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Batman: El Caballero', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 9.0 | 🕒 2h 32m', 
-        desc: 'Héroe de Gotham.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Duro de Matar', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.2 | 🕒 2h 12m', 
-        desc: 'John McClane contra terroristas.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Búsqueda Implacable', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 7.8 | 🕒 1h 33m', 
-        desc: 'Un padre rescata a su hija.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Rápidos y Furiosos', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 6.8 | 🕒 1h 46m', 
-        desc: 'Carreras y acción.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Matrix', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.7 | 🕒 2h 16m', 
-        desc: 'La realidad es una simulación.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Top Gun: Maverick', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.3 | 🕒 2h 10m', 
-        desc: 'Aviones de combate.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: '300', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 7.6 | 🕒 1h 57m', 
-        desc: 'Espartanos en batalla.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Kill Bill Vol. 1', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.2 | 🕒 1h 51m', 
-        desc: 'Venganza samurái.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Inception', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.8 | 🕒 2h 28m', 
-        desc: 'Robo dentro de los sueños.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Deadpool', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.0 | 🕒 1h 48m', 
-        desc: 'Antihéroe cómico.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Logan', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.1 | 🕒 2h 17m', 
-        desc: 'El final de Wolverine.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Spider-Man: No Way Home', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.2 | 🕒 2h 28m', 
-        desc: 'Multiverso arácnido.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Skyfall', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 7.8 | 🕒 2h 23m', 
-        desc: 'James Bond regresa.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'The Avengers', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.0 | 🕒 2h 23m', 
-        desc: 'Héroes unidos.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Ip Man', 
-        genero: 'accion', 
-        img: 'https://themoviedb.org', 
-        info: '⭐ 8.0 | 🕒 1h 46m', 
-        desc: 'Maestro de artes marciales.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-
-
-              // --- TERROR (20 películas) ---
-            { titulo: 'La Momia', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.5', desc: 'Maldición antigua.' },
-            { titulo: 'IT (Eso)', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'El payaso maldito.' },
-            { titulo: 'El Conjuro', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Investigación paranormal.' },
-            { titulo: 'Actividad Paranormal', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.3', desc: 'Fantasmas en casa.' },
-            { titulo: 'Scream', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.4', desc: 'Asesino enmascarado.' },
-            { titulo: 'El Exorcista', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Posesión demoníaca.' },
-            { titulo: 'Hereditary', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.3', desc: 'Terror psicológico familiar.' },
-            { titulo: 'Un Lugar Silencioso', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Monstruos que oyen todo.' },
-            { titulo: 'El Resplandor', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.4', desc: 'Hotel embrujado.' },
-            { titulo: 'Alien: El Octavo Pasajero', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 8.5', desc: 'Terror en el espacio.' },
-            { titulo: 'Siniestro', genero: 'terror', img: 'https://loremflickr.com1', info: '⭐ 6.8', desc: 'Cintas malditas.' },
-            { titulo: 'Insidious', genero: 'terror', img: 'https://loremflickr.com2', info: '⭐ 6.8', desc: 'El mundo astral.' },
-            { titulo: 'La Bruja', genero: 'terror', img: 'https://loremflickr.com3', info: '⭐ 7.0', desc: 'Terror folclórico.' },
-            { titulo: 'Midsommar', genero: 'terror', img: 'https://loremflickr.com4', info: '⭐ 7.1', desc: 'Culto pagano a la luz del día.' },
-            { titulo: 'Babadook', genero: 'terror', img: 'https://loremflickr.com5', info: '⭐ 6.8', desc: 'Un monstruo de libro infantil.' },
-            { titulo: 'El Aro', genero: 'terror', img: 'https://loremflickr.com6', info: '⭐ 7.1', desc: 'Una cinta de video mortal.' },
-            { titulo: 'Get Out', genero: 'terror', img: 'https://loremflickr.com7', info: '⭐ 7.8', desc: 'Suspenso y misterio familiar.' },
-            { titulo: 'Psicosis', genero: 'terror', img: 'https://loremflickr.com8', info: '⭐ 8.5', desc: 'El motel de Norman Bates.' },
-            { titulo: 'Halloween', genero: 'terror', img: 'https://loremflickr.com9', info: '⭐ 7.7', desc: 'Michael Myers regresa.' },
-            { titulo: 'Viernes 13', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 6.4', desc: 'Campamento sangriento.' },
-
-            // --- ROMANCE (20 películas) ---
-            { titulo: 'Mi Último Regalo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Amor verdadero.' },
-            { titulo: 'Cuando Te Encuentre', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.1', desc: 'El destino une dos almas.' },
-            { titulo: 'Titanic', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'Tragedia en el mar.' },
-            { titulo: 'Diario de una Pasión', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Allie y Noah.' },
-            { titulo: 'Orgullo y Prejuicio', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Elizabeth y Sr. Darcy.' },
-            { titulo: 'Bajo la Misma Estrella', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.7', desc: 'Amor juvenil resiliente.' },
-            { titulo: 'La La Land', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.0', desc: 'Música y sueños en Hollywood.' },
-            { titulo: 'Cuestión de Tiempo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Viajes en el tiempo por amor.' },
-            { titulo: 'Antes del Amanecer', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Un encuentro en Viena.' },
-            { titulo: 'Yo Antes de Ti', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 7.4', desc: 'Aprender a vivir de nuevo.' },
-            { titulo: 'Amor de Mis Amores', genero: 'romance', img: 'https://loremflickr.com1', info: '⭐ 7.0', desc: 'Enredos de amor.' },
-            { titulo: '500 Días con Ella', genero: 'romance', img: 'https://loremflickr.com2', info: '⭐ 7.7', desc: 'Una historia no romántica.' },
-            { titulo: 'A Él No Le Gustas Tanto', genero: 'romance', img: 'https://loremflickr.com3', info: '⭐ 6.4', desc: 'Malentendidos amorosos.' },
-            { titulo: 'Votos de Amor', genero: 'romance', img: 'https://loremflickr.com4', info: '⭐ 6.8', desc: 'Recuperar la memoria y el amor.' },
-            { titulo: 'Ghost: El Fantasma', genero: 'romance', img: 'https://loremflickr.com5', info: '⭐ 7.1', desc: 'Amor más allá de la muerte.' },
-            { titulo: 'Un Lugar Llamado Notting Hill', genero: 'romance', img: 'https://loremflickr.com6', info: '⭐ 7.2', desc: 'Una estrella y un librero.' },
-            { titulo: 'Pretty Woman', genero: 'romance', img: 'https://loremflickr.com7', info: '⭐ 7.1', desc: 'Un cuento moderno.' },
-            { titulo: 'La Propuesta', genero: 'romance', img: 'https://loremflickr.com8', info: '⭐ 6.7', desc: 'Matrimonio por conveniencia.' },
-            { titulo: 'Querido John', genero: 'romance', img: 'https://loremflickr.com9', info: '⭐ 6.3', desc: 'Cartas de amor y distancia.' },
-            { titulo: 'Cartas a Julieta', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 6.5', desc: 'Amor en Verona.' },
-
-            // --- AVENTURA (20 películas) ---
-{ titulo: 'Liberen a Willy', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.8', desc: 'Un niño y una orca.' },
-{ titulo: 'El Oso', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia salvaje.' },
-{ titulo: 'Avatar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'El planeta Pandora.' },
-{ titulo: 'Jurassic Park', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.2', desc: 'Parque de dinosaurios.' },
-{ titulo: 'Indiana Jones', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.4', desc: 'Búsqueda del arca.' },
-{ titulo: 'Interstellar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.6', desc: 'Viaje espacial interdimensional.' },
-{ titulo: 'El Señor de los Anillos', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.8', desc: 'La comunidad del anillo.' },
-{ titulo: 'Piratas del Caribe', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'El Capitán Jack Sparrow.' },
-{ titulo: 'El Hobbit', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Un viaje inesperado.' },
-{ titulo: 'Naufrago', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Sobrevivir solo en una isla.' },
-{ titulo: 'Jumanji', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.0', desc: 'Un juego de mesa real.' },
-{ titulo: 'La Vida de Pi', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'Un tigre y un bote.' },
-{ titulo: 'Madagascar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'Animales en la selva.' },
-{ titulo: 'Las Crónicas de Narnia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'El ropero mágico.' },
-{ titulo: 'Up: Una Aventura', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.3', desc: 'Casa con globos.' },
-{ titulo: 'Buscando a Nemo', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.1', desc: 'Viaje en el océano.' },
-{ titulo: 'El Renacido', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia extrema en la nieve.' },
-{ titulo: 'La Momia (1999)', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.1', desc: 'Aventura arqueológica.' },
-{ titulo: 'Zootopia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Investigación en la ciudad.' },
-{ titulo: 'Tarzán', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.3', desc: 'El rey de la selva.' }
+                
+// Tu lista original simplificada (¡ya no necesitas poner los links de las imágenes a mano!)
+const peliculas = [
+    { titulo: 'Mad Max: Fury Road', genero: 'accion', info: '⭐ 8.8', desc: 'Mundo apocalíptico.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Gladiador', genero: 'accion', info: '⭐ 8.5', desc: 'Venganza en Roma.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Misión Imposible', genero: 'accion', info: '⭐ 7.8', desc: 'Acción y espionaje.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Terminator 2', genero: 'accion', info: '⭐ 8.6', desc: 'El juicio final.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Batman: El Caballero', genero: 'accion', info: '⭐ 9.0', desc: 'Héroe de Gotham.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Duro de Matar', genero: 'accion', info: '⭐ 8.2', desc: 'John McClane contra terroristas.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Búsqueda Implacable', genero: 'accion', info: '⭐ 7.8', desc: 'Un padre rescata a su hija.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Rápidos y Furiosos', genero: 'accion', info: '⭐ 6.8', desc: 'Carreras y acción.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Matrix', genero: 'accion', info: '⭐ 8.7', desc: 'La realidad es una simulación.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Top Gun: Maverick', genero: 'accion', info: '⭐ 8.3', desc: 'Aviones de combate.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: '300', genero: 'accion', info: '⭐ 7.6', desc: 'Espartanos en batalla.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Kill Bill Vol. 1', genero: 'accion', info: '⭐ 8.2', desc: 'Venganza samurái.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Inception', genero: 'accion', info: '⭐ 8.8', desc: 'Robo dentro de los sueños.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Deadpool', genero: 'accion', info: '⭐ 8.0', desc: 'Antihéroe cómico.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Logan', genero: 'accion', info: '⭐ 8.1', desc: 'El final de Wolverine.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Spider-Man: No Way Home', genero: 'accion', info: '⭐ 8.2', desc: 'Multiverso arácnido.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Skyfall', genero: 'accion', info: '⭐ 7.8', desc: 'James Bond regresa.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'The Avengers', genero: 'accion', info: '⭐ 8.0', desc: 'Héroes unidos.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Ip Man', genero: 'accion', info: '⭐ 8.0', desc: 'Maestro de artes marciales.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
 ];
+
+// Pega aquí tu Clave API (v3) de TMDB
+const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
+
+async function cargarPortadasAutomaticas() {
+    for (let pelicula of peliculas) {
+        try {
+            const query = encodeURIComponent(pelicula.titulo);
+            // Hacemos la consulta a TMDB usando tu clave personal
+            const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`);
+            const datos = await respuesta.json();
+            
+            if (datos.results && datos.results.length > 0) {
+                const pi = datos.results[0]; // Tomamos la coincidencia más exacta
+                
+                // 1. Asignamos el póster oficial
+                pelicula.img = `https://tmdb.org{pi.poster_path}`;
+                
+                // 2. Opcional: Si quieres sobreescribir la descripción corta por la sinopsis oficial completa de TMDB
+                if (pi.overview) pelicula.desc = pi.overview;
+                
+            } else {
+                pelicula.img = 'https://placeholder.com';
+            }
+        } catch (error) {
+            pelicula.img = 'https://placeholder.com';
+        }
+    }
+    
+    // Cambia "dibujarPeliculasEnPantalla" por el nombre de la función que renderiza tus tarjetas HTML
+    dibujarPeliculasEnPantalla(); 
+}
+
+// Inicia el proceso automático cuando la Mini App se abre
+window.onload = cargarPortadasAutomaticas;
 
 
 
