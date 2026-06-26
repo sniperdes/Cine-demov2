@@ -253,7 +253,7 @@
         <div class="section">
             <div class="title">🔥 Destacadas</div>
             <div class="banner-slider">
-                <img id="banner-img" src="https://picsum.photos">
+                <img id="banner-img" src="https://picsum.photos/200/300?31">
             </div>
             <div class="banner-dots">
                 <span class="dot active-dot"></span>
@@ -265,16 +265,16 @@
             
             <div class="title">Tendencias</div>
             <div class="row">
-                <div class="card pelicula" onclick="abrirModal('Acción Total','https://picsum.photos','⭐ 8.5','Película de acción explosiva llena de adrenalina.')">
-                    <img src="https://picsum.photos">
+                <div class="card pelicula" onclick="abrirModal('Acción Total','https://picsum.photos/200/300?1','⭐ 8.5','Película de acción explosiva llena de adrenalina.')">
+                    <img src="https://picsum.photos/200/300?1">
                     <p>Acción Total</p>
                 </div>
-                <div class="card pelicula" onclick="abrirModal('Terror Nocturno','https://picsum.photos','⭐ 7.2','Una noche aterradora que nadie podrá olvidar.')">
-                    <img src="https://picsum.photos">
+                <div class="card pelicula" onclick="abrirModal('Terror Nocturno','https://picsum.photos/200/300?2','⭐ 7.2','Una noche aterradora que nadie podrá olvidar.')">
+                    <img src="https://picsum.photos/200/300?2">
                     <p>Terror Nocturno</p>
                 </div>
-                <div class="card pelicula" onclick="abrirModal('Aventura Final','https://picsum.photos','⭐ 9.0','Una aventura épica alrededor del mundo.')">
-                    <img src="https://picsum.photos">
+                <div class="card pelicula" onclick="abrirModal('Aventura Final','https://picsum.photos/200/300?3','⭐ 9.0','Una aventura épica alrededor del mundo.')">
+                    <img src="https://picsum.photos/200/300?3">
                     <p>Aventura Final</p>
                 </div>
             </div>
@@ -333,23 +333,23 @@
     <script>
         // 1. BASE DE DATOS
         const baseDeDatosPeliculas = [
-            { titulo: 'John Wick', genero: 'accion', img: 'https://picsum.photos', info: '⭐ 8.5 | 🎭 Acción', desc: 'Un asesino legendario vuelve.' },
-            { titulo: 'Mad Max', genero: 'accion', img: 'https://picsum.photos', info: '⭐ 8.8 | 🎭 Acción', desc: 'Mundo apocalíptico.' },
-            { titulo: 'La Momia', genero: 'terror', img: 'https://picsum.photos', info: '⭐ 6.5 | 🎭 Terror', desc: 'Una maldición despierta.' },
-            { titulo: 'IT', genero: 'terror', img: 'https://picsum.photos', info: '⭐ 7.9 | 🎭 Terror', desc: 'El payaso maldito vuelve.' },
-            { titulo: 'Mi Último Regalo', genero: 'romance', img: 'https://picsum.photos', info: '⭐ 7.5 | 🎭 Romance', desc: 'Historia de amor verdadero.' },
-            { titulo: 'Cuando Te Encuentre', genero: 'romance', img: 'https://picsum.photos', info: '⭐ 7.1 | 🎭 Romance', desc: 'El destino une dos almas.' },
-            { titulo: 'Liberen a Willy', genero: 'aventura', img: 'https://picsum.photos', info: '⭐ 6.8 | 🎭 Aventura', desc: 'Un niño y una orca.' },
-            { titulo: 'El Oso', genero: 'aventura', img: 'https://picsum.photos', info: '⭐ 8.0 | 🎭 Aventura', desc: 'Supervivencia en la naturaleza.' }
+            { titulo: 'John Wick', genero: 'accion', img: 'https://picsum.photos/200/300?10', info: '⭐ 8.5 | 🎭 Acción', desc: 'Un asesino legendario vuelve.' },
+            { titulo: 'Mad Max', genero: 'accion', img: 'https://picsum.photos/200/300?11', info: '⭐ 8.8 | 🎭 Acción', desc: 'Mundo apocalíptico.' },
+            { titulo: 'La Momia', genero: 'terror', img: 'https://picsum.photos/200/300?12', info: '⭐ 6.5 | 🎭 Terror', desc: 'Una maldición despierta.' },
+            { titulo: 'IT', genero: 'terror', img: 'https://picsum.photos/200/300?13', info: '⭐ 7.9 | 🎭 Terror', desc: 'El payaso maldito vuelve.' },
+            { titulo: 'Mi Último Regalo', genero: 'romance', img: 'https://picsum.photos/200/300?14', info: '⭐ 7.5 | 🎭 Romance', desc: 'Historia de amor verdadero.' },
+            { titulo: 'Cuando Te Encuentre', genero: 'romance', img: 'https://picsum.photos/200/300?15', info: '⭐ 7.1 | 🎭 Romance', desc: 'El destino une dos almas.' },
+            { titulo: 'Liberen a Willy', genero: 'aventura', img: 'https://picsum.photos/200/300?16', info: '⭐ 6.8 | 🎭 Aventura', desc: 'Un niño y una orca.' },
+            { titulo: 'El Oso', genero: 'aventura', img: 'https://picsum.photos/200/300?17', info: '⭐ 8.0 | 🎭 Aventura', desc: 'Supervivencia en la naturaleza.' }
         ];
 
         // 2. BANNER ORIGINAL
         const imagenesBanner = [
-            "https://picsum.photos",
-            "https://picsum.photos",
-            "https://picsum.photos",
-            "https://picsum.photos",
-            "https://picsum.photos"
+            "https://picsum.photos/200/300?18",
+            "https://picsum.photos/200/300?19",
+            "https://picsum.photos/200/300?20",
+            "https://picsum.photos/200/300?21",
+            "https://picsum.photos/200/300?22"
         ];
         let bannerIndex = 0;
         let temporizadorBanner;
