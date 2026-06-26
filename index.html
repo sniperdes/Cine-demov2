@@ -345,106 +345,10 @@
 
     <script>
 
-       // 1. BASE DE DATOS MASIVA (20 películas reales por género)
                 
 // Tu lista original simplificada (¡ya no necesitas poner los links de las imágenes a mano!)
-const peliculas = [
-    { titulo: 'Mad Max: Fury Road', genero: 'accion', info: '⭐ 8.8', desc: 'Mundo apocalíptico.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Gladiador', genero: 'accion', info: '⭐ 8.5', desc: 'Venganza en Roma.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Misión Imposible', genero: 'accion', info: '⭐ 7.8', desc: 'Acción y espionaje.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Terminator 2', genero: 'accion', info: '⭐ 8.6', desc: 'El juicio final.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Batman: El Caballero', genero: 'accion', info: '⭐ 9.0', desc: 'Héroe de Gotham.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Duro de Matar', genero: 'accion', info: '⭐ 8.2', desc: 'John McClane contra terroristas.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Búsqueda Implacable', genero: 'accion', info: '⭐ 7.8', desc: 'Un padre rescata a su hija.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Rápidos y Furiosos', genero: 'accion', info: '⭐ 6.8', desc: 'Carreras y acción.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Matrix', genero: 'accion', info: '⭐ 8.7', desc: 'La realidad es una simulación.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Top Gun: Maverick', genero: 'accion', info: '⭐ 8.3', desc: 'Aviones de combate.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: '300', genero: 'accion', info: '⭐ 7.6', desc: 'Espartanos en batalla.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Kill Bill Vol. 1', genero: 'accion', info: '⭐ 8.2', desc: 'Venganza samurái.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Inception', genero: 'accion', info: '⭐ 8.8', desc: 'Robo dentro de los sueños.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Deadpool', genero: 'accion', info: '⭐ 8.0', desc: 'Antihéroe cómico.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Logan', genero: 'accion', info: '⭐ 8.1', desc: 'El final de Wolverine.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Spider-Man: No Way Home', genero: 'accion', info: '⭐ 8.2', desc: 'Multiverso arácnido.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Skyfall', genero: 'accion', info: '⭐ 7.8', desc: 'James Bond regresa.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'The Avengers', genero: 'accion', info: '⭐ 8.0', desc: 'Héroes unidos.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Ip Man', genero: 'accion', info: '⭐ 8.0', desc: 'Maestro de artes marciales.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
-];
-
-// Tu clave API
-const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
-
-async function cargarPortadasAutomaticas() {
-    for (let pelicula of peliculas) {
-        try {
-            const query = encodeURIComponent(pelicula.titulo);
-            
-            // CORREGIDO: URL completa oficial de la API agregando el "$" faltante
-            const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`);
-            const datos = await respuesta.json();
-            
-            if (datos.results && datos.results.length > 0) {
-                const pi = datos.results[0]; 
-                
-                // CORREGIDO: URL oficial para descargar las imágenes de TMDB agregando el "$" faltante
-                if (pi.poster_path) {
-                    pelicula.img = `https://tmdb.org{pi.poster_path}`;
-                } else {
-                    pelicula.img = 'https://placeholder.com';
-                }
-                
-                if (pi.overview) pelicula.desc = pi.overview;
-                
-            } else {
-                pelicula.img = 'https://placeholder.com';
-            }
-        } catch (error) {
-            console.error("Error con:", pelicula.titulo, error);
-            pelicula.img = 'https://placeholder.com';
-        }
-    }
-    
-    // Ejecuta tu función para pintar el catálogo en el HTML
-    if (typeof dibujarPeliculasEnPantalla === "function") {
-        dibujarPeliculasEnPantalla(); 
-    } else {
-        console.warn("La función dibujarPeliculasEnPantalla() no existe con ese nombre exacto.");
-    }
-}
-
-// Inicia el proceso al cargar la web
-window.onload = cargarPortadasAutomaticas;
-
-        // 2. BANNER ORIGINAL
-        const imagenesBanner = [
-            "https://picsum.photos/200/300?18",
-            "https://picsum.photos/200/300?19",
-            "https://picsum.photos/200/300?20",
-            "https://picsum.photos/200/300?21",
-            "https://picsum.photos/200/300?22"
-        ];
-        let bannerIndex = 0;
-        let temporizadorBanner;
-
-        function rotarBanner() {
-            const imgElement = document.getElementById("banner-img");
-            if (!imgElement) return;
-            bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
-            imgElement.src = imagenesBanner[bannerIndex];
-            
-            const puntos = document.querySelectorAll(".banner-dots .dot");
-            puntos.forEach((punto, idx) => {
-                if (idx === bannerIndex) punto.classList.add("active-dot");
-                else punto.classList.remove("active-dot");
-            });
-        }
-
-        function iniciarTemporizador() {
-            clearInterval(temporizadorBanner);
-            temporizadorBanner = setInterval(rotarBanner, 4000);
-        }
-
-        // 3. CARGAR CATÁLOGO
-// 1. BASE DE DATOS SIMPLIFICADA (¡Sin links manuales de fotos!)
+ 
+       // 1. BASE DE DATOS SIMPLIFICADA (¡Sin links manuales de fotos!)
 const baseDeDatosPeliculas = [
     { titulo: 'Mad Max: Fury Road', genero: 'accion', info: '⭐ 8.8', desc: 'Mundo apocalíptico.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
     { titulo: 'Gladiador', genero: 'accion', info: '⭐ 8.5', desc: 'Venganza en Roma.', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
@@ -472,11 +376,11 @@ const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003";
 
 // 2. BANNER ORIGINAL
 const imagenesBanner = [
-    "https://picsum.photos/200/300?18",
-    "https://picsum.photos/200/300?19",
-    "https://picsum.photos/200/300?20",
-    "https://picsum.photos/200/300?21",
-    "https://picsum.photos/200/300?22"
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos"
 ];
 let bannerIndex = 0;
 let temporizadorBanner;
@@ -499,48 +403,58 @@ function iniciarTemporizador() {
     temporizadorBanner = setInterval(rotarBanner, 4000);
 }
 
-// 3. CARGAR CATÁLOGO (Optimizado: Busca la foto en internet y luego la dibuja)
-async function cargarCatalogo() {
-    for (let peli of baseDeDatosPeliculas) {
-        try {
-            const query = encodeURIComponent(peli.titulo);
-            // Consulta directa a la API usando tu clave v3
-            const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`);
-            const datos = await respuesta.json();
-            
-            if (datos.results && datos.results.length > 0) {
-                const pi = datos.results[0]; // Coincidencia principal
-                
-                // Asignamos la portada HD oficial
-                if (pi.poster_path) {
-                    peli.img = `https://tmdb.org{pi.poster_path}`;
-                } else {
-                    peli.img = 'https://placeholder.com';
-                }
-                
-                // Extra: Sobreescribe la descripción corta por la sinopsis extendida oficial de TMDB si existe
-                if (pi.overview) peli.desc = pi.overview;
-                
-            } else {
-                peli.img = 'https://placeholder.com';
-            }
-        } catch (error) {
-            console.error("Error obteniendo datos de:", peli.titulo, error);
-            peli.img = 'https://placeholder.com';
-        }
-
-        // Una vez obtenida la información de la película, se crea su tarjeta en la pantalla
+// 3. CARGAR CATÁLOGO (CORREGIDO Y OPTIMIZADO)
+function cargarCatalogo() {
+    baseDeDatosPeliculas.forEach((peli, index) => {
         const contenedor = document.getElementById(`contenedor-${peli.genero}`);
         if (contenedor) {
+            // Creamos un ID único para la imagen de esta tarjeta
+            const idImagenTarjeta = `img-peli-${index}`;
+            
+            // Imagen temporal de carga mientras se consulta la API
+            peli.img = 'https://placeholder.com...';
+
             const tarjeta = document.createElement('div');
             tarjeta.className = 'card pelicula';
+            
+            // Evento click dinámico (siempre leerá los datos actualizados tras la llamada a la API)
             tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
             tarjeta.innerHTML = `
-                <img src="${peli.img}">
+                <img id="${idImagenTarjeta}" src="${peli.img}">
                 <p>${peli.titulo}</p>
             `;
             contenedor.appendChild(tarjeta);
+
+            // Buscamos de forma asíncrona la portada real en segundo plano sin congelar la app
+            buscarPortadaEnTMDB(peli, idImagenTarjeta);
         }
+    });
+}
+
+// FUNCIÓN AUXILIAR: Se ejecuta individualmente por cada película en segundo plano
+async function buscarPortadaEnTMDB(peli, idElementoImg) {
+    try {
+        const query = encodeURIComponent(peli.titulo);
+        const respuesta = await fetch(`https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`);
+        const datos = await respuesta.json();
+        
+        // CORREGIDO: Verificación estricta del primer resultado del arreglo [0]
+        if (datos.results && datos.results.length > 0) {
+            const pi = datos.results[0]; 
+            
+            if (pi.poster_path) {
+                peli.img = `https://tmdb.org{pi.poster_path}`;
+                
+                // Actualizamos visualmente la imagen en la tarjeta correspondiente
+                const imgHTML = document.getElementById(idElementoImg);
+                if (imgHTML) imgHTML.src = peli.img;
+            }
+            
+            // Actualizamos la sinopsis oficial para cuando se abra el modal
+            if (pi.overview) peli.desc = pi.overview;
+        }
+    } catch (error) {
+        console.error("Error cargando portada de:", peli.titulo, error);
     }
 }
 
@@ -548,7 +462,6 @@ async function cargarCatalogo() {
 const tg = window.Telegram?.WebApp;
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Al ser cargarCatalogo una función asíncrona, se ejecuta en segundo plano ordenadamente
     cargarCatalogo();
     iniciarTemporizador();
 
@@ -566,7 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
+    
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
