@@ -523,54 +523,59 @@
         }
 
                 // Variables globales para guardar los enlaces de la película que se abra (¡Agrega esto!)
-        let trailerActual = "";
+                let trailerActual = "";
         let peliculaActual = "";
 
-        // REEMPLAZADO: Ahora recibe los dos parámetros de video al final
         function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
             document.getElementById("modal-title").innerText = titulo;
             document.getElementById("modal-img").src = img;
             document.getElementById("modal-info").innerText = info;
             document.getElementById("modal-desc").innerText = desc;
             
-            // Guardamos ambos enlaces en las variables globales
-            trailerActual = trailerUrl || "";
+            // Aseguramos que el video inicie oculto y la imagen visible al abrir otra película
+            document.getElementById("modal-video").style.display = "none";
+            document.getElementById("modal-video").src = "";
+            document.getElementById("modal-img").style.display = "block";
+            
+            // Convertimos automáticamente el link normal de YouTube a formato incrustado (embed)
+            if (trailerUrl && trailerUrl.includes("watch?v=")) {
+                let videoId = trailerUrl.split("v=")[1].split("&")[0];
+                trailerActual = "https://youtube.com" + videoId + "?autoplay=1";
+            } else {
+                trailerActual = trailerUrl || "";
+            }
+            
             peliculaActual = peliculaUrl || "";
             
             document.getElementById("modal").style.display = "flex";
             if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
-        // SE QUEDA IGUAL (Tu código original)
         function cerrarModal(){
+            // Apaga el video al cerrar el modal para que no siga sonando de fondo
+            document.getElementById("modal-video").src = "";
             document.getElementById("modal").style.display = "none";
         }
 
-        // SE QUEDA IGUAL (Tu código original)
-        function buscarPelicula() {
-            let input = document.getElementById('buscar').value.toLowerCase();
-            let tarjetas = document.querySelectorAll('.card.pelicula');
-            tarjetas.forEach(tarjeta => {
-                let nombre = tarjeta.querySelector('p').innerText.toLowerCase();
-                tarjeta.style.display = nombre.includes(input) ? "block" : "none";
-            });
-        }
-
-        // NUEVO: Agrega esta función inmediatamente abajo para procesar los clics de los botones
         function reproducirVideo(tipo) {
-            let urlDestino = (tipo === 'pelicula') ? peliculaActual : trailerActual;
-
-            if (urlDestino) {
-                if (tg) {
-                    tg.openLink(urlDestino);
+            if (tipo === 'trailer') {
+                if (trailerActual) {
+                    // Oculta la foto de portada, muestra el reproductor y le da play adentro
+                    document.getElementById("modal-img").style.display = "none";
+                    document.getElementById("modal-video").style.display = "block";
+                    document.getElementById("modal-video").src = trailerActual;
                 } else {
-                    window.open(urlDestino, '_blank');
+                    if (tg) tg.showAlert("Tráiler no disponible.");
+                    else alert("Tráiler no disponible.");
                 }
             } else {
-                if (tg) {
-                    tg.showAlert("⚠️ Película próximamente disponible. Estamos subiendo el archivo de video con los anuncios.");
+                // Para la película completa (que irá con tus anuncios), mantenemos el openLink externo
+                if (peliculaActual) {
+                    if (tg) tg.openLink(peliculaActual);
+                    else window.open(peliculaActual, '_blank');
                 } else {
-                    alert("Contenido no disponible todavía.");
+                    if (tg) tg.showAlert("⚠️ Película próximamente disponible.");
+                    else alert("Contenido no disponible todavía.");
                 }
             }
         }
