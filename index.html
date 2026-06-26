@@ -219,20 +219,28 @@
 </head>
 <body>
 
-    <!-- MODAL FICHA DETALLES -->
+        <!-- MODAL FICHA DETALLES CON REPRODUCTOR INTEGRADO -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">✖</span>
             <h2 id="modal-title">Título</h2>
-            <img id="modal-img" src="" style="width:100%; border-radius:10px;">
-            <p id="modal-info">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
-            <p id="modal-desc">Descripción de la película</p>
+            
+            <!-- La carátula se ocultará cuando se le dé play al video -->
+            <img id="modal-img" src="" style="width:100%; border-radius:10px; display: block;">
+            
+            <!-- REPRODUCTOR INTEGRADO (Oculto al inicio) -->
+            <iframe id="modal-video" src="" style="width:100%; height:220px; border:none; border-radius:10px; display:none;" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+
+            <p id="modal-info" style="color: gold; font-weight: bold; margin: 10px 0;">⭐ Info</p>
+            <p id="modal-desc" style="font-size: 14px; color: #ccc;">Descripción</p>
+            
             <button class="btn" style="background: #e50914;" onclick="reproducirVideo('pelicula')">📺 Ver Película (Con Anuncios)</button>
-<button class="btn" style="background: #333;" onclick="reproducirVideo('trailer')">▶ Ver Tráiler Oficial</button>
-<button class="btn vip" onclick="activarVip()">💎 VIP Sin Anuncios</button>
-<button class="btn btn-volver" onclick="cerrarModal()">⬅ Volver</button>
+            <button class="btn" style="background: #333;" onclick="reproducirVideo('trailer')">▶ Reproducir Tráiler Aquí</button>
+            <button class="btn vip" onclick="activarVip()">💎 VIP Sin Anuncios</button>
+            <button class="btn btn-volver" onclick="cerrarModal()">⬅ Volver</button>
         </div>
     </div>
+
 
     <!-- HEADER -->
     <div class="header">
