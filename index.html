@@ -345,27 +345,8 @@
 
     <script>
 
-                
-// Tu lista original simplificada (¡ya no necesitas poner los links de las imágenes a mano!)
- 
- // 1. BASE DE DATOS REPARADA (Con imágenes reales directas y estables)
-return;
-    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
-    imgElement.src = imagenesBanner[bannerIndex];
-    
-    const puntos = document.querySelectorAll(".banner-dots .dot");
-    puntos.forEach((punto, idx) => {
-        if (idx === bannerIndex) punto.classList.add("active-dot");
-        else punto.classList.remove("active-dot");
-    });
-}
 
-function iniciarTemporizador() {
-    clearInterval(temporizadorBanner);
-    temporizadorBanner = setInterval(rotarBanner, 4000);
-}
-
-      // 1. BASE DE DATOS AUTOMÁTICA (¡Limpia! Sin imágenes, descripciones ni duraciones manuales)
+// 1. BASE DE DATOS AUTOMÁTICA (¡Limpia! No cargues imágenes ni sinopsis a mano)
 const baseDeDatosPeliculas = [
     { titulo: 'Mad Max: Fury Road', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
     { titulo: 'Gladiador', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
@@ -379,10 +360,10 @@ const baseDeDatosPeliculas = [
     { titulo: 'Top Gun: Maverick', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
 ];
 
-// REEMPLAZA ESTE TEXTO POR TU CLAVE API DE 32 CARACTERES DE TMDB
+// COLOCA AQUÍ TU CLAVE API REAL DE 32 CARACTERES DE TMDB
 const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
 
-// 2. BANNER ORIGINAL RESTAURADO
+// 2. BANNER ORIGINAL COMPLETO
 const imagenesBanner = [
     "https://picsum.photos",
     "https://picsum.photos",
@@ -411,18 +392,17 @@ function iniciarTemporizador() {
     temporizadorBanner = setInterval(rotarBanner, 4000);
 }
 
-// 3. CARGAR CATÁLOGO (Dibuja la estructura base de forma instantánea)
+// 3. CARGAR CATÁLOGO (Dibuja los textos al instante para que la app no quede en negro)
 function cargarCatalogo() {
     baseDeDatosPeliculas.forEach((peli, index) => {
         const contenedor = document.getElementById(`contenedor-${peli.genero}`);
         if (contenedor) {
-            // Creamos un ID único para la imagen de esta tarjeta específica
             const idImgHtml = `img-peli-${index}`;
             
-            // Asignamos datos temporales por defecto para evitar errores iniciales
+            // Valores iniciales por defecto mientras responde internet
             peli.img = "https://placeholder.com...";
             peli.info = "⭐ --";
-            peli.desc = "Cargando sinopsis desde el servidor...";
+            peli.desc = "Buscando sinopsis en TMDB...";
 
             const tarjeta = document.createElement('div');
             tarjeta.className = 'card pelicula';
@@ -433,46 +413,46 @@ function cargarCatalogo() {
             `;
             contenedor.appendChild(tarjeta);
 
-            // Disparamos la petición a la API de forma aislada para esta película
+            // Llama a la API de forma independiente en segundo plano
             solicitarDatosTMDB(peli, idImgHtml);
         }
     });
 }
 
-// FUNCIÓN AUXILIAR: Busca los datos en TMDB en segundo plano y actualiza la tarjeta
+// FUNCIÓN AUXILIAR AUTOMÁTICA (Consume tu API de TMDB de forma segura)
 async function solicitarDatosTMDB(peli, idImgHtml) {
     try {
         const query = encodeURIComponent(peli.titulo.trim());
         const url = `https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`;
         
         const respuesta = await fetch(url);
-        if (!respuesta.ok) return; // Si la API da error, ignora y no rompe la app
+        if (!respuesta.ok) return; 
         
         const datos = await respuesta.json();
         
         if (datos && datos.results && datos.results.length > 0) {
-            const pi = datos.results[0]; // Tomamos la primera coincidencia del buscador
+            const pi = datos.results[0]; // Extrae la primera coincidencia exacta con [0]
             
-            // 1. Guardamos y actualizamos el póster real
+            // 1. Inyecta el póster real en el arreglo y actualiza la tarjeta en pantalla
             if (pi.poster_path) {
                 peli.img = `https://tmdb.org{pi.poster_path}`;
                 const elementoImg = document.getElementById(idImgHtml);
                 if (elementoImg) elementoImg.src = peli.img;
             }
             
-            // 2. Guardamos la sinopsis oficial para el modal
+            // 2. Guarda la sinopsis oficial para el Modal
             if (pi.overview) {
                 peli.desc = pi.overview;
             }
             
-            // 3. Guardamos la puntuación transformada a formato estrella (ej: 7.6 -> 76%)
+            // 3. Convierte la puntuación de TMDB a formato porcentaje (ej: 8.5 -> 85%)
             if (pi.vote_average) {
                 let porcentaje = Math.round(pi.vote_average * 10);
                 peli.info = `⭐ ${porcentaje}%`;
             }
         }
     } catch (e) {
-        console.log("Error silencioso controlado en: " + peli.titulo);
+        console.error("Error controlado en: " + peli.titulo);
     }
 }
 
@@ -498,7 +478,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
             
-  
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
