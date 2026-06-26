@@ -349,98 +349,38 @@
 // Tu lista original simplificada (¡ya no necesitas poner los links de las imágenes a mano!)
  
  // 1. BASE DE DATOS REPARADA (Con imágenes reales directas y estables)
+return;
+    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+    imgElement.src = imagenesBanner[bannerIndex];
+    
+    const puntos = document.querySelectorAll(".banner-dots .dot");
+    puntos.forEach((punto, idx) => {
+        if (idx === bannerIndex) punto.classList.add("active-dot");
+        else punto.classList.remove("active-dot");
+    });
+}
+
+function iniciarTemporizador() {
+    clearInterval(temporizadorBanner);
+    temporizadorBanner = setInterval(rotarBanner, 4000);
+}
+
+      // 1. BASE DE DATOS AUTOMÁTICA (¡Limpia! Sin imágenes, descripciones ni duraciones manuales)
 const baseDeDatosPeliculas = [
-    { 
-        titulo: 'Mad Max: Fury Road', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.8 | 🕒 2h 00m', 
-        desc: 'En un mundo apocalíptico, un grupo de rebeldes huye a través del desierto.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Gladiador', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.5 | 🕒 2h 35m', 
-        desc: 'Un general romano traicionado busca venganza contra el corrupto emperador.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Misión Imposible', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 7.8 | 🕒 1h 50m', 
-        desc: 'El agente Ethan Hunt debe limpiar su nombre tras ser acusado de traición.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Terminator 2', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.6 | 🕒 2h 17m', 
-        desc: 'Un cyborg reprogramado es enviado para proteger al joven John Connor.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Batman: El Caballero', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 9.0 | 🕒 2h 32m', 
-        desc: 'Batman enfrenta al Guasón, un cerebro criminal que desata el caos en Gotham.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Duro de Matar', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.2 | 🕒 2h 12m', 
-        desc: 'John McClane enfrenta a un grupo de terroristas que toman un rascacielos.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Búsqueda Implacable', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 7.8 | 🕒 1h 33m', 
-        desc: 'Un exagente de la CIA utiliza sus habilidades para rescatar a su hija secuestrada.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Rápidos y Furiosos', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 6.8 | 🕒 1h 46m', 
-        desc: 'Carreras callejeras ilegales, adrenalina y acción al límite.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Matrix', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.7 | 🕒 2h 16m', 
-        desc: 'Un programador descubre que la realidad es una simulación controlada.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    },
-    { 
-        titulo: 'Top Gun: Maverick', 
-        genero: 'accion', 
-        img: 'https://tmdb.org', 
-        info: '⭐ 8.3 | 🕒 2h 10m', 
-        desc: 'Maverick regresa para entrenar a una nueva generación de pilotos de combate.', 
-        trailer: 'https://youtu.be', 
-        peliculaUrl: 'https://tu-servidor-de-video.com' 
-    }
+    { titulo: 'Mad Max: Fury Road', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Gladiador', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Misión Imposible', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Terminator 2', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Batman: El Caballero', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Duro de Matar', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Búsqueda Implacable', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Rápidos y Furiosos', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Matrix', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Top Gun: Maverick', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
 ];
+
+// REEMPLAZA ESTE TEXTO POR TU CLAVE API DE 32 CARACTERES DE TMDB
+const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
 
 // 2. BANNER ORIGINAL RESTAURADO
 const imagenesBanner = [
@@ -471,21 +411,69 @@ function iniciarTemporizador() {
     temporizadorBanner = setInterval(rotarBanner, 4000);
 }
 
-// 3. CARGAR CATÁLOGO (Función nativa ultraestable)
+// 3. CARGAR CATÁLOGO (Dibuja la estructura base de forma instantánea)
 function cargarCatalogo() {
-    baseDeDatosPeliculas.forEach(peli => {
+    baseDeDatosPeliculas.forEach((peli, index) => {
         const contenedor = document.getElementById(`contenedor-${peli.genero}`);
         if (contenedor) {
+            // Creamos un ID único para la imagen de esta tarjeta específica
+            const idImgHtml = `img-peli-${index}`;
+            
+            // Asignamos datos temporales por defecto para evitar errores iniciales
+            peli.img = "https://placeholder.com...";
+            peli.info = "⭐ --";
+            peli.desc = "Cargando sinopsis desde el servidor...";
+
             const tarjeta = document.createElement('div');
             tarjeta.className = 'card pelicula';
             tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
             tarjeta.innerHTML = `
-                <img src="${peli.img}">
+                <img id="${idImgHtml}" src="${peli.img}" style="background-color: #222; min-height: 150px;">
                 <p>${peli.titulo}</p>
             `;
             contenedor.appendChild(tarjeta);
+
+            // Disparamos la petición a la API de forma aislada para esta película
+            solicitarDatosTMDB(peli, idImgHtml);
         }
     });
+}
+
+// FUNCIÓN AUXILIAR: Busca los datos en TMDB en segundo plano y actualiza la tarjeta
+async function solicitarDatosTMDB(peli, idImgHtml) {
+    try {
+        const query = encodeURIComponent(peli.titulo.trim());
+        const url = `https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`;
+        
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) return; // Si la API da error, ignora y no rompe la app
+        
+        const datos = await respuesta.json();
+        
+        if (datos && datos.results && datos.results.length > 0) {
+            const pi = datos.results[0]; // Tomamos la primera coincidencia del buscador
+            
+            // 1. Guardamos y actualizamos el póster real
+            if (pi.poster_path) {
+                peli.img = `https://tmdb.org{pi.poster_path}`;
+                const elementoImg = document.getElementById(idImgHtml);
+                if (elementoImg) elementoImg.src = peli.img;
+            }
+            
+            // 2. Guardamos la sinopsis oficial para el modal
+            if (pi.overview) {
+                peli.desc = pi.overview;
+            }
+            
+            // 3. Guardamos la puntuación transformada a formato estrella (ej: 7.6 -> 76%)
+            if (pi.vote_average) {
+                let porcentaje = Math.round(pi.vote_average * 10);
+                peli.info = `⭐ ${porcentaje}%`;
+            }
+        }
+    } catch (e) {
+        console.log("Error silencioso controlado en: " + peli.titulo);
+    }
 }
 
 // 4. INICIALIZADOR GENERAL
@@ -509,7 +497,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
+            
   
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
