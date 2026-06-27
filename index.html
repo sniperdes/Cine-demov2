@@ -215,22 +215,26 @@
         const titulosBanner     = ['Interstellar 2014', 'Mad Max Fury Road 2015', 'La La Land 2016', 'Get Out 2017', 'Spider-Man No Way Home'];
         const titularesGenero   = { accion:'John Wick 2014', terror:'It 2017', romance:'Titanic 1997', aventura:'Avatar 2009' };
 
-        // ─── FUNCIÓN CENTRAL: busca poster en TMDB ────────────────────────────────
-        async function obtenerPoster(query) {
-            if (posterCache[query]) return posterCache[query];
-            try {
-                const url = `${TMDB_SEARCH}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`;
-                const res  = await fetch(url);
-                const data = await res.json();
-                const poster = data.results?.[0]?.poster_path
-                    ? `${TMDB_IMG}${data.results[0].poster_path}`
-                    : null;
-                posterCache[query] = poster;
-                return poster;
-            } catch {
-                return null;
-            }
-        }
+        // REEMPLAZA la función obtenerPoster en tu index.html por esta:
+
+const posterCache = {};
+
+async function obtenerPoster(query) {
+    if (posterCache[query]) return posterCache[query];
+
+    try {
+        // Llama a tu Cloudflare Pages Function (mismo dominio, sin CORS)
+        const res  = await fetch(`/poster?q=${encodeURIComponent(query)}`);
+        const data = await res.json();
+
+        const url = data.poster || null;
+        posterCache[query] = url;   // caché local en memoria para esta sesión
+        return url;
+
+    } catch {
+        return null;
+    }
+}
 
         const PLACEHOLDER = 'https://via.placeholder.com/140x200/1a1a1a/666?text=Sin+imagen';
 
