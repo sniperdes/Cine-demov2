@@ -34,6 +34,13 @@
         .active-dot { background:white; }
         .search-box { padding:10px; background:#111; }
         .search-box input { width:100%; padding:12px; border:none; border-radius:8px; background:#222; color:white; font-size:16px; box-sizing:border-box; }
+
+        /* TRAILER */
+        .trailer-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:200; justify-content:center; align-items:center; flex-direction:column; }
+        .trailer-modal.active { display:flex; }
+        .trailer-container { width:95%; max-width:500px; }
+        .trailer-container iframe { width:100%; height:210px; border:none; border-radius:10px; }
+        .trailer-close { color:white; font-size:28px; cursor:pointer; margin-bottom:10px; align-self:flex-end; margin-right:10px; }
     </style>
 </head>
 <body>
@@ -45,9 +52,18 @@
             <img id="modal-img" src="" style="width:100%; border-radius:10px;">
             <p id="modal-info"></p>
             <p id="modal-desc"></p>
+            <button class="btn" id="btn-trailer" onclick="verTrailer()" style="background:#e50914;">▶️ Ver Tráiler</button>
             <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
             <button class="btn vip" onclick="activarVip()">💎 VIP</button>
             <button class="btn" style="background:#333;" onclick="cerrarModal()">⬅ Volver</button>
+        </div>
+    </div>
+
+    <!-- MODAL TRAILER -->
+    <div id="trailer-modal" class="trailer-modal">
+        <span class="trailer-close" onclick="cerrarTrailer()">✖</span>
+        <div class="trailer-container">
+            <iframe id="trailer-frame" src="" allowfullscreen allow="autoplay"></iframe>
         </div>
     </div>
 
@@ -320,7 +336,7 @@
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
                 tarjeta.innerHTML = `<img id="serie-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
-                tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${index}`).src, serie.info, serie.desc);
+                tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${index}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv');
                 contenedor.appendChild(tarjeta);
             });
 
@@ -344,7 +360,7 @@
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
                 tarjeta.innerHTML = `<img id="anime-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${anime.titulo}</p>`;
-                tarjeta.onclick = () => abrirModal(anime.titulo, document.getElementById(`anime-img-${index}`).src, anime.info, anime.desc);
+                tarjeta.onclick = () => abrirModal(anime.titulo, document.getElementById(`anime-img-${index}`).src, anime.info, anime.desc, anime.tmdbQuery, 'tv');
                 contenedor.appendChild(tarjeta);
             });
 
@@ -465,12 +481,43 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        function abrirModal(titulo, img, info, desc) {
+        let modalActual = { tmdbQuery: null, type: 'movie' };
+
+        function abrirModal(titulo, img, info, desc, tmdbQuery = null, type = 'movie') {
             document.getElementById('modal-title').innerText = titulo;
             document.getElementById('modal-img').src = img;
             document.getElementById('modal-info').innerText = info;
             document.getElementById('modal-desc').innerText = desc;
             document.getElementById('modal').style.display = 'flex';
+            modalActual = { tmdbQuery, type };
+            // Mostrar u ocultar botón trailer
+            document.getElementById('btn-trailer').style.display = tmdbQuery ? 'block' : 'none';
+        }
+
+        async function verTrailer() {
+            if (!modalActual.tmdbQuery) return;
+            const tg = window.Telegram?.WebApp;
+            if (tg) tg.HapticFeedback?.impactOccurred('medium');
+
+            try {
+                const res  = await fetch(`/trailer?q=${encodeURIComponent(modalActual.tmdbQuery)}&type=${modalActual.type}`);
+                const data = await res.json();
+                if (data.youtube_key) {
+                    document.getElementById('trailer-frame').src =
+                        `https://www.youtube.com/embed/${data.youtube_key}?autoplay=1`;
+                    document.getElementById('trailer-modal').classList.add('active');
+                } else {
+                    if (tg) tg.showAlert('❌ No se encontró tráiler para esta película.');
+                    else alert('No se encontró tráiler.');
+                }
+            } catch {
+                alert('Error al cargar el tráiler.');
+            }
+        }
+
+        function cerrarTrailer() {
+            document.getElementById('trailer-frame').src = '';
+            document.getElementById('trailer-modal').classList.remove('active');
         }
 
         function cerrarModal() {
