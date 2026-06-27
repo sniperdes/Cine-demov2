@@ -61,6 +61,10 @@
         .ep-row { display:flex; gap:8px; }
         .ep-btn { background:#222; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; white-space:nowrap; }
         .ep-btn.active { background:#e50914; }
+        /* GRILLA VER TODO */
+        .grid-genero { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; padding-bottom:20px; }
+        .grid-genero .card { min-width:unset; width:100%; }
+        .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
 </head>
@@ -152,22 +156,22 @@
     <div id="accion" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
         <div class="title">💥 Todas las de Acción</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;" id="contenedor-accion"></div>
+        <div class="grid-genero" id="contenedor-accion"></div>
     </div>
     <div id="terror" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
         <div class="title">👻 Todas las de Terror</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;" id="contenedor-terror"></div>
+        <div class="grid-genero" id="contenedor-terror"></div>
     </div>
     <div id="romance" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
         <div class="title">💕 Todas las de Romance</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;" id="contenedor-romance"></div>
+        <div class="grid-genero" id="contenedor-romance"></div>
     </div>
     <div id="aventura" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
         <div class="title">🗺️ Todas las de Aventura</div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;" id="contenedor-aventura"></div>
+        <div class="grid-genero" id="contenedor-aventura"></div>
     </div>
 
     <div id="series" class="view">
@@ -489,7 +493,7 @@
                     if (contenedor) {
                         const card2 = document.createElement('div');
                         card2.className = 'card pelicula';
-                        card2.style.minWidth = '140px';
+    
                         card2.innerHTML = `<img id="img-t-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
                         card2.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-t-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie');
                         contenedor.appendChild(card2);
