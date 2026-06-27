@@ -2,145 +2,553 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Pelis Prueba</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cine Bot</title>
+
+    <!-- SDK Oficial de Telegram Mini Apps -->
+    <script src="https://telegram.org"></script>
+
     <style>
-        body { background: #111; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 10px; }
-        .banner { width: 100%; height: 180px; background: #222; border-radius: 10px; overflow: hidden; position: relative; }
-        .banner img { width: 100%; height: 100%; object-fit: cover; }
-        .banner-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; }
-        .dot { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; }
-        .active-dot { background: #fff; }
-        .grid { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-        .card { min-width: 110px; background: #222; border-radius: 8px; overflow: hidden; text-align: center; cursor: pointer; }
-        .card img { width: 110px; height: 165px; object-fit: cover; background: #333; }
-        .card p { font-size: 12px; margin: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); display:none; justify-content:center; align-items:center; z-index:100; }
-        .modal-content { background:#222; padding:20px; border-radius:15px; width:90%; max-width:400px; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b0b0b;
+            color: white;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #111;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            color: #e50914;
+            font-size: 22px;
+            font-weight: bold;
+        }
+          
+        /* MENU */
+        .menu {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding: 10px;
+            background: #0b0b0b;
+            scrollbar-width: none;
+        }
+        .menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu button {
+            background: #1f1f1f;
+            border: none;
+            color: white;
+            padding: 10px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* SECCIONES Y VISTAS */
+        .section {
+            padding: 15px;
+        }
+
+        .title {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #e5e5e5;
+        }
+
+        .view {
+            display: none;
+            padding: 15px;
+        }
+
+        .active {
+            display: block;
+        }
+
+        /* CARDS */
+        .row {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .card {
+            min-width: 140px;
+            background: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .card:active {
+            transform: scale(0.97);
+        }
+
+        .card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .card p {
+            margin: 5px;
+            font-size: 13px;
+        }
+
+     /* MODAL CORREGIDO PARA MÓVILES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            justify-content: center;
+            align-items: flex-start; /* Cambiado de center a flex-start para que empiece arriba */
+            overflow-y: auto;        /* Permite scroll general si la pantalla es muy chica */
+            padding: 20px 0;         /* Margen arriba y abajo para que respire */
+            z-index: 100;
+        }
+
+        .modal-content {
+            background: #111;
+            padding: 15px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 12px;
+            position: relative;
+            text-align: center;
+            margin: auto;            /* Centra la tarjeta horizontalmente */
+        }
+
+
+        .close {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 20px;
+            color: #aaa;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background: #222;
+            color: white;
+            border: none;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .vip {
+            background: gold;
+            color: black;
+        }
+
+        /* BANNERS */
+        .banner-slider {
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .banner-slider img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .banner-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #666;
+        }
+
+        .active-dot {
+            background: white;
+        }
+
+        /* BUSCADOR */
+        .search-box {
+            padding: 10px;
+            background: #111;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #222;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
 
-    <!-- BANNER -->
-    <div class="banner">
-        <img id="banner-img" src="https://picsum.photos" alt="Banner">
-        <div class="banner-dots">
-            <div class="dot active-dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-        </div>
-    </div>
-
-    <h3>Películas de Acción</h3>
-    <!-- CONTENEDOR HTML -->
-    <div id="contenedor-accion" class="grid"></div>
-
-    <!-- MODAL REPARADO CON TU IFRAME -->
+    <!-- MODAL FICHA DETALLES -->
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h2 id="modal-title"></h2>
+            <span class="close" onclick="cerrarModal()">✖</span>
+            <h2 id="modal-title">Título</h2>
             <img id="modal-img" src="" style="width:100%; border-radius:10px;">
-            <iframe id="modal-video" src="" style="width: 100%; aspect-ratio: 16/9; border: none; border-radius: 10px; display: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-            <p id="modal-info"></p>
-            <p id="modal-desc"></p>
-            <button onclick="reproducirVideo('trailer')">Ver Tráiler</button>
-            <button onclick="cerrarModal()">Cerrar</button>
+            <p id="modal-info">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
+            <p id="modal-desc">Descripción de la película</p>
+            <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
+            <button class="btn vip" onclick="activarVip()">💎 VIP</button>
+            <button class="btn" style="background: #333;" onclick="cerrarModal()">⬅ Volver</button>
         </div>
     </div>
 
-    <script>
-        // 1. BASE DE DATOS LOCAL CON PUENTE SEGURO DE IMÁGENES (images.weserv.nl)
-        const baseDeDatosPeliculas = [
-            { 
-                titulo: 'Mad Max: Fury Road', genero: 'accion', 
-                img: 'https://weserv.nl', 
-                info: '⭐ 81% | 🕒 2h 00m', desc: 'En un futuro post-apocalíptico, Max se une a Furiosa para escapar de un tirano a través del desierto.',
-                trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' 
-            },
-            { 
-                titulo: 'Gladiador', genero: 'accion', 
-                img: 'https://weserv.nl', 
-                info: '⭐ 85% | 🕒 2h 35m', desc: 'El general romano Máximo es traicionado por el heredero al trono y regresa como gladiador para buscar venganza.',
-                trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' 
-            },
-            { 
-                titulo: 'Misión Imposible', genero: 'accion', 
-                img: 'https://weserv.nl', 
-                info: '⭐ 77% | 🕒 1h 50m', desc: 'El agente de inteligencia Ethan Hunt es acusado falsamente de espionaje y debe huir para limpiar su nombre.',
-                trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' 
-            }
-        ];
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">CINE DEMO</div>
+    </div>
 
-        // 2. LÓGICA DEL BANNER
-        const imagenesBanner = ["https://picsum.photos", "https://picsum.photos", "https://picsum.photos"];
+    <!-- BUSCADOR -->
+    <div class="search-box">
+        <input type="text" id="buscar" placeholder="🔍 Buscar película..." onkeyup="buscarPelicula()">
+    </div>
+
+    <!-- MENU PRINCIPAL -->
+    <div class="menu">
+        <button onclick="show('home')">🏠 Inicio</button>
+        <button onclick="show('peliculas')">🎬 Películas</button>
+        <button onclick="show('series')">📺 Series</button>
+        <button onclick="show('anime')">🎌 Anime</button>
+        <button onclick="show('adulto')">🔞 +18</button>
+    </div>
+
+    <!-- HOME (INICIO) -->
+    <div id="home" class="view active">
+        <div class="section">
+            <div class="title">🔥 Destacadas</div>
+            <div class="banner-slider">
+                <img id="banner-img" src="https://picsum.photos/200/300?31">
+            </div>
+            <div class="banner-dots">
+                <span class="dot active-dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+            
+            <div class="title">Tendencias</div>
+            <div class="row">
+                <div class="card pelicula" onclick="abrirModal('Acción Total','https://picsum.photos/200/300?1','⭐ 8.5','Película de acción explosiva llena de adrenalina.')">
+                    <img src="https://picsum.photos/200/300?33">
+                    <p>Acción Total</p>
+                </div>
+                <div class="card pelicula" onclick="abrirModal('Terror Nocturno','https://picsum.photos/200/300?2','⭐ 7.2','Una noche aterradora que nadie podrá olvidar.')">
+                    <img src="https://picsum.photos/200/300?34">
+                    <p>Terror Nocturno</p>
+                </div>
+                <div class="card pelicula" onclick="abrirModal('Aventura Final','https://picsum.photos/200/300?3','⭐ 9.0','Una aventura épica alrededor del mundo.')">
+                    <img src="https://picsum.photos/200/300?35">
+                    <p>Aventura Final</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SELECCIÓN DE GÉNEROS -->
+    <div id="peliculas" class="view">
+        <div class="title">🎬 Géneros</div>
+        <div class="row">
+            <div class="card" onclick="show('accion')">
+                <img src="https://picsum.photos/200/300?36">
+                <p>Acción</p>
+            </div>
+            <div class="card" onclick="show('terror')">
+                <img src="https://picsum.photos/200/300?37">
+                <p>Terror</p>
+            </div>
+            <div class="card" onclick="show('romance')">
+                <img src="https://picsum.photos/200/300?38">
+                <p>Romance</p>
+            </div>
+            <div class="card" onclick="show('aventura')">
+                <img src="https://picsum.photos/200/300?39">
+                <p>Aventura</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENEDORES PARA CADA GÉNERO (JAVASCRIPT METE LAS COSAS AQUÍ) -->
+    <div id="accion" class="view">
+        <button class="btn" style="background:#333; width:auto; display:inline-block; padding:8px 16px; margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button> 
+        <div class="row" id="contenedor-accion"></div>
+    </div>
+
+    <div id="terror" class="view">
+        <button class="btn" style="background:#333; width:auto; display:inline-block; padding:8px 16px; margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button> 
+        <div class="row" id="contenedor-terror"></div>
+    </div>
+
+    <div id="romance" class="view">
+        <button class="btn" style="background:#333; width:auto; display:inline-block; padding:8px 16px; margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button> 
+        <div class="row" id="contenedor-romance"></div>
+    </div>
+
+    <div id="aventura" class="view">
+        <button class="btn" style="background:#333; width:auto; display:inline-block; padding:8px 16px; margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button> 
+        <div class="row" id="contenedor-aventura"></div>
+    </div>
+
+    <!-- SECCIONES EXTRAS -->
+    <div id="series" class="view"><div class="title">📺 Series Próximamente</div></div>
+    <div id="anime" class="view"><div class="title">🎌 Anime Próximamente</div></div>
+    <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
+
+    <script>
+
+       // 1. BASE DE DATOS MASIVA (20 películas reales por género)
+        const baseDeDatosPeliculas = [
+            // --- ACCIÓN (20 películas) ---
+            { 
+                titulo: 'John Wick', 
+                genero: 'accion', 
+                img: 'https://es.wikipedia.org/wiki/John_Wick#/media/Archivo:JohnWick_logo_bg.svg', 
+                info: '⭐ 8.5', 
+                desc: 'Un asesino legendario vuelve del retiro para buscar venganza.' 
+            },
+            { titulo: 'Mad Max: Fury Road', genero: 'accion', img: 'https://picsum.photos', info: '⭐ 8.8', desc: 'Mundo apocalíptico.' },
+            { titulo: 'Gladiador', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.5', desc: 'Venganza en Roma.' },
+            { titulo: 'Misión Imposible', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Acción y espionaje.' },
+            { titulo: 'Terminator 2', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.6', desc: 'El juicio final.' },
+            { titulo: 'Batman: El Caballero', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 9.0', desc: 'Héroe de Gotham.' },
+            { titulo: 'Duro de Matar', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.2', desc: 'John McClane contra terroristas.' },
+            { titulo: 'Búsqueda Implacable', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Un padre rescata a su hija.' },
+            { titulo: 'Rápidos y Furiosos', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 6.8', desc: 'Carreras y acción.' },
+            { titulo: 'Matrix', genero: 'accion', img: 'https://loremflickr.com0', info: '⭐ 8.7', desc: 'La realidad es una simulación.' },
+            { titulo: 'Top Gun: Maverick', genero: 'accion', img: 'https://loremflickr.com1', info: '⭐ 8.3', desc: 'Aviones de combate.' },
+            { titulo: '300', genero: 'accion', img: 'https://loremflickr.com2', info: '⭐ 7.6', desc: 'Espartanos en batalla.' },
+            { titulo: 'Kill Bill Vol. 1', genero: 'accion', img: 'https://loremflickr.com3', info: '⭐ 8.2', desc: 'Venganza samurái.' },
+            { titulo: 'Inception', genero: 'accion', img: 'https://loremflickr.com4', info: '⭐ 8.8', desc: 'Robo dentro de los sueños.' },
+            { titulo: 'Deadpool', genero: 'accion', img: 'https://loremflickr.com5', info: '⭐ 8.0', desc: 'Antihéroe cómico.' },
+            { titulo: 'Logan', genero: 'accion', img: 'https://loremflickr.com6', info: '⭐ 8.1', desc: 'El final de Wolverine.' },
+            { titulo: 'Spider-Man: No Way Home', genero: 'accion', img: 'https://loremflickr.com7', info: '⭐ 8.2', desc: 'Multiverso arácnido.' },
+            { titulo: 'Skyfall', genero: 'accion', img: 'https://loremflickr.com8', info: '⭐ 7.8', desc: 'James Bond regresa.' },
+            { titulo: 'The Avengers', genero: 'accion', img: 'https://loremflickr.com9', info: '⭐ 8.0', desc: 'Héroes unidos.' },
+            { titulo: 'Ip Man', genero: 'accion', img: 'https://loremflickr.com0', info: '⭐ 8.0', desc: 'Maestro de artes marciales.' },
+
+            // --- TERROR (20 películas) ---
+            { titulo: 'La Momia', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.5', desc: 'Maldición antigua.' },
+            { titulo: 'IT (Eso)', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'El payaso maldito.' },
+            { titulo: 'El Conjuro', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Investigación paranormal.' },
+            { titulo: 'Actividad Paranormal', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.3', desc: 'Fantasmas en casa.' },
+            { titulo: 'Scream', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.4', desc: 'Asesino enmascarado.' },
+            { titulo: 'El Exorcista', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Posesión demoníaca.' },
+            { titulo: 'Hereditary', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.3', desc: 'Terror psicológico familiar.' },
+            { titulo: 'Un Lugar Silencioso', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Monstruos que oyen todo.' },
+            { titulo: 'El Resplandor', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.4', desc: 'Hotel embrujado.' },
+            { titulo: 'Alien: El Octavo Pasajero', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 8.5', desc: 'Terror en el espacio.' },
+            { titulo: 'Siniestro', genero: 'terror', img: 'https://loremflickr.com1', info: '⭐ 6.8', desc: 'Cintas malditas.' },
+            { titulo: 'Insidious', genero: 'terror', img: 'https://loremflickr.com2', info: '⭐ 6.8', desc: 'El mundo astral.' },
+            { titulo: 'La Bruja', genero: 'terror', img: 'https://loremflickr.com3', info: '⭐ 7.0', desc: 'Terror folclórico.' },
+            { titulo: 'Midsommar', genero: 'terror', img: 'https://loremflickr.com4', info: '⭐ 7.1', desc: 'Culto pagano a la luz del día.' },
+            { titulo: 'Babadook', genero: 'terror', img: 'https://loremflickr.com5', info: '⭐ 6.8', desc: 'Un monstruo de libro infantil.' },
+            { titulo: 'El Aro', genero: 'terror', img: 'https://loremflickr.com6', info: '⭐ 7.1', desc: 'Una cinta de video mortal.' },
+            { titulo: 'Get Out', genero: 'terror', img: 'https://loremflickr.com7', info: '⭐ 7.8', desc: 'Suspenso y misterio familiar.' },
+            { titulo: 'Psicosis', genero: 'terror', img: 'https://loremflickr.com8', info: '⭐ 8.5', desc: 'El motel de Norman Bates.' },
+            { titulo: 'Halloween', genero: 'terror', img: 'https://loremflickr.com9', info: '⭐ 7.7', desc: 'Michael Myers regresa.' },
+            { titulo: 'Viernes 13', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 6.4', desc: 'Campamento sangriento.' },
+
+            // --- ROMANCE (20 películas) ---
+            { titulo: 'Mi Último Regalo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Amor verdadero.' },
+            { titulo: 'Cuando Te Encuentre', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.1', desc: 'El destino une dos almas.' },
+            { titulo: 'Titanic', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'Tragedia en el mar.' },
+            { titulo: 'Diario de una Pasión', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Allie y Noah.' },
+            { titulo: 'Orgullo y Prejuicio', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Elizabeth y Sr. Darcy.' },
+            { titulo: 'Bajo la Misma Estrella', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.7', desc: 'Amor juvenil resiliente.' },
+            { titulo: 'La La Land', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.0', desc: 'Música y sueños en Hollywood.' },
+            { titulo: 'Cuestión de Tiempo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Viajes en el tiempo por amor.' },
+            { titulo: 'Antes del Amanecer', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Un encuentro en Viena.' },
+            { titulo: 'Yo Antes de Ti', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 7.4', desc: 'Aprender a vivir de nuevo.' },
+            { titulo: 'Amor de Mis Amores', genero: 'romance', img: 'https://loremflickr.com1', info: '⭐ 7.0', desc: 'Enredos de amor.' },
+            { titulo: '500 Días con Ella', genero: 'romance', img: 'https://loremflickr.com2', info: '⭐ 7.7', desc: 'Una historia no romántica.' },
+            { titulo: 'A Él No Le Gustas Tanto', genero: 'romance', img: 'https://loremflickr.com3', info: '⭐ 6.4', desc: 'Malentendidos amorosos.' },
+            { titulo: 'Votos de Amor', genero: 'romance', img: 'https://loremflickr.com4', info: '⭐ 6.8', desc: 'Recuperar la memoria y el amor.' },
+            { titulo: 'Ghost: El Fantasma', genero: 'romance', img: 'https://loremflickr.com5', info: '⭐ 7.1', desc: 'Amor más allá de la muerte.' },
+            { titulo: 'Un Lugar Llamado Notting Hill', genero: 'romance', img: 'https://loremflickr.com6', info: '⭐ 7.2', desc: 'Una estrella y un librero.' },
+            { titulo: 'Pretty Woman', genero: 'romance', img: 'https://loremflickr.com7', info: '⭐ 7.1', desc: 'Un cuento moderno.' },
+            { titulo: 'La Propuesta', genero: 'romance', img: 'https://loremflickr.com8', info: '⭐ 6.7', desc: 'Matrimonio por conveniencia.' },
+            { titulo: 'Querido John', genero: 'romance', img: 'https://loremflickr.com9', info: '⭐ 6.3', desc: 'Cartas de amor y distancia.' },
+            { titulo: 'Cartas a Julieta', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 6.5', desc: 'Amor en Verona.' },
+
+            // --- AVENTURA (20 películas) ---
+{ titulo: 'Liberen a Willy', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.8', desc: 'Un niño y una orca.' },
+{ titulo: 'El Oso', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia salvaje.' },
+{ titulo: 'Avatar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'El planeta Pandora.' },
+{ titulo: 'Jurassic Park', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.2', desc: 'Parque de dinosaurios.' },
+{ titulo: 'Indiana Jones', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.4', desc: 'Búsqueda del arca.' },
+{ titulo: 'Interstellar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.6', desc: 'Viaje espacial interdimensional.' },
+{ titulo: 'El Señor de los Anillos', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.8', desc: 'La comunidad del anillo.' },
+{ titulo: 'Piratas del Caribe', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'El Capitán Jack Sparrow.' },
+{ titulo: 'El Hobbit', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Un viaje inesperado.' },
+{ titulo: 'Naufrago', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Sobrevivir solo en una isla.' },
+{ titulo: 'Jumanji', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.0', desc: 'Un juego de mesa real.' },
+{ titulo: 'La Vida de Pi', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'Un tigre y un bote.' },
+{ titulo: 'Madagascar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'Animales en la selva.' },
+{ titulo: 'Las Crónicas de Narnia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'El ropero mágico.' },
+{ titulo: 'Up: Una Aventura', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.3', desc: 'Casa con globos.' },
+{ titulo: 'Buscando a Nemo', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.1', desc: 'Viaje en el océano.' },
+{ titulo: 'El Renacido', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia extrema en la nieve.' },
+{ titulo: 'La Momia (1999)', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.1', desc: 'Aventura arqueológica.' },
+{ titulo: 'Zootopia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Investigación en la ciudad.' },
+{ titulo: 'Tarzán', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.3', desc: 'El rey de la selva.' }
+];
+
+
+
+        // 2. BANNER ORIGINAL
+        const imagenesBanner = [
+            "https://picsum.photos/200/300?18",
+            "https://picsum.photos/200/300?19",
+            "https://picsum.photos/200/300?20",
+            "https://picsum.photos/200/300?21",
+            "https://picsum.photos/200/300?22"
+        ];
         let bannerIndex = 0;
+        let temporizadorBanner;
+
         function rotarBanner() {
             const imgElement = document.getElementById("banner-img");
             if (!imgElement) return;
             bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
             imgElement.src = imagenesBanner[bannerIndex];
+            
+            const puntos = document.querySelectorAll(".banner-dots .dot");
+            puntos.forEach((punto, idx) => {
+                if (idx === bannerIndex) punto.classList.add("active-dot");
+                else punto.classList.remove("active-dot");
+            });
         }
-        setInterval(rotarBanner, 4000);
 
-        // 3. CARGAR CATÁLOGO (Limpio y directo)
-        async function cargarCatalogo() {
-    try {
-        const respuesta = await fetch('/peliculas');
-        const baseDeDatosPeliculas = await respuesta.json();
+        function iniciarTemporizador() {
+            clearInterval(temporizadorBanner);
+            temporizadorBanner = setInterval(rotarBanner, 4000);
+        }
 
-        baseDeDatosPeliculas.forEach(peli => {
-            const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-            if (contenedor) {
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'card pelicula';
-                tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
-                tarjeta.innerHTML = `<img src="${peli.img}"><p>${peli.titulo}</p>`;
-                contenedor.appendChild(tarjeta);
+        // 3. CARGAR CATÁLOGO
+        function cargarCatalogo() {
+            baseDeDatosPeliculas.forEach(peli => {
+                const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+                if (contenedor) {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'card pelicula';
+                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
+                    tarjeta.innerHTML = `
+                        <img src="${peli.img}">
+                        <p>${peli.titulo}</p>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                }
+            });
+        }
+
+        // 4. INICIALIZADOR GENERAL
+        const tg = window.Telegram?.WebApp;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarCatalogo();
+            iniciarTemporizador();
+
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+
+            const bannerElement = document.getElementById("banner-img");
+            if (bannerElement) {
+                bannerElement.addEventListener("click", () => {
+                    rotarBanner();
+                    iniciarTemporizador();
+                    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                });
             }
         });
-    } catch (error) { console.error("Error cargando catálogo:", error); }
-}
 
+        // 5. NAVEGACIÓN Y MODAL
+        function show(id){
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            const targetView = document.getElementById(id);
+            if(targetView) targetView.classList.add('active');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        }
 
-        // 5. NAVEGACIÓN Y MODAL (Tu extractor reparado al principio)
-        let trailerActual = "";
-        let peliculaActual = "";
-
-        function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
+        function abrirModal(titulo, img, info, desc){
             document.getElementById("modal-title").innerText = titulo;
             document.getElementById("modal-img").src = img;
             document.getElementById("modal-info").innerText = info;
             document.getElementById("modal-desc").innerText = desc;
-            
-            document.getElementById("modal-video").style.display = "none";
-            document.getElementById("modal-video").src = "";
-            document.getElementById("modal-img").style.display = "block";
-            
-            let videoId = null;
-            if (trailerUrl && trailerUrl.includes("watch?v=")) videoId = trailerUrl.split("v=")[1].split("&")[0];
-            else if (trailerUrl && trailerUrl.includes("youtu.be/")) videoId = trailerUrl.split("youtu.be/")[1].split("?")[0];
-
-            if (videoId) trailerActual = "https://youtube.com" + videoId + "?autoplay=1&rel=0";
-            else trailerActual = trailerUrl || "";
-            
-            peliculaActual = peliculaUrl || "";
             document.getElementById("modal").style.display = "flex";
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
 
         function cerrarModal(){
-            document.getElementById("modal-video").src = "";
             document.getElementById("modal").style.display = "none";
         }
 
-        function reproducirVideo(tipo) {
-            if (tipo === 'trailer' && trailerActual) {
-                document.getElementById("modal-img").style.display = "none";
-                document.getElementById("modal-video").style.display = "block";
-                document.getElementById("modal-video").src = trailerActual;
-            }
+        function buscarPelicula() {
+            let input = document.getElementById('buscar').value.toLowerCase();
+            let tarjetas = document.querySelectorAll('.card.pelicula');
+            tarjetas.forEach(tarjeta => {
+                let nombre = tarjeta.querySelector('p').innerText.toLowerCase();
+                tarjeta.style.display = nombre.includes(input) ? "block" : "none";
+            });
         }
 
-        document.addEventListener("DOMContentLoaded", cargarCatalogo);
+        function verAnuncio() {
+            if (tg) tg.showAlert("▶️ Cargando video publicitario...");
+            else alert("Cargando anuncio...");
+        }
+
+        function activarVip() {
+            if (tg) {
+                tg.showPopup({
+                    title: 'Suscripción VIP',
+                    message: '¿Quieres desbloquear todo el catálogo sin anuncios?',
+                    buttons: [{id: 'vip', type: 'default', text: 'Obtener Cuenta VIP'}, {type: 'cancel', text: 'Luego'}]
+                });
+            } else {
+                alert("Pase VIP Premium.");
+            }
+        }
     </script>
 </body>
 </html>
