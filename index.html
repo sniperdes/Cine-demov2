@@ -464,22 +464,29 @@
             temporizadorBanner = setInterval(rotarBanner, 4000);
         }
 
-        // 3. CARGAR CATÁLOGO
-        function cargarCatalogo() {
-            baseDeDatosPeliculas.forEach(peli => {
-                const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-                if (contenedor) {
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'card pelicula';
-                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
-                    tarjeta.innerHTML = `
-                        <img src="${peli.img}">
-                        <p>${peli.titulo}</p>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                }
-            });
-        }
+        // 3. CARGAR CATÁLOGO (Automatizado con tu base de datos de Cloudflare KV)
+async function cargarCatalogo() {
+    try {
+        // Le pedimos la lista ya cocinada por el servidor a tu propia ruta local
+        const respuesta = await fetch('/catalogo');
+        const baseDeDatosPeliculas = await respuesta.json();
+
+        baseDeDatosPeliculas.forEach(peli => {
+            const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+            if (contenedor) {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
+                tarjeta.innerHTML = `
+                    <img src="${peli.img}">
+                    <p>${peli.titulo}</p>
+                `;
+                contenedor.appendChild(tarjeta);
+            }
+        });
+    } catch (error) { console.error("Error al cargar el catálogo de Cloudflare:", error); }
+}
+
 
         // 4. INICIALIZADOR GENERAL
         const tg = window.Telegram?.WebApp;
