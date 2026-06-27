@@ -219,28 +219,19 @@
 </head>
 <body>
 
-        <!-- MODAL FICHA DETALLES CON REPRODUCTOR INTEGRADO -->
+    <!-- MODAL FICHA DETALLES -->
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">✖</span>
             <h2 id="modal-title">Título</h2>
-            
-            <!-- La carátula se ocultará cuando se le dé play al video -->
-            <img id="modal-img" src="" style="width:100%; border-radius:10px; display: block;">
-            
-            <!-- REPRODUCTOR INTEGRADO (Oculto al inicio) -->
-            <iframe id="modal-video" src="" style="width: 100%; aspect-ratio: 16/9; border: none; border-radius: 10px; display: none;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
-            <p id="modal-info" style="color: gold; font-weight: bold; margin: 10px 0;">⭐ Info</p>
-            <p id="modal-desc" style="font-size: 14px; color: #ccc;">Descripción</p>
-            
-            <button class="btn" style="background: #e50914;" onclick="reproducirVideo('pelicula')">📺 Ver Película (Con Anuncios)</button>
-            <button class="btn" style="background: #333;" onclick="reproducirVideo('trailer')">▶ Reproducir Tráiler Aquí</button>
-            <button class="btn vip" onclick="activarVip()">💎 VIP Sin Anuncios</button>
-            <button class="btn btn-volver" onclick="cerrarModal()">⬅ Volver</button>
+            <img id="modal-img" src="" style="width:100%; border-radius:10px;">
+            <p id="modal-info">⭐ 8.5 | 🎭 Acción | 🕒 120 min</p>
+            <p id="modal-desc">Descripción de la película</p>
+            <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
+            <button class="btn vip" onclick="activarVip()">💎 VIP</button>
+            <button class="btn" style="background: #333;" onclick="cerrarModal()">⬅ Volver</button>
         </div>
     </div>
-
 
     <!-- HEADER -->
     <div class="header">
@@ -345,213 +336,173 @@
 
     <script>
 
+       // 1. BASE DE DATOS MASIVA (20 películas reales por género)
+        const baseDeDatosPeliculas = [
+            // --- ACCIÓN (20 películas) ---
+            { 
+                titulo: 'John Wick', 
+                genero: 'accion', 
+                img: 'https://es.wikipedia.org/wiki/John_Wick#/media/Archivo:JohnWick_logo_bg.svg', 
+                info: '⭐ 8.5', 
+                desc: 'Un asesino legendario vuelve del retiro para buscar venganza.' 
+            },
+            { titulo: 'Mad Max: Fury Road', genero: 'accion', img: 'https://picsum.photos', info: '⭐ 8.8', desc: 'Mundo apocalíptico.' },
+            { titulo: 'Gladiador', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.5', desc: 'Venganza en Roma.' },
+            { titulo: 'Misión Imposible', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Acción y espionaje.' },
+            { titulo: 'Terminator 2', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.6', desc: 'El juicio final.' },
+            { titulo: 'Batman: El Caballero', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 9.0', desc: 'Héroe de Gotham.' },
+            { titulo: 'Duro de Matar', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 8.2', desc: 'John McClane contra terroristas.' },
+            { titulo: 'Búsqueda Implacable', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Un padre rescata a su hija.' },
+            { titulo: 'Rápidos y Furiosos', genero: 'accion', img: 'https://loremflickr.com', info: '⭐ 6.8', desc: 'Carreras y acción.' },
+            { titulo: 'Matrix', genero: 'accion', img: 'https://loremflickr.com0', info: '⭐ 8.7', desc: 'La realidad es una simulación.' },
+            { titulo: 'Top Gun: Maverick', genero: 'accion', img: 'https://loremflickr.com1', info: '⭐ 8.3', desc: 'Aviones de combate.' },
+            { titulo: '300', genero: 'accion', img: 'https://loremflickr.com2', info: '⭐ 7.6', desc: 'Espartanos en batalla.' },
+            { titulo: 'Kill Bill Vol. 1', genero: 'accion', img: 'https://loremflickr.com3', info: '⭐ 8.2', desc: 'Venganza samurái.' },
+            { titulo: 'Inception', genero: 'accion', img: 'https://loremflickr.com4', info: '⭐ 8.8', desc: 'Robo dentro de los sueños.' },
+            { titulo: 'Deadpool', genero: 'accion', img: 'https://loremflickr.com5', info: '⭐ 8.0', desc: 'Antihéroe cómico.' },
+            { titulo: 'Logan', genero: 'accion', img: 'https://loremflickr.com6', info: '⭐ 8.1', desc: 'El final de Wolverine.' },
+            { titulo: 'Spider-Man: No Way Home', genero: 'accion', img: 'https://loremflickr.com7', info: '⭐ 8.2', desc: 'Multiverso arácnido.' },
+            { titulo: 'Skyfall', genero: 'accion', img: 'https://loremflickr.com8', info: '⭐ 7.8', desc: 'James Bond regresa.' },
+            { titulo: 'The Avengers', genero: 'accion', img: 'https://loremflickr.com9', info: '⭐ 8.0', desc: 'Héroes unidos.' },
+            { titulo: 'Ip Man', genero: 'accion', img: 'https://loremflickr.com0', info: '⭐ 8.0', desc: 'Maestro de artes marciales.' },
 
-// 1. BASE DE DATOS AUTOMÁTICA (¡Limpia! No cargues imágenes ni sinopsis a mano)
-= `img-peli-${index}`;
-            
-            // Valores iniciales por defecto mientras responde internet
-            peli.img = "https://placeholder.com...";
-            peli.info = "⭐ --";
-            peli.desc = "Buscando sinopsis en TMDB...";
+            // --- TERROR (20 películas) ---
+            { titulo: 'La Momia', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.5', desc: 'Maldición antigua.' },
+            { titulo: 'IT (Eso)', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'El payaso maldito.' },
+            { titulo: 'El Conjuro', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Investigación paranormal.' },
+            { titulo: 'Actividad Paranormal', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 6.3', desc: 'Fantasmas en casa.' },
+            { titulo: 'Scream', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.4', desc: 'Asesino enmascarado.' },
+            { titulo: 'El Exorcista', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Posesión demoníaca.' },
+            { titulo: 'Hereditary', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.3', desc: 'Terror psicológico familiar.' },
+            { titulo: 'Un Lugar Silencioso', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Monstruos que oyen todo.' },
+            { titulo: 'El Resplandor', genero: 'terror', img: 'https://loremflickr.com', info: '⭐ 8.4', desc: 'Hotel embrujado.' },
+            { titulo: 'Alien: El Octavo Pasajero', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 8.5', desc: 'Terror en el espacio.' },
+            { titulo: 'Siniestro', genero: 'terror', img: 'https://loremflickr.com1', info: '⭐ 6.8', desc: 'Cintas malditas.' },
+            { titulo: 'Insidious', genero: 'terror', img: 'https://loremflickr.com2', info: '⭐ 6.8', desc: 'El mundo astral.' },
+            { titulo: 'La Bruja', genero: 'terror', img: 'https://loremflickr.com3', info: '⭐ 7.0', desc: 'Terror folclórico.' },
+            { titulo: 'Midsommar', genero: 'terror', img: 'https://loremflickr.com4', info: '⭐ 7.1', desc: 'Culto pagano a la luz del día.' },
+            { titulo: 'Babadook', genero: 'terror', img: 'https://loremflickr.com5', info: '⭐ 6.8', desc: 'Un monstruo de libro infantil.' },
+            { titulo: 'El Aro', genero: 'terror', img: 'https://loremflickr.com6', info: '⭐ 7.1', desc: 'Una cinta de video mortal.' },
+            { titulo: 'Get Out', genero: 'terror', img: 'https://loremflickr.com7', info: '⭐ 7.8', desc: 'Suspenso y misterio familiar.' },
+            { titulo: 'Psicosis', genero: 'terror', img: 'https://loremflickr.com8', info: '⭐ 8.5', desc: 'El motel de Norman Bates.' },
+            { titulo: 'Halloween', genero: 'terror', img: 'https://loremflickr.com9', info: '⭐ 7.7', desc: 'Michael Myers regresa.' },
+            { titulo: 'Viernes 13', genero: 'terror', img: 'https://loremflickr.com0', info: '⭐ 6.4', desc: 'Campamento sangriento.' },
 
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'card pelicula';
-            tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
-            tarjeta.innerHTML = `
-                <img id="${idImgHtml}" src="${peli.img}" style="background-color: #222; min-height: 150px;">
-                <p>${peli.titulo}</p>
-            `;
-            contenedor.appendChild(tarjeta);
+            // --- ROMANCE (20 películas) ---
+            { titulo: 'Mi Último Regalo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.5', desc: 'Amor verdadero.' },
+            { titulo: 'Cuando Te Encuentre', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.1', desc: 'El destino une dos almas.' },
+            { titulo: 'Titanic', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.9', desc: 'Tragedia en el mar.' },
+            { titulo: 'Diario de una Pasión', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Allie y Noah.' },
+            { titulo: 'Orgullo y Prejuicio', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Elizabeth y Sr. Darcy.' },
+            { titulo: 'Bajo la Misma Estrella', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.7', desc: 'Amor juvenil resiliente.' },
+            { titulo: 'La La Land', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.0', desc: 'Música y sueños en Hollywood.' },
+            { titulo: 'Cuestión de Tiempo', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 7.8', desc: 'Viajes en el tiempo por amor.' },
+            { titulo: 'Antes del Amanecer', genero: 'romance', img: 'https://loremflickr.com', info: '⭐ 8.1', desc: 'Un encuentro en Viena.' },
+            { titulo: 'Yo Antes de Ti', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 7.4', desc: 'Aprender a vivir de nuevo.' },
+            { titulo: 'Amor de Mis Amores', genero: 'romance', img: 'https://loremflickr.com1', info: '⭐ 7.0', desc: 'Enredos de amor.' },
+            { titulo: '500 Días con Ella', genero: 'romance', img: 'https://loremflickr.com2', info: '⭐ 7.7', desc: 'Una historia no romántica.' },
+            { titulo: 'A Él No Le Gustas Tanto', genero: 'romance', img: 'https://loremflickr.com3', info: '⭐ 6.4', desc: 'Malentendidos amorosos.' },
+            { titulo: 'Votos de Amor', genero: 'romance', img: 'https://loremflickr.com4', info: '⭐ 6.8', desc: 'Recuperar la memoria y el amor.' },
+            { titulo: 'Ghost: El Fantasma', genero: 'romance', img: 'https://loremflickr.com5', info: '⭐ 7.1', desc: 'Amor más allá de la muerte.' },
+            { titulo: 'Un Lugar Llamado Notting Hill', genero: 'romance', img: 'https://loremflickr.com6', info: '⭐ 7.2', desc: 'Una estrella y un librero.' },
+            { titulo: 'Pretty Woman', genero: 'romance', img: 'https://loremflickr.com7', info: '⭐ 7.1', desc: 'Un cuento moderno.' },
+            { titulo: 'La Propuesta', genero: 'romance', img: 'https://loremflickr.com8', info: '⭐ 6.7', desc: 'Matrimonio por conveniencia.' },
+            { titulo: 'Querido John', genero: 'romance', img: 'https://loremflickr.com9', info: '⭐ 6.3', desc: 'Cartas de amor y distancia.' },
+            { titulo: 'Cartas a Julieta', genero: 'romance', img: 'https://loremflickr.com0', info: '⭐ 6.5', desc: 'Amor en Verona.' },
 
-            // Llama a la API de forma independiente en segundo plano
-            solicitarDatosTMDB(peli, idImgHtml);
-        }
-    });
-}
-
-// FUNCIÓN AUXILIAR AUTOMÁTICA (Consume tu API de TMDB de forma segura)
-async function solicitarDatosTMDB(peli, idImgHtml) {
-    try {
-        const query = encodeURIComponent(peli.titulo.trim());
-        const url = `https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`;
-        
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) return; 
-        
-        const datos = await respuesta.json();
-        
-        if (datos && datos.results && datos.results.length > 0) {
-            const pi = datos.results[0]; // Extrae la primera coincidencia exacta con [0]
-            
-            // 1. Inyecta el póster real en el arreglo y actualiza la tarjeta en pantalla
-if (pi.poster_path) {
-    // CORREGIDO: Añadimos el puente 'images.weserv.nl' y arreglamos la sintaxis ${}
-    peli.img = `https://weserv.nl{pi.poster_path}`;
-    
-    const elementoImg = document.getElementById(idImgHtml);
-    if (elementoImg) elementoImg.src = peli.img;
-}
-
-            
-            // 2. Guarda la sinopsis oficial para el Modal
-            if (pi.overview) {
-                peli.desc = pi.overview;
-            }
-            
-            // 3. Convierte la puntuación de TMDB a formato porcentaje (ej: 8.5 -> 85%)
-            if (pi.vote_average) {
-                let porcentaje = Math.round(pi.vote_average * 10);
-                peli.info = `⭐ ${porcentaje}%`;
-            }
-        }
-    } catch (e) {
-        console.error("Error controlado en: " + peli.titulo);
-    }
-}
-
-// 1. BASE DE DATOS AUTOMÁTICA SIMPLIFICADA (¡Las 19 películas juntas sin links manuales!)
-const baseDeDatosPeliculas = [
-    { titulo: 'Mad Max: Fury Road', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Gladiador', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Misión Imposible', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Terminator 2', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Batman: El Caballero', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Duro de Matar', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Búsqueda Implacable', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Rápidos y Furiosos', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Matrix', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Top Gun: Maverick', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: '300', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Kill Bill Vol. 1', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Inception', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Deadpool', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Logan', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Spider-Man: No Way Home', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Skyfall', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'The Avengers', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Ip Man', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
+            // --- AVENTURA (20 películas) ---
+{ titulo: 'Liberen a Willy', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.8', desc: 'Un niño y una orca.' },
+{ titulo: 'El Oso', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia salvaje.' },
+{ titulo: 'Avatar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'El planeta Pandora.' },
+{ titulo: 'Jurassic Park', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.2', desc: 'Parque de dinosaurios.' },
+{ titulo: 'Indiana Jones', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.4', desc: 'Búsqueda del arca.' },
+{ titulo: 'Interstellar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.6', desc: 'Viaje espacial interdimensional.' },
+{ titulo: 'El Señor de los Anillos', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.8', desc: 'La comunidad del anillo.' },
+{ titulo: 'Piratas del Caribe', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'El Capitán Jack Sparrow.' },
+{ titulo: 'El Hobbit', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Un viaje inesperado.' },
+{ titulo: 'Naufrago', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.8', desc: 'Sobrevivir solo en una isla.' },
+{ titulo: 'Jumanji', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.0', desc: 'Un juego de mesa real.' },
+{ titulo: 'La Vida de Pi', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.9', desc: 'Un tigre y un bote.' },
+{ titulo: 'Madagascar', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'Animales en la selva.' },
+{ titulo: 'Las Crónicas de Narnia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 6.9', desc: 'El ropero mágico.' },
+{ titulo: 'Up: Una Aventura', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.3', desc: 'Casa con globos.' },
+{ titulo: 'Buscando a Nemo', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.1', desc: 'Viaje en el océano.' },
+{ titulo: 'El Renacido', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Supervivencia extrema en la nieve.' },
+{ titulo: 'La Momia (1999)', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.1', desc: 'Aventura arqueológica.' },
+{ titulo: 'Zootopia', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 8.0', desc: 'Investigación en la ciudad.' },
+{ titulo: 'Tarzán', genero: 'aventura', img: 'loremflickr.com', info: '⭐ 7.3', desc: 'El rey de la selva.' }
 ];
 
-// REEMPLAZÁ ESTE TEXTO POR TU CLAVE API REAL DE TMDB
-const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
 
-// 2. BANNER ORIGINAL
-const imagenesBanner = [
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos"
-];
-let bannerIndex = 0;
-let temporizadorBanner;
 
-function rotarBanner() {
-    const imgElement = document.getElementById("banner-img");
-    if (!imgElement) return;
-    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
-    imgElement.src = imagenesBanner[bannerIndex];
-    
-    const puntos = document.querySelectorAll(".banner-dots .dot");
-    puntos.forEach((punto, idx) => {
-        if (idx === bannerIndex) punto.classList.add("active-dot");
-        else punto.classList.remove("active-dot");
-    });
-}
+        // 2. BANNER ORIGINAL
+        const imagenesBanner = [
+            "https://picsum.photos/200/300?18",
+            "https://picsum.photos/200/300?19",
+            "https://picsum.photos/200/300?20",
+            "https://picsum.photos/200/300?21",
+            "https://picsum.photos/200/300?22"
+        ];
+        let bannerIndex = 0;
+        let temporizadorBanner;
 
-function iniciarTemporizador() {
-    clearInterval(temporizadorBanner);
-    temporizadorBanner = setInterval(rotarBanner, 4000);
-}
-
-// 3. CARGAR CATÁLOGO (Dibuja los textos al instante en segundo plano)
-function cargarCatalogo() {
-    baseDeDatosPeliculas.forEach((peli, index) => {
-        const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-        if (contenedor) {
-            const idImgHtml = `img-peli-${index}`;
+        function rotarBanner() {
+            const imgElement = document.getElementById("banner-img");
+            if (!imgElement) return;
+            bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+            imgElement.src = imagenesBanner[bannerIndex];
             
-            // Valores iniciales por defecto mientras responde internet
-            peli.img = "https://placeholder.com...";
-            peli.info = "⭐ --";
-            peli.desc = "Buscando sinopsis en TMDB...";
-
-            const tarjeta = document.createElement('div');
-            tarjeta.className = 'card pelicula';
-            tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
-            tarjeta.innerHTML = `
-                <img id="${idImgHtml}" src="${peli.img}" style="background-color: #222; min-height: 150px;">
-                <p>${peli.titulo}</p>
-            `;
-            contenedor.appendChild(tarjeta);
-
-            // Ejecuta de forma asíncrona e independiente la consulta a TMDB
-            solicitarDatosTMDB(peli, idImgHtml);
+            const puntos = document.querySelectorAll(".banner-dots .dot");
+            puntos.forEach((punto, idx) => {
+                if (idx === bannerIndex) punto.classList.add("active-dot");
+                else punto.classList.remove("active-dot");
+            });
         }
-    });
-}
 
-// FUNCIÓN AUXILIAR AUTOMÁTICA (REPARADA: Lee correctamente el índice)
-async function solicitarDatosTMDB(peli, idImgHtml) {
-    try {
-        const query = encodeURIComponent(peli.titulo.trim());
-        const url = `https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`;
-        
-        const respuesta = await fetch(url);
-        if (!respuesta.ok) return; 
-        
-        const datos = await respuesta.json();
-        
-        if (datos && datos.results && datos.results.length > 0) {
-            // CORREGIDO: Agregado el índice [0] para tomar la primera película encontrada
-            const pi = datos.results[0]; 
-            
-            // 1. Inyecta el póster real aplicando el puente proxy para evitar bloqueos en Telegram
-            if (pi.poster_path) {
-                peli.img = `https://weserv.nl{pi.poster_path}`;
-                const elementoImg = document.getElementById(idImgHtml);
-                if (elementoImg) elementoImg.src = peli.img;
-            }
-            
-            // 2. Guarda la sinopsis oficial para el Modal
-            if (pi.overview) {
-                peli.desc = pi.overview;
-            }
-            
-            // 3. Convierte la puntuación de TMDB a formato porcentaje (ej: 8.5 -> ⭐ 85%)
-            if (pi.vote_average) {
-                let porcentaje = Math.round(pi.vote_average * 10);
-                peli.info = `⭐ ${porcentaje}%`;
-            }
+        function iniciarTemporizador() {
+            clearInterval(temporizadorBanner);
+            temporizadorBanner = setInterval(rotarBanner, 4000);
         }
-    } catch (e) {
-        console.error("Error en: " + peli.titulo);
-    }
-}
 
-// 4. INICIALIZADOR GENERAL
-const tg = window.Telegram?.WebApp;
+        // 3. CARGAR CATÁLOGO
+        function cargarCatalogo() {
+            baseDeDatosPeliculas.forEach(peli => {
+                const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+                if (contenedor) {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'card pelicula';
+                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc);
+                    tarjeta.innerHTML = `
+                        <img src="${peli.img}">
+                        <p>${peli.titulo}</p>
+                    `;
+                    contenedor.appendChild(tarjeta);
+                }
+            });
+        }
 
-document.addEventListener("DOMContentLoaded", () => {
-    cargarCatalogo();
-    iniciarTemporizador();
+        // 4. INICIALIZADOR GENERAL
+        const tg = window.Telegram?.WebApp;
 
-    if (tg) {
-        tg.ready();
-        tg.expand();
-    }
-
-    const bannerElement = document.getElementById("banner-img");
-    if (bannerElement) {
-        bannerElement.addEventListener("click", () => {
-            rotarBanner();
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarCatalogo();
             iniciarTemporizador();
-            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-        });
-    }
-});
 
-            
+            if (tg) {
+                tg.ready();
+                tg.expand();
+            }
+
+            const bannerElement = document.getElementById("banner-img");
+            if (bannerElement) {
+                bannerElement.addEventListener("click", () => {
+                    rotarBanner();
+                    iniciarTemporizador();
+                    if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+                });
+            }
+        });
+
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -560,77 +511,27 @@ document.addEventListener("DOMContentLoaded", () => {
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-// Variables globales para guardar los enlaces de la película que se abra (¡Agrega esto!)
-        let trailerActual = "";
-        let peliculaActual = "";
-
-function abrirModal(titulo, img, info, desc, trailerUrl, peliculaUrl){
-    document.getElementById("modal-title").innerText = titulo;
-    document.getElementById("modal-img").src = img;
-    document.getElementById("modal-info").innerText = info;
-    document.getElementById("modal-desc").innerText = desc;
-    
-    // Aseguramos que el video inicie oculto y la imagen visible
-    document.getElementById("modal-video").style.display = "none";
-    document.getElementById("modal-video").src = "";
-    document.getElementById("modal-img").style.display = "block";
-    
-    // Extractor robusto para CUALQUIER link de YouTube (watch, youtu.be, shorts)
-    let videoId = null;
-    if (trailerUrl) {
-        if (trailerUrl.includes("watch?v=")) {
-            videoId = trailerUrl.split("v=")[1].split("&")[0];
-        } else if (trailerUrl.includes("youtu.be/")) {
-            videoId = trailerUrl.split("youtu.be/")[1].split("?")[0];
-        } else if (trailerUrl.includes("/shorts/")) {
-            videoId = trailerUrl.split("/shorts/")[1].split("?")[0];
+        function abrirModal(titulo, img, info, desc){
+            document.getElementById("modal-title").innerText = titulo;
+            document.getElementById("modal-img").src = img;
+            document.getElementById("modal-info").innerText = info;
+            document.getElementById("modal-desc").innerText = desc;
+            document.getElementById("modal").style.display = "flex";
+            if (tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
         }
-    }
-
-    // Si encontramos el ID, creamos el enlace incrustado (embed) definitivo
-    if (videoId) {
-        trailerActual = "https://www.youtube.com/embed/" + videoId + "?autoplay=1&rel=0&modestbranding=1";
-    } else {
-        // Si ya venía en formato embed o es otro tipo de enlace externo
-        trailerActual = trailerUrl || "";
-    }
-    
-    peliculaActual = peliculaUrl || "";
-    
-    document.getElementById("modal").style.display = "flex";
-    if (window.tg?.HapticFeedback) tg.HapticFeedback.selectionChanged();
-}
-
 
         function cerrarModal(){
-            // Apaga el video al cerrar el modal para que no siga sonando de fondo
-            document.getElementById("modal-video").src = "";
             document.getElementById("modal").style.display = "none";
         }
 
-        function reproducirVideo(tipo) {
-            if (tipo === 'trailer') {
-                if (trailerActual) {
-                    // Oculta la foto de portada, muestra el reproductor y le da play adentro
-                    document.getElementById("modal-img").style.display = "none";
-                    document.getElementById("modal-video").style.display = "block";
-                    document.getElementById("modal-video").src = trailerActual;
-                } else {
-                    if (tg) tg.showAlert("Tráiler no disponible.");
-                    else alert("Tráiler no disponible.");
-                }
-            } else {
-                // Para la película completa (que irá con tus anuncios), mantenemos el openLink externo
-                if (peliculaActual) {
-                    if (tg) tg.openLink(peliculaActual);
-                    else window.open(peliculaActual, '_blank');
-                } else {
-                    if (tg) tg.showAlert("⚠️ Película próximamente disponible.");
-                    else alert("Contenido no disponible todavía.");
-                }
-            }
+        function buscarPelicula() {
+            let input = document.getElementById('buscar').value.toLowerCase();
+            let tarjetas = document.querySelectorAll('.card.pelicula');
+            tarjetas.forEach(tarjeta => {
+                let nombre = tarjeta.querySelector('p').innerText.toLowerCase();
+                tarjeta.style.display = nombre.includes(input) ? "block" : "none";
+            });
         }
-
 
         function verAnuncio() {
             if (tg) tg.showAlert("▶️ Cargando video publicitario...");
