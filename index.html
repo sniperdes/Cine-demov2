@@ -347,57 +347,7 @@
 
 
 // 1. BASE DE DATOS AUTOMÁTICA (¡Limpia! No cargues imágenes ni sinopsis a mano)
-const baseDeDatosPeliculas = [
-    { titulo: 'Mad Max: Fury Road', genero: 'accion', trailer: 'https://youtu.be/MonFNCgK4WE?si=BNlbeE6BXtx7KoSM', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Gladiador', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Misión Imposible', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Terminator 2', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Batman: El Caballero', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Duro de Matar', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Búsqueda Implacable', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Rápidos y Furiosos', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Matrix', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
-    { titulo: 'Top Gun: Maverick', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
-];
-
-// COLOCA AQUÍ TU CLAVE API REAL DE 32 CARACTERES DE TMDB
-const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
-
-// 2. BANNER ORIGINAL COMPLETO
-const imagenesBanner = [
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos",
-    "https://picsum.photos"
-];
-let bannerIndex = 0;
-let temporizadorBanner;
-
-function rotarBanner() {
-    const imgElement = document.getElementById("banner-img");
-    if (!imgElement) return;
-    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
-    imgElement.src = imagenesBanner[bannerIndex];
-    
-    const puntos = document.querySelectorAll(".banner-dots .dot");
-    puntos.forEach((punto, idx) => {
-        if (idx === bannerIndex) punto.classList.add("active-dot");
-        else punto.classList.remove("active-dot");
-    });
-}
-
-function iniciarTemporizador() {
-    clearInterval(temporizadorBanner);
-    temporizadorBanner = setInterval(rotarBanner, 4000);
-}
-
-// 3. CARGAR CATÁLOGO (Dibuja los textos al instante para que la app no quede en negro)
-function cargarCatalogo() {
-    baseDeDatosPeliculas.forEach((peli, index) => {
-        const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-        if (contenedor) {
-            const idImgHtml = `img-peli-${index}`;
+= `img-peli-${index}`;
             
             // Valores iniciales por defecto mientras responde internet
             peli.img = "https://placeholder.com...";
@@ -459,6 +409,126 @@ if (pi.poster_path) {
     }
 }
 
+// 1. BASE DE DATOS AUTOMÁTICA SIMPLIFICADA (¡Las 19 películas juntas sin links manuales!)
+const baseDeDatosPeliculas = [
+    { titulo: 'Mad Max: Fury Road', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Gladiador', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Misión Imposible', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Terminator 2', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Batman: El Caballero', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Duro de Matar', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Búsqueda Implacable', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Rápidos y Furiosos', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Matrix', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Top Gun: Maverick', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: '300', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Kill Bill Vol. 1', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Inception', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Deadpool', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Logan', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Spider-Man: No Way Home', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Skyfall', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'The Avengers', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' },
+    { titulo: 'Ip Man', genero: 'accion', trailer: 'https://youtu.be', peliculaUrl: 'https://tu-servidor-de-video.com' }
+];
+
+// REEMPLAZÁ ESTE TEXTO POR TU CLAVE API REAL DE TMDB
+const MI_API_KEY = "acd65342b986ff7dad902ea7412fc003"; 
+
+// 2. BANNER ORIGINAL
+const imagenesBanner = [
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos",
+    "https://picsum.photos"
+];
+let bannerIndex = 0;
+let temporizadorBanner;
+
+function rotarBanner() {
+    const imgElement = document.getElementById("banner-img");
+    if (!imgElement) return;
+    bannerIndex = (bannerIndex + 1) % imagenesBanner.length;
+    imgElement.src = imagenesBanner[bannerIndex];
+    
+    const puntos = document.querySelectorAll(".banner-dots .dot");
+    puntos.forEach((punto, idx) => {
+        if (idx === bannerIndex) punto.classList.add("active-dot");
+        else punto.classList.remove("active-dot");
+    });
+}
+
+function iniciarTemporizador() {
+    clearInterval(temporizadorBanner);
+    temporizadorBanner = setInterval(rotarBanner, 4000);
+}
+
+// 3. CARGAR CATÁLOGO (Dibuja los textos al instante en segundo plano)
+function cargarCatalogo() {
+    baseDeDatosPeliculas.forEach((peli, index) => {
+        const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+        if (contenedor) {
+            const idImgHtml = `img-peli-${index}`;
+            
+            // Valores iniciales por defecto mientras responde internet
+            peli.img = "https://placeholder.com...";
+            peli.info = "⭐ --";
+            peli.desc = "Buscando sinopsis en TMDB...";
+
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'card pelicula';
+            tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
+            tarjeta.innerHTML = `
+                <img id="${idImgHtml}" src="${peli.img}" style="background-color: #222; min-height: 150px;">
+                <p>${peli.titulo}</p>
+            `;
+            contenedor.appendChild(tarjeta);
+
+            // Ejecuta de forma asíncrona e independiente la consulta a TMDB
+            solicitarDatosTMDB(peli, idImgHtml);
+        }
+    });
+}
+
+// FUNCIÓN AUXILIAR AUTOMÁTICA (REPARADA: Lee correctamente el índice)
+async function solicitarDatosTMDB(peli, idImgHtml) {
+    try {
+        const query = encodeURIComponent(peli.titulo.trim());
+        const url = `https://themoviedb.org{MI_API_KEY}&query=${query}&language=es-MX`;
+        
+        const respuesta = await fetch(url);
+        if (!respuesta.ok) return; 
+        
+        const datos = await respuesta.json();
+        
+        if (datos && datos.results && datos.results.length > 0) {
+            // CORREGIDO: Agregado el índice [0] para tomar la primera película encontrada
+            const pi = datos.results[0]; 
+            
+            // 1. Inyecta el póster real aplicando el puente proxy para evitar bloqueos en Telegram
+            if (pi.poster_path) {
+                peli.img = `https://weserv.nl{pi.poster_path}`;
+                const elementoImg = document.getElementById(idImgHtml);
+                if (elementoImg) elementoImg.src = peli.img;
+            }
+            
+            // 2. Guarda la sinopsis oficial para el Modal
+            if (pi.overview) {
+                peli.desc = pi.overview;
+            }
+            
+            // 3. Convierte la puntuación de TMDB a formato porcentaje (ej: 8.5 -> ⭐ 85%)
+            if (pi.vote_average) {
+                let porcentaje = Math.round(pi.vote_average * 10);
+                peli.info = `⭐ ${porcentaje}%`;
+            }
+        }
+    } catch (e) {
+        console.error("Error en: " + peli.titulo);
+    }
+}
+
 // 4. INICIALIZADOR GENERAL
 const tg = window.Telegram?.WebApp;
 
@@ -480,6 +550,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
             
         // 5. NAVEGACIÓN Y MODAL
         function show(id){
