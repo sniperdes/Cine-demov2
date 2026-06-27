@@ -42,6 +42,7 @@
         .trailer-container iframe { width:100%; height:210px; border:none; border-radius:10px; }
         .trailer-close { color:white; font-size:28px; cursor:pointer; margin-bottom:10px; align-self:flex-end; margin-right:10px; }
     </style>
+    <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
 </head>
 <body>
 
@@ -532,8 +533,24 @@
         }
 
         function verAnuncio() {
-            if (tg) tg.showAlert('▶️ Cargando video publicitario...');
-            else alert('Cargando anuncio...');
+            const tg = window.Telegram?.WebApp;
+            if (typeof show_11208906 === 'function') {
+                show_11208906().then(() => {
+                    // Usuario vio el anuncio — mostrar contenido
+                    cerrarModal();
+                    if (tg) {
+                        tg.showAlert('✅ ¡Gracias por ver el anuncio! Ya podés ver la película.');
+                    } else {
+                        alert('✅ ¡Gracias por ver el anuncio! Ya podés ver la película.');
+                    }
+                }).catch(() => {
+                    if (tg) tg.showAlert('⚠️ No se pudo cargar el anuncio. Intentá de nuevo.');
+                    else alert('⚠️ No se pudo cargar el anuncio.');
+                });
+            } else {
+                if (tg) tg.showAlert('⚠️ Publicidad no disponible por el momento.');
+                else alert('⚠️ Publicidad no disponible.');
+            }
         }
 
         function activarVip() {
