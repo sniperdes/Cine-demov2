@@ -1,12 +1,14 @@
 // /functions/bot.js
-// Worker de Telegram Bot para gestionar contenido en KV
+// El token y admin ID se leen desde variables de entorno de Cloudflare
+// Nunca se exponen en el código
 
-const BOT_TOKEN   = '8917767201:AAG-a2u3LAjxhWcUfi7DwQ2ZUYMKdhAie5k';
-const ADMIN_ID    = 1590059037;
-const BOT_API     = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const ADMIN_ID = 1590059037;
 
 export async function onRequest(context) {
     const { request, env } = context;
+
+    const BOT_TOKEN = env.BOT_TOKEN; // Variable secreta en Cloudflare
+    const BOT_API   = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
     if (request.method !== 'POST') {
         return new Response('OK', { status: 200 });
@@ -19,183 +21,123 @@ export async function onRequest(context) {
         return new Response('Bad Request', { status: 400 });
     }
 
-    const msg     = update.message;
+    const msg    = update.message;
     if (!msg) return new Response('OK');
 
-    const chatId  = msg.chat.id;
-    const userId  = msg.from.id;
-    const texto   = msg.text || '';
+    const chatId = msg.chat.id;
+    const userId = msg.from.id;
+    const texto  = msg.text || '';
 
-    // Solo el admin puede usar comandos
+    const enviar = (txt) => enviarMensaje(BOT_API, chatId, txt);
+
     if (userId !== ADMIN_ID) {
-        await enviarMensaje(chatId, '⛔ No autorizado.');
+        await enviar('⛔ No autorizado.');
         return new Response('OK');
     }
 
-    // ─── COMANDOS ─────────────────────────────────────────────────────────────
-
-    // /start
     if (texto === '/start') {
-        await enviarMensaje(chatId, `👋 *Bot Admin Cine Demo*
+        await enviar(`👋 *Bot Admin Cine Demo*
 
 Comandos disponibles:
 
-*Agregar contenido:*
-/agregar serie nombre temporada episodio url
-/agregar pelicula nombre parte url
-
-*Ejemplos:*
+*Agregar:*
 \`/agregar serie kiralik-ask 1 1 https://youtu.be/xxx\`
 \`/agregar pelicula matrix 1 https://servidor.com/matrix\`
 
 *Consultar:*
-/ver serie nombre temporada episodio
-/ver pelicula nombre parte
-/listar nombre
+\`/ver serie kiralik-ask 1 1\`
+\`/listar kiralik-ask\`
 
 *Borrar:*
-/borrar serie nombre temporada episodio
-/borrar pelicula nombre parte`);
+\`/borrar serie kiralik-ask 1 1\``);
         return new Response('OK');
     }
 
     const partes = texto.split(' ');
     const cmd    = partes[0];
 
-    // /agregar serie kiralik-ask 1 1 https://...
-    // /agregar pelicula matrix 1 https://...
     if (cmd === '/agregar') {
         const tipo = partes[1];
-
         if (tipo === 'serie') {
-            const nombre    = partes[2];
-            const temporada = partes[3];
-            const episodio  = partes[4];
-            const url       = partes[5];
-
+            const [,, nombre, temporada, episodio, url] = partes;
             if (!nombre || !temporada || !episodio || !url) {
-                await enviarMensaje(chatId, '❌ Formato: /agregar serie nombre temporada episodio url');
+                await enviar('❌ Formato: /agregar serie nombre temporada episodio url');
                 return new Response('OK');
             }
-
-            const key = `video:${nombre}:${temporada}:${episodio}`;
-            await env.PELICULAS_KV.put(key, url);
-            await enviarMensaje(chatId, `✅ Guardado!\n\n📺 *${nombre}*\nT${temporada}E${episodio}\n🔗 ${url}`);
+            await env.PELICULAS_KV.put(`video:${nombre}:${temporada}:${episodio}`, url);
+            await enviar(`✅ Guardado!\n📺 *${nombre}* T${temporada}E${episodio}\n🔗 ${url}`);
 
         } else if (tipo === 'pelicula') {
-            const nombre = partes[2];
-            const parte  = partes[3];
-            const url    = partes[4];
-
+            const [,, nombre, parte, url] = partes;
             if (!nombre || !parte || !url) {
-                await enviarMensaje(chatId, '❌ Formato: /agregar pelicula nombre parte url');
+                await enviar('❌ Formato: /agregar pelicula nombre parte url');
                 return new Response('OK');
             }
-
-            const key = `video:${nombre}:${parte}`;
-            await env.PELICULAS_KV.put(key, url);
-            await enviarMensaje(chatId, `✅ Guardado!\n\n🎬 *${nombre}*\nParte ${parte}\n🔗 ${url}`);
+            await env.PELICULAS_KV.put(`video:${nombre}:${parte}`, url);
+            await enviar(`✅ Guardado!\n🎬 *${nombre}* Parte ${parte}\n🔗 ${url}`);
 
         } else {
-            await enviarMensaje(chatId, '❌ Tipo inválido. Usá: serie o pelicula');
+            await enviar('❌ Tipo inválido. Usá: serie o pelicula');
         }
-
         return new Response('OK');
     }
 
-    // /ver serie kiralik-ask 1 1
-    // /ver pelicula matrix 1
     if (cmd === '/ver') {
         const tipo = partes[1];
         let key, label;
-
         if (tipo === 'serie') {
-            const nombre = partes[2], temporada = partes[3], episodio = partes[4];
-            key   = `video:${nombre}:${temporada}:${episodio}`;
+            const [,, nombre, temporada, episodio] = partes;
+            key = `video:${nombre}:${temporada}:${episodio}`;
             label = `${nombre} T${temporada}E${episodio}`;
         } else if (tipo === 'pelicula') {
-            const nombre = partes[2], parte = partes[3];
-            key   = `video:${nombre}:${parte}`;
+            const [,, nombre, parte] = partes;
+            key = `video:${nombre}:${parte}`;
             label = `${nombre} parte ${parte}`;
-        } else {
-            await enviarMensaje(chatId, '❌ Usá: /ver serie nombre temp ep  o  /ver pelicula nombre parte');
-            return new Response('OK');
         }
-
         const url = await env.PELICULAS_KV.get(key);
-        if (url) {
-            await enviarMensaje(chatId, `✅ *${label}*\n🔗 ${url}`);
-        } else {
-            await enviarMensaje(chatId, `❌ No encontrado: ${label}`);
-        }
-
+        await enviar(url ? `✅ *${label}*\n🔗 ${url}` : `❌ No encontrado: ${label}`);
         return new Response('OK');
     }
 
-    // /listar kiralik-ask  (muestra todos los capítulos de una serie)
     if (cmd === '/listar') {
         const nombre = partes[1];
-        if (!nombre) {
-            await enviarMensaje(chatId, '❌ Formato: /listar nombre-serie');
-            return new Response('OK');
-        }
-
+        if (!nombre) { await enviar('❌ Formato: /listar nombre'); return new Response('OK'); }
         const lista = await env.PELICULAS_KV.list({ prefix: `video:${nombre}:` });
-        if (!lista.keys.length) {
-            await enviarMensaje(chatId, `❌ No hay contenido para: ${nombre}`);
-            return new Response('OK');
-        }
-
-        let respuesta = `📋 *${nombre}* (${lista.keys.length} entradas)\n\n`;
+        if (!lista.keys.length) { await enviar(`❌ No hay contenido para: ${nombre}`); return new Response('OK'); }
+        let resp = `📋 *${nombre}* (${lista.keys.length} entradas)\n\n`;
         for (const k of lista.keys) {
-            const partesClave = k.name.split(':');
-            if (partesClave.length === 4) {
-                respuesta += `T${partesClave[2]}E${partesClave[3]}\n`;
-            } else {
-                respuesta += `Parte ${partesClave[2]}\n`;
-            }
+            const p = k.name.split(':');
+            resp += p.length === 4 ? `T${p[2]}E${p[3]}\n` : `Parte ${p[2]}\n`;
         }
-
-        await enviarMensaje(chatId, respuesta);
+        await enviar(resp);
         return new Response('OK');
     }
 
-    // /borrar serie kiralik-ask 1 1
     if (cmd === '/borrar') {
         const tipo = partes[1];
         let key, label;
-
         if (tipo === 'serie') {
-            const nombre = partes[2], temporada = partes[3], episodio = partes[4];
-            key   = `video:${nombre}:${temporada}:${episodio}`;
+            const [,, nombre, temporada, episodio] = partes;
+            key = `video:${nombre}:${temporada}:${episodio}`;
             label = `${nombre} T${temporada}E${episodio}`;
         } else if (tipo === 'pelicula') {
-            const nombre = partes[2], parte = partes[3];
-            key   = `video:${nombre}:${parte}`;
+            const [,, nombre, parte] = partes;
+            key = `video:${nombre}:${parte}`;
             label = `${nombre} parte ${parte}`;
-        } else {
-            await enviarMensaje(chatId, '❌ Usá: /borrar serie nombre temp ep');
-            return new Response('OK');
         }
-
         await env.PELICULAS_KV.delete(key);
-        await enviarMensaje(chatId, `🗑️ Borrado: ${label}`);
+        await enviar(`🗑️ Borrado: ${label}`);
         return new Response('OK');
     }
 
-    // Comando no reconocido
-    await enviarMensaje(chatId, '❓ Comando no reconocido. Escribí /start para ver los comandos.');
+    await enviar('❓ Comando no reconocido. Escribí /start para ver los comandos.');
     return new Response('OK');
 }
 
-async function enviarMensaje(chatId, texto) {
-    await fetch(`${BOT_API}/sendMessage`, {
+async function enviarMensaje(botApi, chatId, texto) {
+    await fetch(`${botApi}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            chat_id: chatId,
-            text: texto,
-            parse_mode: 'Markdown'
-        })
+        body: JSON.stringify({ chat_id: chatId, text: texto, parse_mode: 'Markdown' })
     });
 }
