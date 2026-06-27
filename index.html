@@ -423,7 +423,7 @@
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
                 tarjeta.innerHTML = `<img id="img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
-                tarjeta.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-${index}`).src, peli.info, peli.desc);
+                tarjeta.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-${index}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie');
                 contenedor.appendChild(tarjeta);
             });
 
@@ -446,7 +446,7 @@
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
                 tarjeta.innerHTML = `<img id="tend-img-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${nombre}</p>`;
-                tarjeta.onclick = () => abrirModal(nombre, document.getElementById(`tend-img-${i}`).src, '', '');
+                tarjeta.onclick = () => abrirModal(nombre, document.getElementById(`tend-img-${i}`).src, '', '', query, 'movie');
                 contenedor.appendChild(tarjeta);
             });
             await Promise.all(titulosTendencias.map(async (query, i) => {
@@ -490,8 +490,7 @@
             document.getElementById('modal-desc').innerText = desc;
             document.getElementById('modal').style.display = 'flex';
             modalActual = { tmdbQuery, type };
-            // Mostrar u ocultar botón trailer
-            document.getElementById('btn-trailer').style.display = tmdbQuery ? 'block' : 'none';
+            document.getElementById('btn-trailer').style.display = 'block';
         }
 
         async function verTrailer() {
