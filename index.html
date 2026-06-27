@@ -232,7 +232,7 @@
 
             // Llamar a TMDB directamente
             try {
-                const res  = await fetch(`${TMDB_SEARCH}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`);
+                const res = await fetch(`/poster?q=${encodeURIComponent(query)}`);
                 const data = await res.json();
                 const resultado = data.results?.find(r => r.poster_path) || data.results?.[0];
                 const url = resultado?.poster_path ? `${TMDB_IMG}${resultado.poster_path}` : null;
