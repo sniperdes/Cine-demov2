@@ -115,6 +115,9 @@
         <button onclick="show('peliculas')">🎬 Películas</button>
         <button onclick="show('series')">📺 Series</button>
         <button onclick="show('anime')">🎌 Anime</button>
+        <button onclick="show('doramas')">🌸 Doramas</button>
+        <button onclick="show('turcas')">🌙 Turcas</button>
+        <button onclick="show('rusas')">❄️ Rusas</button>
         <button onclick="show('adulto')">🔞 +18</button>
     </div>
 
@@ -198,6 +201,102 @@
         <div class="title">🎌 Anime</div>
         <div class="row" id="contenedor-anime"></div>
     </div>
+    <!-- DORAMAS -->
+    <div id="doramas" class="view">
+        <div class="title">🌸 Doramas</div>
+        <div id="seccion-dorama-romance" class="genero-seccion">
+            <div class="genero-header"><h3>💕 Romance</h3></div>
+            <div class="row" id="slider-dorama-romance"></div>
+        </div>
+        <div id="seccion-dorama-drama" class="genero-seccion">
+            <div class="genero-header"><h3>🎭 Drama</h3></div>
+            <div class="row" id="slider-dorama-drama"></div>
+        </div>
+        <div id="seccion-dorama-accion" class="genero-seccion">
+            <div class="genero-header"><h3>💥 Acción</h3></div>
+            <div class="row" id="slider-dorama-accion"></div>
+        </div>
+    </div>
+    <div id="dorama-romance" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
+        <div class="title">💕 Doramas Romance</div>
+        <div class="grid-genero" id="contenedor-dorama-romance"></div>
+    </div>
+    <div id="dorama-drama" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
+        <div class="title">🎭 Doramas Drama</div>
+        <div class="grid-genero" id="contenedor-dorama-drama"></div>
+    </div>
+    <div id="dorama-accion" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
+        <div class="title">💥 Doramas Acción</div>
+        <div class="grid-genero" id="contenedor-dorama-accion"></div>
+    </div>
+
+    <!-- TURCAS -->
+    <div id="turcas" class="view">
+        <div class="title">🌙 Series Turcas</div>
+        <div id="seccion-turca-romance" class="genero-seccion">
+            <div class="genero-header"><h3>💕 Romance</h3></div>
+            <div class="row" id="slider-turca-romance"></div>
+        </div>
+        <div id="seccion-turca-drama" class="genero-seccion">
+            <div class="genero-header"><h3>🎭 Drama</h3></div>
+            <div class="row" id="slider-turca-drama"></div>
+        </div>
+        <div id="seccion-turca-accion" class="genero-seccion">
+            <div class="genero-header"><h3>💥 Acción</h3></div>
+            <div class="row" id="slider-turca-accion"></div>
+        </div>
+    </div>
+    <div id="turca-romance" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('turcas')">⬅ Volver</button>
+        <div class="title">💕 Turcas Romance</div>
+        <div class="grid-genero" id="contenedor-turca-romance"></div>
+    </div>
+    <div id="turca-drama" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('turcas')">⬅ Volver</button>
+        <div class="title">🎭 Turcas Drama</div>
+        <div class="grid-genero" id="contenedor-turca-drama"></div>
+    </div>
+    <div id="turca-accion" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('turcas')">⬅ Volver</button>
+        <div class="title">💥 Turcas Acción</div>
+        <div class="grid-genero" id="contenedor-turca-accion"></div>
+    </div>
+
+    <!-- RUSAS -->
+    <div id="rusas" class="view">
+        <div class="title">❄️ Series Rusas</div>
+        <div id="seccion-rusa-drama" class="genero-seccion">
+            <div class="genero-header"><h3>🎭 Drama</h3></div>
+            <div class="row" id="slider-rusa-drama"></div>
+        </div>
+        <div id="seccion-rusa-accion" class="genero-seccion">
+            <div class="genero-header"><h3>💥 Acción</h3></div>
+            <div class="row" id="slider-rusa-accion"></div>
+        </div>
+        <div id="seccion-rusa-thriller" class="genero-seccion">
+            <div class="genero-header"><h3>🔪 Thriller</h3></div>
+            <div class="row" id="slider-rusa-thriller"></div>
+        </div>
+    </div>
+    <div id="rusa-drama" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
+        <div class="title">🎭 Rusas Drama</div>
+        <div class="grid-genero" id="contenedor-rusa-drama"></div>
+    </div>
+    <div id="rusa-accion" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
+        <div class="title">💥 Rusas Acción</div>
+        <div class="grid-genero" id="contenedor-rusa-accion"></div>
+    </div>
+    <div id="rusa-thriller" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
+        <div class="title">🔪 Rusas Thriller</div>
+        <div class="grid-genero" id="contenedor-rusa-thriller"></div>
+    </div>
+
     <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
 
     <script>
@@ -426,6 +525,157 @@
             }
         }
 
+
+        // ─── BASE DE DATOS DORAMAS ───────────────────────────────────────────────
+        const baseDeDatosDoramas = [
+            // ROMANCE
+            { titulo:'Crash Landing on You',   tmdbQuery:'Crash Landing on You 2019',  genero:'dorama-romance', info:'⭐ 8.7 | 🌸 Dorama | 📺 16 ep', desc:'Una heredera surcoreana aterriza accidentalmente en Corea del Norte.' },
+            { titulo:'Goblin',                  tmdbQuery:'Guardian The Lonely and Great God 2016', genero:'dorama-romance', info:'⭐ 8.7 | 🌸 Dorama | 📺 16 ep', desc:'Un goblin inmortal busca a su novia para poner fin a su existencia.' },
+            { titulo:'My Love from the Star',   tmdbQuery:'My Love from the Star 2013', genero:'dorama-romance', info:'⭐ 8.3 | 🌸 Dorama | 📺 21 ep', desc:'Un alienígena que llegó a la Tierra 400 años atrás se enamora de una actriz.' },
+            { titulo:'Boys Over Flowers',       tmdbQuery:'Boys Over Flowers 2009',     genero:'dorama-romance', info:'⭐ 7.9 | 🌸 Dorama | 📺 25 ep', desc:'Una chica humilde ingresa a una escuela de élite y se enamora.' },
+            { titulo:'Descendants of the Sun',  tmdbQuery:'Descendants of the Sun 2016', genero:'dorama-romance', info:'⭐ 8.4 | 🌸 Dorama | 📺 16 ep', desc:'Un soldado y una médica se enamoran en zona de conflicto.' },
+            { titulo:'Its Okay Not to Be Okay', tmdbQuery:'Its Okay to Not Be Okay 2020', genero:'dorama-romance', info:'⭐ 8.7 | 🌸 Dorama | 📺 16 ep', desc:'Un trabajador psiquiátrico y una escritora de cuentos se enamoran.' },
+            { titulo:'Vincenzo',                tmdbQuery:'Vincenzo 2021',              genero:'dorama-romance', info:'⭐ 8.8 | 🌸 Dorama | 📺 20 ep', desc:'Un abogado mafioso italo-coreano regresa a Corea.' },
+            { titulo:'Weightlifting Fairy',     tmdbQuery:'Weightlifting Fairy Kim Bok-joo 2016', genero:'dorama-romance', info:'⭐ 8.5 | 🌸 Dorama | 📺 16 ep', desc:'Una halterófila se enamora de su amigo de infancia.' },
+            # DRAMA
+            { titulo:'Reply 1988',              tmdbQuery:'Reply 1988 2015',            genero:'dorama-drama', info:'⭐ 9.2 | 🌸 Dorama | 📺 20 ep', desc:'Cinco familias vecinas en el Seúl de 1988.' },
+            { titulo:'My Mister',               tmdbQuery:'My Mister 2018',             genero:'dorama-drama', info:'⭐ 9.0 | 🌸 Dorama | 📺 16 ep', desc:'Un hombre de mediana edad y una joven con vidas difíciles se apoyan.' },
+            { titulo:'Signal',                  tmdbQuery:'Signal 2016',                genero:'dorama-drama', info:'⭐ 9.0 | 🌸 Dorama | 📺 16 ep', desc:'Un detective del presente se comunica con uno del pasado.' },
+            { titulo:'Kingdom',                 tmdbQuery:'Kingdom 2019',               genero:'dorama-drama', info:'⭐ 8.3 | 🌸 Dorama | 📺 12 ep', desc:'Un príncipe investiga una plaga de zombies en el Joseon medieval.' },
+            { titulo:'Misaeng',                 tmdbQuery:'Misaeng Incomplete Life 2014', genero:'dorama-drama', info:'⭐ 8.9 | 🌸 Dorama | 📺 20 ep', desc:'La vida de empleados en una gran empresa coreana.' },
+            { titulo:'Mother',                  tmdbQuery:'Mother Korean 2018',         genero:'dorama-drama', info:'⭐ 8.8 | 🌸 Dorama | 📺 16 ep', desc:'Una maestra rescata a una niña maltratada y huyen juntas.' },
+            { titulo:'Mr Sunshine',             tmdbQuery:'Mr Sunshine 2018',           genero:'dorama-drama', info:'⭐ 8.7 | 🌸 Dorama | 📺 24 ep', desc:'Corea 1900: un soldado americano de origen coreano regresa a su tierra.' },
+            { titulo:'Itaewon Class',           tmdbQuery:'Itaewon Class 2020',         genero:'dorama-drama', info:'⭐ 8.3 | 🌸 Dorama | 📺 16 ep', desc:'Un joven busca venganza abriendo un bar en Itaewon.' },
+            # ACCIÓN
+            { titulo:'Vagabond',                tmdbQuery:'Vagabond 2019',              genero:'dorama-accion', info:'⭐ 8.1 | 🌸 Dorama | 📺 16 ep', desc:'Un hombre investiga un accidente de avión que mató a su sobrino.' },
+            { titulo:'Arthdal Chronicles',      tmdbQuery:'Arthdal Chronicles 2019',   genero:'dorama-accion', info:'⭐ 7.5 | 🌸 Dorama | 📺 18 ep', desc:'Épica de fantasía en una civilización antigua.' },
+            { titulo:'Rugal',                   tmdbQuery:'Rugal 2020',                 genero:'dorama-accion', info:'⭐ 7.2 | 🌸 Dorama | 📺 16 ep', desc:'Un policía convertido en cyborg busca vengar a su familia.' },
+            { titulo:'Healer',                  tmdbQuery:'Healer 2014',                genero:'dorama-accion', info:'⭐ 8.6 | 🌸 Dorama | 📺 20 ep', desc:'Un mensajero nocturno con habilidades de combate se convierte en guardaespaldas.' },
+        ];
+
+        // ─── BASE DE DATOS TURCAS ────────────────────────────────────────────────
+        const baseDeDatosTurcas = [
+            // ROMANCE
+            { titulo:'Erkenci Kus',             tmdbQuery:'Erkenci Kus 2018',           genero:'turca-romance', info:'⭐ 8.5 | 🌙 Turca | 📺 51 ep', desc:'Una joven soñadora se enamora de su jefe.' },
+            { titulo:'Sen Cal Kapimi',           tmdbQuery:'Sen Cal Kapimi 2020',        genero:'turca-romance', info:'⭐ 8.6 | 🌙 Turca | 📺 52 ep', desc:'Una estudiante firma un contrato de amor falso con un millonario.' },
+            { titulo:'Kiralik Ask',              tmdbQuery:'Kiralik Ask 2015',           genero:'turca-romance', info:'⭐ 8.2 | 🌙 Turca | 📺 68 ep', desc:'Un millonario contrata a una chica para que finja ser su novia.' },
+            { titulo:'Medcezir',                 tmdbQuery:'Medcezir 2013',              genero:'turca-romance', info:'⭐ 8.1 | 🌙 Turca | 📺 72 ep', desc:'Adaptación turca de The OC.' },
+            { titulo:'Kara Sevda',               tmdbQuery:'Kara Sevda 2015',            genero:'turca-romance', info:'⭐ 8.4 | 🌙 Turca | 📺 74 ep', desc:'Un amor imposible entre dos familias rivales.' },
+            { titulo:'Fatmagul',                 tmdbQuery:'Fatmagul 2010',              genero:'turca-romance', info:'⭐ 8.5 | 🌙 Turca | 📺 80 ep', desc:'Una joven busca justicia tras un terrible crimen.' },
+            { titulo:'Asi',                      tmdbQuery:'Asi 2007',                   genero:'turca-romance', info:'⭐ 8.3 | 🌙 Turca | 📺 79 ep', desc:'El amor entre una chica rebelde y un hombre de ciudad.' },
+            { titulo:'Elif',                     tmdbQuery:'Elif 2014',                  genero:'turca-romance', info:'⭐ 7.8 | 🌙 Turca | 📺 1000+ ep', desc:'Una niña huérfana busca el amor de su familia.' },
+            # DRAMA
+            { titulo:'Dirilis Ertugrul',         tmdbQuery:'Dirilis Ertugrul 2014',      genero:'turca-drama', info:'⭐ 8.1 | 🌙 Turca | 📺 150 ep', desc:'Las aventuras del padre del fundador del Imperio Otomano.' },
+            { titulo:'Fatih Harbiye',            tmdbQuery:'Fatih Harbiye 2013',         genero:'turca-drama', info:'⭐ 7.9 | 🌙 Turca | 📺 60 ep', desc:'Una chica entre dos mundos y dos amores.' },
+            { titulo:'Cesur ve Guzel',           tmdbQuery:'Cesur ve Guzel 2016',        genero:'turca-drama', info:'⭐ 8.3 | 🌙 Turca | 📺 32 ep', desc:'Un hombre busca vengar la muerte de su padre.' },
+            { titulo:'Ezel',                     tmdbQuery:'Ezel 2009',                  genero:'turca-drama', info:'⭐ 8.5 | 🌙 Turca | 📺 71 ep', desc:'Un hombre sale de prisión para vengarse de quienes lo traicionaron.' },
+            { titulo:'Guzey Guney',              tmdbQuery:'Guney Kuzey 2011',           genero:'turca-drama', info:'⭐ 8.2 | 🌙 Turca | 📺 61 ep', desc:'Dos hermanos con personalidades opuestas.' },
+            { titulo:'Kacak',                    tmdbQuery:'Kacak 2013',                 genero:'turca-drama', info:'⭐ 7.8 | 🌙 Turca | 📺 48 ep', desc:'Un hombre inocente huye de la justicia.' },
+            { titulo:'Calikusu',                 tmdbQuery:'Calikusu 2013',              genero:'turca-drama', info:'⭐ 7.7 | 🌙 Turca | 📺 39 ep', desc:'Adaptación del clásico literario turco.' },
+            { titulo:'Karadayi',                 tmdbQuery:'Karadayi 2012',              genero:'turca-drama', info:'⭐ 8.0 | 🌙 Turca | 📺 93 ep', desc:'Un hombre en la Turquía de los 70 busca limpiar su nombre.' },
+            # ACCIÓN
+            { titulo:'Resurrection Ertugrul',    tmdbQuery:'Dirilis Ertugrul 2014',      genero:'turca-accion', info:'⭐ 8.1 | 🌙 Turca | 📺 150 ep', desc:'Épica histórica del guerrero otomano Ertugrul.' },
+            { titulo:'Kuruluş Osman',            tmdbQuery:'Kurulus Osman 2019',         genero:'turca-accion', info:'⭐ 7.9 | 🌙 Turca | 📺 100+ ep', desc:'La fundación del Imperio Otomano por Osman I.' },
+            { titulo:'Poyraz Karayel',           tmdbQuery:'Poyraz Karayel 2015',        genero:'turca-accion', info:'⭐ 8.0 | 🌙 Turca | 📺 67 ep', desc:'Un agente de inteligencia turco en misiones peligrosas.' },
+            { titulo:'Icerde',                   tmdbQuery:'Icerde 2016',                genero:'turca-accion', info:'⭐ 8.2 | 🌙 Turca | 📺 43 ep', desc:'Dos hermanos en lados opuestos de la ley.' },
+        ];
+
+        // ─── BASE DE DATOS RUSAS ─────────────────────────────────────────────────
+        const baseDeDatosRusas = [
+            // DRAMA
+            { titulo:'Brigada',                  tmdbQuery:'Brigada 2002',               genero:'rusa-drama', info:'⭐ 8.5 | ❄️ Rusa | 📺 15 ep', desc:'La historia de una banda criminal en la Rusia postsoviética.' },
+            { titulo:'Byvshie',                  tmdbQuery:'Byvshie 2020',               genero:'rusa-drama', info:'⭐ 7.5 | ❄️ Rusa | 📺 8 ep', desc:'Ex parejas que se reencuentran años después.' },
+            { titulo:'Fizruk',                   tmdbQuery:'Fizruk 2014',                genero:'rusa-drama', info:'⭐ 7.8 | ❄️ Rusa | 📺 40 ep', desc:'Un gánster se convierte en profesor de educación física.' },
+            { titulo:'Ottepel',                  tmdbQuery:'Ottepel 2013',               genero:'rusa-drama', info:'⭐ 8.2 | ❄️ Rusa | 📺 12 ep', desc:'La industria del cine soviético en los años 60.' },
+            { titulo:'Ekaterina',                tmdbQuery:'Ekaterina 2014',             genero:'rusa-drama', info:'⭐ 7.9 | ❄️ Rusa | 📺 8 ep', desc:'La vida de Catalina la Grande de Rusia.' },
+            { titulo:'Soldaty',                  tmdbQuery:'Soldaty 2004',               genero:'rusa-drama', info:'⭐ 7.6 | ❄️ Rusa | 📺 200+ ep', desc:'La vida cotidiana de soldados en el ejército ruso.' },
+            { titulo:'Kitchen',                  tmdbQuery:'Kukhnya 2012',               genero:'rusa-drama', info:'⭐ 8.0 | ❄️ Rusa | 📺 50 ep', desc:'El caótico mundo de un restaurante de lujo en Moscú.' },
+            { titulo:'Interny',                  tmdbQuery:'Interny 2010',               genero:'rusa-drama', info:'⭐ 8.1 | ❄️ Rusa | 📺 200+ ep', desc:'Versión rusa de House MD con humor negro.' },
+            # ACCIÓN
+            { titulo:'Spetsy',                   tmdbQuery:'Spetsy 2021',                genero:'rusa-accion', info:'⭐ 7.3 | ❄️ Rusa | 📺 8 ep', desc:'Fuerzas especiales rusas en misiones antiterroristas.' },
+            { titulo:'Sleepers',                 tmdbQuery:'Spyashchie 2017',            genero:'rusa-accion', info:'⭐ 7.5 | ❄️ Rusa | 📺 8 ep', desc:'Agentes durmientes rusos activados después de décadas.' },
+            { titulo:'Shtirlits',                tmdbQuery:'Semnadtsat mgnoveniy vesny 1973', genero:'rusa-accion', info:'⭐ 8.8 | ❄️ Rusa | 📺 12 ep', desc:'Un espía soviético infiltrado en las SS durante la Segunda Guerra.' },
+            { titulo:'Likvidatsiya',             tmdbQuery:'Likvidatsiya 2007',          genero:'rusa-accion', info:'⭐ 8.7 | ❄️ Rusa | 📺 14 ep', desc:'Odessa 1946: un detective lucha contra el crimen organizado.' },
+            { titulo:'Maykl',                    tmdbQuery:'Michael 2019 Russia',        genero:'rusa-accion', info:'⭐ 7.2 | ❄️ Rusa | 📺 8 ep', desc:'Un agente de seguridad protege a una familia en peligro.' },
+            { titulo:'Zashchitnik',              tmdbQuery:'Zashchitnik 2015',           genero:'rusa-accion', info:'⭐ 7.4 | ❄️ Rusa | 📺 8 ep', desc:'Un abogado defensor enfrenta la corrupción del sistema.' },
+            { titulo:'Operatsiya Mishka',        tmdbQuery:'Operatsiya Mishka 2021',     genero:'rusa-accion', info:'⭐ 7.0 | ❄️ Rusa | 📺 6 ep', desc:'Operación encubierta contra el tráfico de armas.' },
+            { titulo:'Turetsky Gambit',          tmdbQuery:'Turetsky Gambit 2005',       genero:'rusa-accion', info:'⭐ 7.3 | ❄️ Rusa | 📺 8 ep', desc:'Un detective en la guerra ruso-turca del siglo XIX.' },
+            # THRILLER
+            { titulo:'Method',                   tmdbQuery:'Metod 2015',                 genero:'rusa-thriller', info:'⭐ 8.0 | ❄️ Rusa | 📺 16 ep', desc:'Un detective con métodos poco convencionales resuelve crímenes.' },
+            { titulo:'Better Than Us',           tmdbQuery:'Luchshe chem lyudi 2018',    genero:'rusa-thriller', info:'⭐ 7.5 | ❄️ Rusa | 📺 16 ep', desc:'Un robot del futuro se integra a una familia rusa.' },
+            { titulo:'To the Lake',              tmdbQuery:'Epidemiya 2019',             genero:'rusa-thriller', info:'⭐ 7.4 | ❄️ Rusa | 📺 8 ep', desc:'Un grupo huye de Moscú durante una epidemia mortal.' },
+            { titulo:'Chernobyl 2019 HBO',       tmdbQuery:'Chernobyl 2019',             genero:'rusa-thriller', info:'⭐ 9.4 | ❄️ Rusa | 📺 5 ep', desc:'El desastre nuclear de Chernóbil y su encubrimiento.' },
+        ];
+
+        // ─── CARGAR DORAMAS ───────────────────────────────────────────────────────
+        async function cargarDoramas() {
+            await cargarCategoria(baseDeDatosDoramas, ['dorama-romance','dorama-drama','dorama-accion'], 'tv');
+        }
+
+        // ─── CARGAR TURCAS ────────────────────────────────────────────────────────
+        async function cargarTurcas() {
+            await cargarCategoria(baseDeDatosTurcas, ['turca-romance','turca-drama','turca-accion'], 'tv');
+        }
+
+        // ─── CARGAR RUSAS ─────────────────────────────────────────────────────────
+        async function cargarRusas() {
+            await cargarCategoria(baseDeDatosRusas, ['rusa-drama','rusa-accion','rusa-thriller'], 'tv');
+        }
+
+        // ─── FUNCIÓN GENÉRICA PARA CARGAR CUALQUIER CATEGORÍA CON SLIDERS ────────
+        async function cargarCategoria(base, generos, type) {
+            for (const genero of generos) {
+                const slider     = document.getElementById(`slider-${genero}`);
+                const contenedor = document.getElementById(`contenedor-${genero}`);
+                const items      = base.filter(p => p.genero === genero);
+
+                items.forEach((item, index) => {
+                    const uid = `${genero}-${index}`;
+
+                    if (index < SLIDER_MAX && slider) {
+                        const card = document.createElement('div');
+                        card.className = 'card pelicula';
+                        card.innerHTML = `<img id="img-s-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
+                        card.onclick = () => abrirModal(item.titulo, document.getElementById(`img-s-${uid}`).src, item.info, item.desc, item.tmdbQuery, type);
+                        slider.appendChild(card);
+                    }
+
+                    if (contenedor) {
+                        const card2 = document.createElement('div');
+                        card2.className = 'card pelicula';
+                        card2.innerHTML = `<img id="img-t-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
+                        card2.onclick = () => abrirModal(item.titulo, document.getElementById(`img-t-${uid}`).src, item.info, item.desc, item.tmdbQuery, type);
+                        contenedor.appendChild(card2);
+                    }
+                });
+
+                if (slider && items.length > SLIDER_MAX) {
+                    const verTodo = document.createElement('div');
+                    verTodo.className = 'card-ver-todo';
+                    verTodo.style.minWidth = '100px';
+                    verTodo.style.height = '200px';
+                    verTodo.innerHTML = `<div class="ver-todo-icon">▶️</div><p>Ver todo</p>`;
+                    verTodo.onclick = () => show(genero);
+                    slider.appendChild(verTodo);
+                }
+            }
+
+            // Cargar posters en lotes
+            const LOTE = 5;
+            for (let i = 0; i < base.length; i += LOTE) {
+                await Promise.all(base.slice(i, i + LOTE).map(async (item, j) => {
+                    const genero = item.genero;
+                    const index  = base.filter(p => p.genero === genero).indexOf(item);
+                    const uid    = `${genero}-${index}`;
+                    const poster = await obtenerPoster(item.tmdbQuery, type);
+                    const s = document.getElementById(`img-s-${uid}`);
+                    const t = document.getElementById(`img-t-${uid}`);
+                    if (s) { s.src = poster || PLACEHOLDER; s.classList.remove('skeleton'); }
+                    if (t) { t.src = poster || PLACEHOLDER; t.classList.remove('skeleton'); }
+                }));
+            }
+        }
+
         // ─── BANNER ───────────────────────────────────────────────────────────────
         const bannerUrls = [];
         let bannerIndex = 0;
@@ -555,6 +805,9 @@
             cargarCatalogo();
             cargarSeries();
             cargarAnime();
+            cargarDoramas();
+            cargarTurcas();
+            cargarRusas();
             iniciarTemporizador();
             document.getElementById('banner-img').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
