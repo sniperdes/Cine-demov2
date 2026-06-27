@@ -1,4 +1,3 @@
-
 // /functions/poster.js
 // Cloudflare Pages Function — cachea posters de TMDB en PELICULAS_KV
 
