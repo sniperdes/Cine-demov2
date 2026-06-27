@@ -107,8 +107,30 @@
         <div class="row" id="contenedor-aventura"></div>
     </div>
 
-    <div id="series" class="view"><div class="title">📺 Series Próximamente</div></div>
-    <div id="anime" class="view"><div class="title">🎌 Anime Próximamente</div></div>
+    <div id="series" class="view">
+        <div class="title">📺 Géneros Series</div>
+        <div class="row">
+            <div class="card" onclick="show('drama')"><img id="img-genero-drama" class="skeleton" src=""><p>Drama</p></div>
+            <div class="card" onclick="show('comedia')"><img id="img-genero-comedia" class="skeleton" src=""><p>Comedia</p></div>
+            <div class="card" onclick="show('accion-serie')"><img id="img-genero-accion-serie" class="skeleton" src=""><p>Acción</p></div>
+        </div>
+    </div>
+    <div id="drama" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
+        <div class="row" id="contenedor-drama"></div>
+    </div>
+    <div id="comedia" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
+        <div class="row" id="contenedor-comedia"></div>
+    </div>
+    <div id="accion-serie" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
+        <div class="row" id="contenedor-accion-serie"></div>
+    </div>
+    <div id="anime" class="view">
+        <div class="title">🎌 Anime</div>
+        <div class="row" id="contenedor-anime"></div>
+    </div>
     <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
 
     <script>
@@ -209,16 +231,131 @@
         // ─── FUNCIÓN CENTRAL: usa el Worker /poster con caché en KV ─────────────
         const posterCache = {};
 
-        async function obtenerPoster(query) {
-            if (posterCache[query]) return posterCache[query];
+        async function obtenerPoster(query, type = 'movie') {
+            const cacheKey = `${type}:${query}`;
+            if (posterCache[cacheKey]) return posterCache[cacheKey];
             try {
-                const res  = await fetch(`/poster?q=${encodeURIComponent(query)}`);
+                const res  = await fetch(`/poster?q=${encodeURIComponent(query)}&type=${type}`);
                 const data = await res.json();
                 const url  = data.poster || null;
-                posterCache[query] = url;
+                posterCache[cacheKey] = url;
                 return url;
             } catch {
                 return null;
+            }
+        }
+
+
+        // ─── BASE DE DATOS SERIES ─────────────────────────────────────────────────
+        const baseDeDatosSeries = [
+            // DRAMA
+            { titulo:'Breaking Bad',       tmdbQuery:'Breaking Bad 2008',      genero:'drama',        info:'⭐ 9.5 | 🎭 Drama | 📺 5 temporadas',   desc:'Un profesor de química se convierte en el mayor fabricante de metanfetamina.' },
+            { titulo:'Game of Thrones',    tmdbQuery:'Game of Thrones 2011',   genero:'drama',        info:'⭐ 9.2 | 🎭 Fantasía | 📺 8 temporadas',  desc:'Familias nobles luchan por el control del Trono de Hierro.' },
+            { titulo:'Peaky Blinders',     tmdbQuery:'Peaky Blinders 2013',    genero:'drama',        info:'⭐ 8.8 | 🎭 Drama | 📺 6 temporadas',   desc:'Una familia de gángsters domina Birmingham tras la Primera Guerra Mundial.' },
+            { titulo:'Dark',               tmdbQuery:'Dark 2017',              genero:'drama',        info:'⭐ 8.8 | 🎭 Sci-Fi | 📺 3 temporadas',   desc:'Viajes en el tiempo y misterios en un pueblo alemán.' },
+            { titulo:'Ozark',              tmdbQuery:'Ozark 2017',             genero:'drama',        info:'⭐ 8.4 | 🎭 Drama | 📺 4 temporadas',   desc:'Un contador lava dinero para un cartel mexicano.' },
+            { titulo:'The Crown',          tmdbQuery:'The Crown 2016',         genero:'drama',        info:'⭐ 8.6 | 🎭 Drama | 📺 6 temporadas',   desc:'La vida de la familia real británica.' },
+            { titulo:'Better Call Saul',   tmdbQuery:'Better Call Saul 2015',  genero:'drama',        info:'⭐ 9.0 | 🎭 Drama | 📺 6 temporadas',   desc:'El origen del abogado Saul Goodman.' },
+            { titulo:'Succession',         tmdbQuery:'Succession 2018',        genero:'drama',        info:'⭐ 8.9 | 🎭 Drama | 📺 4 temporadas',   desc:'La familia Roy lucha por el control de un imperio mediático.' },
+            { titulo:'Dexter',             tmdbQuery:'Dexter 2006',            genero:'drama',        info:'⭐ 8.6 | 🎭 Thriller | 📺 8 temporadas',  desc:'Un forense de la policía es también un asesino en serie.' },
+            { titulo:'House of Cards',     tmdbQuery:'House of Cards 2013',    genero:'drama',        info:'⭐ 8.7 | 🎭 Drama | 📺 6 temporadas',   desc:'Un político manipulador asciende al poder en Washington.' },
+            // COMEDIA
+            { titulo:'Squid Game',         tmdbQuery:'Squid Game 2021',        genero:'comedia',      info:'⭐ 8.0 | 🎭 Thriller | 📺 2 temporadas',  desc:'Participantes en juegos mortales por una enorme suma de dinero.' },
+            { titulo:'Sherlock',           tmdbQuery:'Sherlock 2010',          genero:'comedia',      info:'⭐ 9.1 | 🎭 Misterio | 📺 4 temporadas',  desc:'Sherlock Holmes en el Londres moderno.' },
+            { titulo:'Black Mirror',       tmdbQuery:'Black Mirror 2011',      genero:'comedia',      info:'⭐ 8.8 | 🎭 Sci-Fi | 📺 6 temporadas',   desc:'Antología sobre el lado oscuro de la tecnología.' },
+            { titulo:'Stranger Things',    tmdbQuery:'Stranger Things 2016',   genero:'comedia',      info:'⭐ 8.7 | 🎭 Sci-Fi | 📺 4 temporadas',   desc:'Un grupo de niños enfrenta fuerzas sobrenaturales en los 80.' },
+            { titulo:'The Boys',           tmdbQuery:'The Boys 2019',          genero:'comedia',      info:'⭐ 8.7 | 🎭 Acción | 📺 4 temporadas',   desc:'Superhéroes corruptos enfrentados por un grupo de vigilantes.' },
+            // ACCIÓN
+            { titulo:'The Walking Dead',   tmdbQuery:'The Walking Dead 2010',  genero:'accion-serie', info:'⭐ 8.2 | 🎭 Terror | 📺 11 temporadas',  desc:'Sobrevivientes en un mundo post-apocalíptico lleno de zombies.' },
+            { titulo:'The Witcher',        tmdbQuery:'The Witcher 2019',       genero:'accion-serie', info:'⭐ 8.2 | 🎭 Fantasía | 📺 3 temporadas',  desc:'Un cazador de monstruos en un mundo de magia y peligro.' },
+            { titulo:'Narcos',             tmdbQuery:'Narcos 2015',            genero:'accion-serie', info:'⭐ 8.8 | 🎭 Crime | 📺 3 temporadas',    desc:'La historia real del narcotraficante Pablo Escobar.' },
+            { titulo:'Prison Break',       tmdbQuery:'Prison Break 2005',      genero:'accion-serie', info:'⭐ 8.3 | 🎭 Acción | 📺 5 temporadas',   desc:'Un hombre se deja encarcelar para escapar con su hermano.' },
+            { titulo:'24',                 tmdbQuery:'24 2001',                genero:'accion-serie', info:'⭐ 8.4 | 🎭 Acción | 📺 9 temporadas',   desc:'Jack Bauer salva al mundo en tiempo real.' },
+        ];
+
+        // ─── BASE DE DATOS ANIME ──────────────────────────────────────────────────
+        const baseDeDatosAnime = [
+            { titulo:'Attack on Titan',           tmdbQuery:'Attack on Titan 2013',          info:'⭐ 9.0 | 🎌 Anime | 📺 4 temporadas',   desc:'La humanidad lucha por sobrevivir contra gigantes devoradores.' },
+            { titulo:'Demon Slayer',              tmdbQuery:'Demon Slayer 2019',             info:'⭐ 8.7 | 🎌 Anime | 📺 4 temporadas',   desc:'Un joven busca vengar a su familia y curar a su hermana.' },
+            { titulo:'Naruto',                    tmdbQuery:'Naruto 2002',                   info:'⭐ 8.4 | 🎌 Anime | 📺 5 temporadas',   desc:'Un joven ninja busca convertirse en el líder de su aldea.' },
+            { titulo:'Dragon Ball Z',             tmdbQuery:'Dragon Ball Z 1989',            info:'⭐ 8.8 | 🎌 Anime | 📺 9 temporadas',   desc:'Goku defiende la Tierra de enemigos cada vez más poderosos.' },
+            { titulo:'Death Note',                tmdbQuery:'Death Note 2006',               info:'⭐ 9.0 | 🎌 Anime | 📺 1 temporada',    desc:'Un estudiante usa un cuaderno mágico para matar criminales.' },
+            { titulo:'One Piece',                 tmdbQuery:'One Piece 1999',                info:'⭐ 8.9 | 🎌 Anime | 📺 20+ temporadas', desc:'Luffy y su tripulación buscan el tesoro más grande del mundo.' },
+            { titulo:'Fullmetal Alchemist',       tmdbQuery:'Fullmetal Alchemist Brotherhood 2009', info:'⭐ 9.1 | 🎌 Anime | 📺 1 temporada', desc:'Dos hermanos buscan la piedra filosofal para recuperar sus cuerpos.' },
+            { titulo:'Tokyo Ghoul',               tmdbQuery:'Tokyo Ghoul 2014',              info:'⭐ 7.8 | 🎌 Anime | 📺 4 temporadas',   desc:'Un estudiante se convierte en mitad ghoul tras un ataque.' },
+            { titulo:'Hunter x Hunter',           tmdbQuery:'Hunter x Hunter 2011',          info:'⭐ 9.0 | 🎌 Anime | 📺 6 temporadas',   desc:'Un niño busca a su padre convirtiéndose en cazador.' },
+            { titulo:'My Hero Academia',          tmdbQuery:'My Hero Academia 2016',         info:'⭐ 8.4 | 🎌 Anime | 📺 7 temporadas',   desc:'Un mundo de superhéroes donde un chico sin poderes lucha por ser el mejor.' },
+            { titulo:'Bleach',                    tmdbQuery:'Bleach 2004',                   info:'⭐ 8.2 | 🎌 Anime | 📺 16 temporadas',  desc:'Un adolescente se convierte en sustituto de los shinigami.' },
+            { titulo:'Jujutsu Kaisen',            tmdbQuery:'Jujutsu Kaisen 2020',           info:'⭐ 8.6 | 🎌 Anime | 📺 2 temporadas',   desc:'Un estudiante ingiere un dedo maldito y combate espíritus malignos.' },
+            { titulo:'One Punch Man',             tmdbQuery:'One Punch Man 2015',            info:'⭐ 8.8 | 🎌 Anime | 📺 2 temporadas',   desc:'Un héroe que derrota a cualquier enemigo de un solo golpe.' },
+            { titulo:'Vinland Saga',              tmdbQuery:'Vinland Saga 2019',             info:'⭐ 8.8 | 🎌 Anime | 📺 2 temporadas',   desc:'Un joven vikingo busca vengar la muerte de su padre.' },
+            { titulo:'Spy x Family',              tmdbQuery:'Spy x Family 2022',             info:'⭐ 8.5 | 🎌 Anime | 📺 2 temporadas',   desc:'Un espía forma una familia falsa sin que ninguno sepa la verdad.' },
+            { titulo:'Chainsaw Man',              tmdbQuery:'Chainsaw Man 2022',             info:'⭐ 8.5 | 🎌 Anime | 📺 1 temporada',    desc:'Un joven fusionado con un demonio trabaja como cazador de demonios.' },
+            { titulo:'Sword Art Online',          tmdbQuery:'Sword Art Online 2012',         info:'⭐ 7.5 | 🎌 Anime | 📺 3 temporadas',   desc:'Jugadores atrapados en un videojuego de realidad virtual.' },
+            { titulo:'Cowboy Bebop',              tmdbQuery:'Cowboy Bebop 1998',             info:'⭐ 8.9 | 🎌 Anime | 📺 1 temporada',    desc:'Cazarrecompensas viajan por el espacio en el año 2071.' },
+            { titulo:'Re:Zero',                   tmdbQuery:'Re Zero 2016',                  info:'⭐ 8.3 | 🎌 Anime | 📺 3 temporadas',   desc:'Un joven revive una y otra vez tras morir en un mundo de fantasía.' },
+            { titulo:'Neon Genesis Evangelion',   tmdbQuery:'Neon Genesis Evangelion 1995',  info:'⭐ 8.5 | 🎌 Anime | 📺 1 temporada',    desc:'Jóvenes pilotan robots gigantes para salvar a la humanidad.' },
+        ];
+
+        // ─── IMÁGENES PORTADA GÉNEROS SERIES ─────────────────────────────────────
+        const titularesGeneroSeries = {
+            drama: 'Breaking Bad 2008',
+            comedia: 'Squid Game 2021',
+            'accion-serie': 'The Walking Dead 2010'
+        };
+
+        // ─── CARGAR SERIES ────────────────────────────────────────────────────────
+        async function cargarSeries() {
+            // Portadas géneros
+            for (const [genero, query] of Object.entries(titularesGeneroSeries)) {
+                const poster = await obtenerPoster(query, 'tv');
+                const el = document.getElementById(`img-genero-${genero}`);
+                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+            }
+
+            // Tarjetas
+            baseDeDatosSeries.forEach((serie, index) => {
+                const contenedor = document.getElementById(`contenedor-${serie.genero}`);
+                if (!contenedor) return;
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.innerHTML = `<img id="serie-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
+                tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${index}`).src, serie.info, serie.desc);
+                contenedor.appendChild(tarjeta);
+            });
+
+            const LOTE = 5;
+            for (let i = 0; i < baseDeDatosSeries.length; i += LOTE) {
+                await Promise.all(baseDeDatosSeries.slice(i, i + LOTE).map(async (serie, j) => {
+                    const idx    = i + j;
+                    const poster = await obtenerPoster(serie.tmdbQuery, 'tv');
+                    const imgEl  = document.getElementById(`serie-img-${idx}`);
+                    if (imgEl) { imgEl.src = poster || PLACEHOLDER; imgEl.classList.remove('skeleton'); }
+                }));
+            }
+        }
+
+        // ─── CARGAR ANIME ─────────────────────────────────────────────────────────
+        async function cargarAnime() {
+            const contenedor = document.getElementById('contenedor-anime');
+            if (!contenedor) return;
+
+            baseDeDatosAnime.forEach((anime, index) => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.innerHTML = `<img id="anime-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${anime.titulo}</p>`;
+                tarjeta.onclick = () => abrirModal(anime.titulo, document.getElementById(`anime-img-${index}`).src, anime.info, anime.desc);
+                contenedor.appendChild(tarjeta);
+            });
+
+            const LOTE = 5;
+            for (let i = 0; i < baseDeDatosAnime.length; i += LOTE) {
+                await Promise.all(baseDeDatosAnime.slice(i, i + LOTE).map(async (anime, j) => {
+                    const idx    = i + j;
+                    const poster = await obtenerPoster(anime.tmdbQuery, 'tv');
+                    const imgEl  = document.getElementById(`anime-img-${idx}`);
+                    if (imgEl) { imgEl.src = poster || PLACEHOLDER; imgEl.classList.remove('skeleton'); }
+                }));
             }
         }
 
@@ -312,6 +449,8 @@
             cargarImagenesGenero();
             cargarTendencias();
             cargarCatalogo();
+            cargarSeries();
+            cargarAnime();
             iniciarTemporizador();
             document.getElementById('banner-img').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
