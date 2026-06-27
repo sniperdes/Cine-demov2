@@ -83,21 +83,24 @@
         setInterval(rotarBanner, 4000);
 
         // 3. CARGAR CATÁLOGO (Limpio y directo)
-        function cargarCatalogo() {
-            baseDeDatosPeliculas.forEach(peli => {
-                const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-                if (contenedor) {
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'card';
-                    tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
-                    tarjeta.innerHTML = `
-                        <img src="${peli.img}">
-                        <p>${peli.titulo}</p>
-                    `;
-                    contenedor.appendChild(tarjeta);
-                }
-            });
-        }
+        async function cargarCatalogo() {
+    try {
+        const respuesta = await fetch('/peliculas');
+        const baseDeDatosPeliculas = await respuesta.json();
+
+        baseDeDatosPeliculas.forEach(peli => {
+            const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+            if (contenedor) {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
+                tarjeta.innerHTML = `<img src="${peli.img}"><p>${peli.titulo}</p>`;
+                contenedor.appendChild(tarjeta);
+            }
+        });
+    } catch (error) { console.error("Error cargando catálogo:", error); }
+}
+
 
         // 5. NAVEGACIÓN Y MODAL (Tu extractor reparado al principio)
         let trailerActual = "";
