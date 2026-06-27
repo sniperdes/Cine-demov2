@@ -1,1 +1,4 @@
 
+/*
+  Access-Control-Allow-Origin: *
+  X-Frame-Options: ALLOWALL
