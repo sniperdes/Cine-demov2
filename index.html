@@ -434,11 +434,14 @@ async function solicitarDatosTMDB(peli, idImgHtml) {
             const pi = datos.results[0]; // Extrae la primera coincidencia exacta con [0]
             
             // 1. Inyecta el póster real en el arreglo y actualiza la tarjeta en pantalla
-            if (pi.poster_path) {
-                peli.img = `https://tmdb.org{pi.poster_path}`;
-                const elementoImg = document.getElementById(idImgHtml);
-                if (elementoImg) elementoImg.src = peli.img;
-            }
+if (pi.poster_path) {
+    // CORREGIDO: Añadimos el puente 'images.weserv.nl' y arreglamos la sintaxis ${}
+    peli.img = `https://weserv.nl{pi.poster_path}`;
+    
+    const elementoImg = document.getElementById(idImgHtml);
+    if (elementoImg) elementoImg.src = peli.img;
+}
+
             
             // 2. Guarda la sinopsis oficial para el Modal
             if (pi.overview) {
