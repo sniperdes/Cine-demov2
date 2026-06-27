@@ -464,28 +464,55 @@
             temporizadorBanner = setInterval(rotarBanner, 4000);
         }
 
-        // 3. CARGAR CATÁLOGO (Automatizado con tu base de datos de Cloudflare KV)
-async function cargarCatalogo() {
-    try {
-        // Le pedimos la lista ya cocinada por el servidor a tu propia ruta local
-        const respuesta = await fetch('/catalogo');
-        const baseDeDatosPeliculas = await respuesta.json();
+        // 3. CARGAR CATÁLOGO (Dibuja tus pelis al instante y actualiza las fotos desde Cloudflare KV)
+function cargarCatalogo() {
+    // Tomamos tu lista de películas original del HTML
+    baseDeDatosPeliculas.forEach((peli, index) => {
+        const contenedor = document.getElementById(`contenedor-${peli.genero}`);
+        if (contenedor) {
+            const idImgHtml = `img-peli-${index}`;
 
-        baseDeDatosPeliculas.forEach(peli => {
-            const contenedor = document.getElementById(`contenedor-${peli.genero}`);
-            if (contenedor) {
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'card pelicula';
-                tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
-                tarjeta.innerHTML = `
-                    <img src="${peli.img}">
-                    <p>${peli.titulo}</p>
-                `;
-                contenedor.appendChild(tarjeta);
+            const tarjeta = document.createElement('div');
+            tarjeta.className = 'card pelicula';
+            tarjeta.onclick = () => abrirModal(peli.titulo, peli.img, peli.info, peli.desc, peli.trailer, peli.peliculaUrl);
+            tarjeta.innerHTML = `
+                <img id="${idImgHtml}" src="${peli.img}">
+                <p>${peli.titulo}</p>
+            `;
+            contenedor.appendChild(tarjeta);
+        }
+    });
+
+    // Una vez dibujadas las tarjetas, le pedimos a Cloudflare las portadas reales
+    actualizarPortadasDesdeServidor();
+}
+
+// FUNCIÓN DE APOYO: Sincroniza las imágenes en segundo plano usando tu base de datos KV
+async function actualizarPortadasDesdeServidor() {
+    try {
+        const respuesta = await fetch('/catalogo');
+        if (!respuesta.ok) return;
+        
+        const catalogoActualizado = await respuesta.json();
+        
+        // Recorremos las películas que nos devolvió Cloudflare ya con imágenes reales
+        baseDeDatosPeliculas.forEach((peli, index) => {
+            const peliReal = catalogoActualizado.find(item => item.titulo === peli.titulo);
+            if (peliReal && peliReal.img) {
+                // Actualizamos los datos en tu lista local y en la pantalla del celular
+                peli.img = peliReal.img;
+                peli.desc = peliReal.desc;
+                peli.info = peliReal.info;
+                
+                const elementoImg = document.getElementById(`img-peli-${index}`);
+                if (elementoImg) elementoImg.src = peliReal.img;
             }
         });
-    } catch (error) { console.error("Error al cargar el catálogo de Cloudflare:", error); }
+    } catch (error) {
+        console.error("Error silencioso de sincronización:", error);
+    }
 }
+
 
 
         // 4. INICIALIZADOR GENERAL
