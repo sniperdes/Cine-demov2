@@ -8,7 +8,6 @@ const TMDB_SEARCH  = 'https://api.themoviedb.org/3/search/movie';
 export async function onRequest(context) {
     const { request, env } = context;
 
-    // CORS — permite que tu HTML en Pages llame a esta función
     const corsHeaders = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, OPTIONS',
@@ -19,7 +18,6 @@ export async function onRequest(context) {
         return new Response(null, { headers: corsHeaders });
     }
 
-    // Leer el parámetro ?q=nombre+pelicula
     const url   = new URL(request.url);
     const query = url.searchParams.get('q');
 
@@ -31,7 +29,7 @@ export async function onRequest(context) {
 
     const cacheKey = `poster:${query.toLowerCase().trim()}`;
 
-    // 1. Buscar en KV primero
+    // 1. Buscar en KV primero (respuesta instantánea)
     const cachedUrl = await env.PELICULAS_KV.get(cacheKey);
     if (cachedUrl) {
         return new Response(JSON.stringify({ poster: cachedUrl, fuente: 'kv' }), {
@@ -41,15 +39,19 @@ export async function onRequest(context) {
 
     // 2. Si no está en KV → buscar en TMDB
     try {
-        const tmdbUrl = `${TMDB_SEARCH}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&language=es-ES`;
+        // Primero busca SIN idioma para garantizar que poster_path no sea null
+        const tmdbUrl = `${TMDB_SEARCH}?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`;
         const res     = await fetch(tmdbUrl);
         const data    = await res.json();
 
-        const posterPath = data.results?.[0]?.poster_path;
-        const posterUrl  = posterPath ? `${TMDB_IMG}${posterPath}` : null;
+        // Toma el primer resultado que tenga poster_path
+        const resultado = data.results?.find(r => r.poster_path) || data.results?.[0];
+        const posterUrl = resultado?.poster_path
+            ? `${TMDB_IMG}${resultado.poster_path}`
+            : null;
 
         if (posterUrl) {
-            // 3. Guardar en KV con TTL de 30 días (en segundos)
+            // Guardar en KV con TTL de 30 días
             await env.PELICULAS_KV.put(cacheKey, posterUrl, { expirationTtl: 60 * 60 * 24 * 30 });
         }
 
