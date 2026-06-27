@@ -206,45 +206,15 @@
 
         const PLACEHOLDER = 'https://via.placeholder.com/140x200/1a1a1a/666?text=Sin+imagen';
 
-        // ─── FUNCIÓN CENTRAL: llama directo a TMDB con caché en localStorage ────
-        // Primera visita → llama a TMDB y guarda en localStorage (30 días)
-        // Siguientes visitas → lee de localStorage al instante, sin red
-        const TMDB_API_KEY = 'acd65342b986ff7dad902ea7412fc003';
-        const TMDB_IMG     = 'https://image.tmdb.org/t/p/w500';
-        const TMDB_SEARCH  = 'https://api.themoviedb.org/3/search/movie';
-        const CACHE_DAYS   = 30;
-        const posterCache  = {};
+        // ─── FUNCIÓN CENTRAL: usa el Worker /poster con caché en KV ─────────────
+        const posterCache = {};
 
         async function obtenerPoster(query) {
             if (posterCache[query]) return posterCache[query];
-
-            // Revisar localStorage
             try {
-                const cached = localStorage.getItem(`poster:${query}`);
-                if (cached) {
-                    const { url, expira } = JSON.parse(cached);
-                    if (Date.now() < expira) {
-                        posterCache[query] = url;
-                        return url;
-                    }
-                }
-            } catch {}
-
-            // Llamar a TMDB directamente
-            try {
-                const res = await fetch(`/poster?q=${encodeURIComponent(query)}`);
+                const res  = await fetch(`/poster?q=${encodeURIComponent(query)}`);
                 const data = await res.json();
-                const resultado = data.results?.find(r => r.poster_path) || data.results?.[0];
-                const url = resultado?.poster_path ? `${TMDB_IMG}${resultado.poster_path}` : null;
-
-                // Guardar en localStorage con expiración de 30 días
-                try {
-                    localStorage.setItem(`poster:${query}`, JSON.stringify({
-                        url,
-                        expira: Date.now() + CACHE_DAYS * 24 * 60 * 60 * 1000
-                    }));
-                } catch {}
-
+                const url  = data.poster || null;
                 posterCache[query] = url;
                 return url;
             } catch {
