@@ -61,6 +61,22 @@
         .ep-row { display:flex; gap:8px; }
         .ep-btn { background:#222; color:white; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; white-space:nowrap; }
         .ep-btn.active { background:#e50914; }
+        /* MODAL EPISODIOS */
+        .ep-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.92); z-index:150; flex-direction:column; }
+        .ep-modal.active { display:flex; }
+        .ep-modal-header { display:flex; align-items:center; justify-content:space-between; padding:15px; background:#111; }
+        .ep-modal-header h3 { margin:0; color:white; font-size:16px; }
+        .ep-modal-close { color:white; font-size:24px; cursor:pointer; }
+        .ep-modal-body { flex:1; overflow-y:auto; padding:15px; }
+        .ep-temporada { margin-bottom:20px; }
+        .ep-temporada h4 { color:#e50914; margin:0 0 10px 0; font-size:15px; }
+        .ep-lista { display:flex; flex-direction:column; gap:8px; }
+        .ep-item { background:#1a1a1a; border-radius:8px; padding:12px 15px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
+        .ep-item:active { background:#333; }
+        .ep-item span { color:white; font-size:14px; }
+        .ep-item .ep-play { color:#e50914; font-size:20px; }
+        .ep-cargando { color:#aaa; text-align:center; padding:30px; font-size:14px; }
+        .ep-vacio { color:#666; text-align:center; padding:30px; font-size:14px; }
         /* GRILLA VER TODO */
         .grid-genero { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; padding-bottom:20px; }
         .grid-genero .card { min-width:unset; width:100%; }
@@ -78,6 +94,7 @@
             <p id="modal-info"></p>
             <p id="modal-desc"></p>
             <button class="btn" id="btn-trailer" onclick="verTrailer()" style="background:#e50914;">▶️ Ver Tráiler</button>
+            <button class="btn" id="btn-episodios" onclick="verEpisodios()" style="background:#1a6b3c;">📺 Ver Episodios</button>
             <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
             <button class="btn vip" onclick="activarVip()">💎 VIP</button>
             <button class="btn" style="background:#333;" onclick="cerrarModal()">⬅ Volver</button>
@@ -102,6 +119,17 @@
             <div class="ep-row" id="ep-row"></div>
         </div>
         <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+    </div>
+
+    <!-- MODAL EPISODIOS -->
+    <div id="ep-modal" class="ep-modal">
+        <div class="ep-modal-header">
+            <h3 id="ep-modal-titulo">Episodios</h3>
+            <span class="ep-modal-close" onclick="cerrarEpisodios()">✖</span>
+        </div>
+        <div class="ep-modal-body" id="ep-modal-body">
+            <div class="ep-cargando">⏳ Cargando episodios...</div>
+        </div>
     </div>
 
     <div class="header"><div class="logo">CINE DEMO</div></div>
@@ -558,7 +586,7 @@
             // ROMANCE
             { titulo:'Erkenci Kus',             tmdbQuery:'Erkenci Kus 2018',           genero:'turca-romance', info:'⭐ 8.5 | 🌙 Turca | 📺 51 ep', desc:'Una joven soñadora se enamora de su jefe.' },
             { titulo:'Sen Cal Kapimi',           tmdbQuery:'Sen Cal Kapimi 2020',        genero:'turca-romance', info:'⭐ 8.6 | 🌙 Turca | 📺 52 ep', desc:'Una estudiante firma un contrato de amor falso con un millonario.' },
-            { titulo:'Kiralik Ask',              tmdbQuery:'Kiralik Ask 2015',           genero:'turca-romance', info:'⭐ 8.2 | 🌙 Turca | 📺 68 ep', desc:'Un millonario contrata a una chica para que finja ser su novia.' },
+            { titulo:'Kiralik Ask',              tmdbQuery:'Kiralik Ask 2015',           nombreKV:'kiralik-ask', genero:'turca-romance', info:'⭐ 8.2 | 🌙 Turca | 📺 68 ep', desc:'Un millonario contrata a una chica para que finja ser su novia.' },
             { titulo:'Medcezir',                 tmdbQuery:'Medcezir 2013',              genero:'turca-romance', info:'⭐ 8.1 | 🌙 Turca | 📺 72 ep', desc:'Adaptación turca de The OC.' },
             { titulo:'Kara Sevda',               tmdbQuery:'Kara Sevda 2015',            genero:'turca-romance', info:'⭐ 8.4 | 🌙 Turca | 📺 74 ep', desc:'Un amor imposible entre dos familias rivales.' },
             { titulo:'Fatmagul',                 tmdbQuery:'Fatmagul 2010',              genero:'turca-romance', info:'⭐ 8.5 | 🌙 Turca | 📺 80 ep', desc:'Una joven busca justicia tras un terrible crimen.' },
@@ -636,7 +664,7 @@
                         const card = document.createElement('div');
                         card.className = 'card pelicula';
                         card.innerHTML = `<img id="img-s-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
-                        card.onclick = () => abrirModal(item.titulo, document.getElementById(`img-s-${uid}`).src, item.info, item.desc, item.tmdbQuery, type);
+                        card.onclick = () => abrirModal(item.titulo, document.getElementById(`img-s-${uid}`).src, item.info, item.desc, item.tmdbQuery, type, item.nombreKV || null);
                         slider.appendChild(card);
                     }
 
@@ -644,7 +672,7 @@
                         const card2 = document.createElement('div');
                         card2.className = 'card pelicula';
                         card2.innerHTML = `<img id="img-t-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
-                        card2.onclick = () => abrirModal(item.titulo, document.getElementById(`img-t-${uid}`).src, item.info, item.desc, item.tmdbQuery, type);
+                        card2.onclick = () => abrirModal(item.titulo, document.getElementById(`img-t-${uid}`).src, item.info, item.desc, item.tmdbQuery, type, item.nombreKV || null);
                         contenedor.appendChild(card2);
                     }
                 });
@@ -822,15 +850,15 @@
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        let modalActual = { tmdbQuery: null, type: 'movie' };
+        let modalActual = { tmdbQuery: null, type: 'movie', nombreKV: null };
 
-        function abrirModal(titulo, img, info, desc, tmdbQuery = null, type = 'movie') {
+        function abrirModal(titulo, img, info, desc, tmdbQuery = null, type = 'movie', nombreKV = null) {
             document.getElementById('modal-title').innerText = titulo;
             document.getElementById('modal-img').src = img;
             document.getElementById('modal-info').innerText = info;
             document.getElementById('modal-desc').innerText = desc;
             document.getElementById('modal').style.display = 'flex';
-            modalActual = { tmdbQuery, type };
+            modalActual = { tmdbQuery, type, nombreKV };
             document.getElementById('btn-trailer').style.display = 'block';
         }
 
@@ -862,6 +890,92 @@
 
         function cerrarModal() {
             document.getElementById('modal').style.display = 'none';
+        }
+
+        // ─── EPISODIOS ────────────────────────────────────────────────────────────
+        async function verEpisodios() {
+            const tg     = window.Telegram?.WebApp;
+            const nombre = modalActual.nombreKV;
+            const titulo = document.getElementById('modal-title').innerText;
+
+            if (!nombre) {
+                if (tg) tg.showAlert('⚠️ Esta serie no tiene contenido disponible aún.');
+                else alert('Sin contenido disponible.');
+                return;
+            }
+
+            cerrarModal();
+            document.getElementById('ep-modal-titulo').innerText = titulo;
+            document.getElementById('ep-modal-body').innerHTML = '<div class="ep-cargando">⏳ Cargando episodios...</div>';
+            document.getElementById('ep-modal').classList.add('active');
+
+            try {
+                const res  = await fetch(`/video?nombre=${encodeURIComponent(nombre)}&tipo=serie`);
+                const data = await res.json();
+
+                if (!data.total) {
+                    document.getElementById('ep-modal-body').innerHTML = '<div class="ep-vacio">📭 No hay episodios disponibles aún.</div>';
+                    return;
+                }
+
+                let html = '';
+                const temporadas = Object.keys(data.temporadas).sort((a,b) => a-b);
+                for (const t of temporadas) {
+                    html += `<div class="ep-temporada"><h4>📺 Temporada ${t}</h4><div class="ep-lista">`;
+                    for (const ep of data.temporadas[t]) {
+                        html += `<div class="ep-item" onclick="reproducirEpisodio('${nombre}','${t}','${ep.episodio}')">
+                            <span>Episodio ${ep.episodio}</span>
+                            <span class="ep-play">▶</span>
+                        </div>`;
+                    }
+                    html += '</div></div>';
+                }
+                document.getElementById('ep-modal-body').innerHTML = html;
+
+            } catch {
+                document.getElementById('ep-modal-body').innerHTML = '<div class="ep-vacio">❌ Error al cargar episodios.</div>';
+            }
+        }
+
+        async function reproducirEpisodio(nombre, temporada, episodio) {
+            const tg  = window.Telegram?.WebApp;
+            const key = `video:${nombre}:${temporada}:${episodio}`;
+
+            // Obtener URL desde KV via Worker
+            try {
+                const res  = await fetch(`/video?nombre=${encodeURIComponent(nombre)}&tipo=serie`);
+                const data = await res.json();
+                const ep   = data.temporadas[temporada]?.find(e => e.episodio == episodio);
+
+                if (!ep) { alert('No encontrado'); return; }
+
+                // Obtener URL real desde KV
+                const resUrl  = await fetch(`/getvideourl?key=${encodeURIComponent(key)}`);
+                const dataUrl = await resUrl.json();
+                const url     = dataUrl.url;
+
+                if (!url) { alert('URL no disponible'); return; }
+
+                if (typeof show_11208906 === 'function') {
+                    show_11208906().then(() => {
+                        if (tg) tg.openLink(url);
+                        else window.open(url, '_blank');
+                    }).catch(() => {
+                        if (tg) tg.openLink(url);
+                        else window.open(url, '_blank');
+                    });
+                } else {
+                    if (tg) tg.openLink(url);
+                    else window.open(url, '_blank');
+                }
+
+            } catch(err) {
+                alert('Error: ' + err.message);
+            }
+        }
+
+        function cerrarEpisodios() {
+            document.getElementById('ep-modal').classList.remove('active');
         }
 
         function buscarPelicula() {
