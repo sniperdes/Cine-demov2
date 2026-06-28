@@ -83,7 +83,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -764,7 +763,7 @@
                         const card = document.createElement('div');
                         card.className = 'card pelicula';
                         card.innerHTML = `<img id="img-s-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
-                        card.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-s-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie');
+                        card.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-s-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
                         slider.appendChild(card);
                     }
 
@@ -774,7 +773,7 @@
                         card2.className = 'card pelicula';
     
                         card2.innerHTML = `<img id="img-t-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
-                        card2.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-t-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie');
+                        card2.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-t-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
                         contenedor.appendChild(card2);
                     }
                 });
@@ -1047,13 +1046,13 @@
             const nombre = modalActual.nombreKV;
             const type   = modalActual.type;
 
-            cerrarModal();
-
             if (!nombre) {
                 if (tg) tg.showAlert('⚠️ Esta película no tiene contenido disponible aún.');
                 else alert('Sin contenido disponible aún.');
                 return;
             }
+
+            cerrarModal();
 
             // Para películas usamos parte 1
             if (type === 'movie') {
