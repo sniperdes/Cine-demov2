@@ -81,7 +81,7 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
-    if (texto === '/start') {
+    if (texto.startsWith('/start')) {
         await enviar(`👋 *Bot Admin Cine Demo*
 
 *Para agregar video desde canal:*
