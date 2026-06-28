@@ -83,7 +83,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -990,7 +989,18 @@
                         });
                         const data2 = await res2.json();
                         if (data2.ok) {
-                            if (tg) tg.showAlert('✅ ¡Video enviado a tu chat de Telegram!');
+                            if (tg) {
+                                tg.showPopup({
+                                    title: '✅ ¡Video listo!',
+                                    message: 'El video fue enviado a tu chat. Tocá "Ver ahora" para reproducirlo.',
+                                    buttons: [
+                                        { id: 'ver', type: 'default', text: '▶️ Ver ahora' },
+                                        { id: 'cerrar', type: 'cancel', text: 'Cerrar' }
+                                    ]
+                                }, (btnId) => {
+                                    if (btnId === 'ver') tg.close();
+                                });
+                            }
                         } else {
                             if (tg) tg.showAlert('⚠️ Error al enviar el video.');
                         }
