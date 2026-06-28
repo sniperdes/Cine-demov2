@@ -82,7 +82,6 @@
         .grid-genero .card { min-width:unset; width:100%; }
         .grid-genero .card img { height:220px; }
     </style>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
 </head>
 <body>
@@ -332,7 +331,7 @@
         // ─── BASE DE DATOS ────────────────────────────────────────────────────────
         const baseDeDatosPeliculas = [
             // ACCIÓN
-            { titulo:'John Wick',               tmdbQuery:'John Wick 2014',            genero:'accion',   info:'⭐ 8.5 | 🎭 Acción | 🕒 101 min', desc:'Un asesino legendario vuelve del retiro para buscar venganza.' },
+            { titulo:'John Wick',               tmdbQuery:'John Wick 2014',            nombreKV:'john-wick', genero:'accion',   info:'⭐ 8.5 | 🎭 Acción | 🕒 101 min', desc:'Un asesino legendario vuelve del retiro para buscar venganza.' },
             { titulo:'Mad Max: Fury Road',       tmdbQuery:'Mad Max Fury Road 2015',    genero:'accion',   info:'⭐ 8.8 | 🎭 Acción | 🕒 120 min', desc:'Mundo apocalíptico en las dunas.' },
             { titulo:'Gladiador',                tmdbQuery:'Gladiator 2000',            genero:'accion',   info:'⭐ 8.5 | 🎭 Acción | 🕒 155 min', desc:'Venganza y gloria en la Roma antigua.' },
             { titulo:'Misión Imposible',         tmdbQuery:'Mission Impossible 1996',   genero:'accion',   info:'⭐ 7.8 | 🎭 Acción | 🕒 110 min', desc:'Ethan Hunt y sus misiones de espionaje.' },
@@ -942,36 +941,67 @@
             const tg     = window.Telegram?.WebApp;
             const userId = tg?.initDataUnsafe?.user?.id;
 
-            if (!userId) {
-                alert('⚠️ Abrí la app desde Telegram para ver el contenido.');
-                return;
-            }
-
-            const enviarVideo = async () => {
+            const ejecutar = async () => {
                 try {
-                    const res  = await fetch('/sendvideo', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ userId, nombre, temporada, episodio, tipo: 'serie' })
-                    });
+                    // Obtener la URL/file_id del contenido
+                    const key = temporada 
+                        ? `video:${nombre}:${temporada}:${episodio}`
+                        : `video:${nombre}:${episodio}`;
+                    
+                    const res  = await fetch(`/getvideourl?key=${encodeURIComponent(key)}`);
                     const data = await res.json();
+                    const url  = data.url;
 
-                    if (data.ok) {
-                        tg.showAlert('✅ ¡El video fue enviado a tu chat de Telegram!');
-                    } else {
-                        tg.showAlert('⚠️ Contenido no disponible aún.');
+                    if (!url) {
+                        if (tg) tg.showAlert('⚠️ Contenido no disponible aún.');
+                        else alert('Sin contenido.');
+                        return;
                     }
-                } catch {
-                    tg.showAlert('❌ Error al enviar el video.');
+
+                    // Si es URL de embed → abrir reproductor interno
+                    if (url.startsWith('http')) {
+                        abrirReproductorEmbed(url, nombre, temporada, episodio);
+                    } else {
+                        // Si es file_id de Telegram → mandar por bot
+                        if (!userId) {
+                            if (tg) tg.showAlert('⚠️ Abrí la app desde Telegram para ver el contenido.');
+                            else alert('Abrí desde Telegram.');
+                            return;
+                        }
+                        const res2 = await fetch('/sendvideo', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ userId, nombre, temporada, episodio, tipo: 'serie' })
+                        });
+                        const data2 = await res2.json();
+                        if (data2.ok) {
+                            if (tg) tg.showAlert('✅ ¡Video enviado a tu chat de Telegram!');
+                        } else {
+                            if (tg) tg.showAlert('⚠️ Error al enviar el video.');
+                        }
+                    }
+                } catch(err) {
+                    if (tg) tg.showAlert('❌ Error: ' + err.message);
+                    else alert('Error: ' + err.message);
                 }
             };
 
-            // Mostrar anuncio primero si está disponible
+            // Mostrar anuncio primero
             if (typeof show_11208906 === 'function') {
-                show_11208906().then(enviarVideo).catch(enviarVideo);
+                show_11208906().then(ejecutar).catch(ejecutar);
             } else {
-                await enviarVideo();
+                await ejecutar();
             }
+        }
+
+        // Reproductor interno para embeds (Archive.org, etc)
+        function abrirReproductorEmbed(url, nombre, temporada, episodio) {
+            document.getElementById('player-title').innerText = temporada 
+                ? `${nombre} T${temporada}E${episodio}` 
+                : nombre;
+            document.getElementById('player-episodios').style.display = 'none';
+            document.getElementById('player-frame').src = url;
+            document.getElementById('player-modal').classList.add('active');
         }
 
         function cerrarEpisodios() {
@@ -987,19 +1017,23 @@
         }
 
         function verAnuncio() {
-            const tg = window.Telegram?.WebApp;
-            if (typeof show_11208906 === 'function') {
-                show_11208906().then(() => {
-                    cerrarModal();
-                    abrirPlayer(false); // false = con anuncio ya visto
-                }).catch(() => {
-                    if (tg) tg.showAlert('⚠️ No se pudo cargar el anuncio. Intentá de nuevo.');
-                    else alert('⚠️ No se pudo cargar el anuncio.');
-                });
+            const tg     = window.Telegram?.WebApp;
+            const nombre = modalActual.nombreKV;
+            const type   = modalActual.type;
+
+            if (!nombre) {
+                if (tg) tg.showAlert('⚠️ Contenido no disponible aún.');
+                else alert('Sin contenido.');
+                return;
+            }
+
+            cerrarModal();
+
+            // Para películas usamos parte 1, para series abrimos episodios
+            if (type === 'movie') {
+                reproducirEpisodio(nombre, null, '1');
             } else {
-                // En desarrollo sin Monetag, abrir directo
-                cerrarModal();
-                abrirPlayer(false);
+                verEpisodios();
             }
         }
 
