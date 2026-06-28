@@ -938,39 +938,38 @@
         }
 
         async function reproducirEpisodio(nombre, temporada, episodio) {
-            const tg  = window.Telegram?.WebApp;
-            const key = `video:${nombre}:${temporada}:${episodio}`;
+            const tg     = window.Telegram?.WebApp;
+            const userId = tg?.initDataUnsafe?.user?.id;
 
-            // Obtener URL desde KV via Worker
-            try {
-                const res  = await fetch(`/video?nombre=${encodeURIComponent(nombre)}&tipo=serie`);
-                const data = await res.json();
-                const ep   = data.temporadas[temporada]?.find(e => e.episodio == episodio);
+            if (!userId) {
+                alert('⚠️ Abrí la app desde Telegram para ver el contenido.');
+                return;
+            }
 
-                if (!ep) { alert('No encontrado'); return; }
-
-                // Obtener URL real desde KV
-                const resUrl  = await fetch(`/getvideourl?key=${encodeURIComponent(key)}`);
-                const dataUrl = await resUrl.json();
-                const url     = dataUrl.url;
-
-                if (!url) { alert('URL no disponible'); return; }
-
-                if (typeof show_11208906 === 'function') {
-                    show_11208906().then(() => {
-                        if (tg) tg.openLink(url);
-                        else window.open(url, '_blank');
-                    }).catch(() => {
-                        if (tg) tg.openLink(url);
-                        else window.open(url, '_blank');
+            const enviarVideo = async () => {
+                try {
+                    const res  = await fetch('/sendvideo', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ userId, nombre, temporada, episodio, tipo: 'serie' })
                     });
-                } else {
-                    if (tg) tg.openLink(url);
-                    else window.open(url, '_blank');
-                }
+                    const data = await res.json();
 
-            } catch(err) {
-                alert('Error: ' + err.message);
+                    if (data.ok) {
+                        tg.showAlert('✅ ¡El video fue enviado a tu chat de Telegram!');
+                    } else {
+                        tg.showAlert('⚠️ Contenido no disponible aún.');
+                    }
+                } catch {
+                    tg.showAlert('❌ Error al enviar el video.');
+                }
+            };
+
+            // Mostrar anuncio primero si está disponible
+            if (typeof show_11208906 === 'function') {
+                show_11208906().then(enviarVideo).catch(enviarVideo);
+            } else {
+                await enviarVideo();
             }
         }
 
