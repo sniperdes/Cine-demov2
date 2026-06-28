@@ -83,7 +83,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -861,16 +860,16 @@
             document.getElementById('modal').style.display = 'flex';
             modalActual = { tmdbQuery, type, nombreKV };
             document.getElementById('btn-trailer').style.display = 'block';
-            // Mostrar botones según tipo y si tiene contenido
+            // Mostrar botones según tipo
             if (type === 'tv' && nombreKV) {
                 document.getElementById('btn-episodios').style.display = 'block';
                 document.getElementById('btn-ver-anuncio').style.display = 'none';
-            } else if (type === 'movie' && nombreKV) {
+            } else if (type === 'movie') {
                 document.getElementById('btn-episodios').style.display = 'none';
                 document.getElementById('btn-ver-anuncio').style.display = 'block';
             } else {
                 document.getElementById('btn-episodios').style.display = 'none';
-                document.getElementById('btn-ver-anuncio').style.display = 'none';
+                document.getElementById('btn-ver-anuncio').style.display = 'block';
             }
         }
 
@@ -1047,15 +1046,15 @@
             const nombre = modalActual.nombreKV;
             const type   = modalActual.type;
 
+            cerrarModal();
+
             if (!nombre) {
-                if (tg) tg.showAlert('⚠️ Contenido no disponible aún.');
-                else alert('Sin contenido.');
+                if (tg) tg.showAlert('⚠️ Esta película no tiene contenido disponible aún.');
+                else alert('Sin contenido disponible aún.');
                 return;
             }
 
-            cerrarModal();
-
-            // Para películas usamos parte 1, para series abrimos episodios
+            // Para películas usamos parte 1
             if (type === 'movie') {
                 reproducirEpisodio(nombre, null, '1');
             } else {
