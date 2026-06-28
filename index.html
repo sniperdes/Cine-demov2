@@ -94,8 +94,8 @@
             <p id="modal-info"></p>
             <p id="modal-desc"></p>
             <button class="btn" id="btn-trailer" onclick="verTrailer()" style="background:#e50914;">▶️ Ver Tráiler</button>
-            <button class="btn" id="btn-episodios" onclick="verEpisodios()" style="background:#1a6b3c;">📺 Ver Episodios</button>
-            <button class="btn" onclick="verAnuncio()">📺 Ver con anuncios</button>
+            <button class="btn" id="btn-episodios" onclick="verEpisodios()" style="background:#1a6b3c; display:none;">📺 Ver Episodios</button>
+            <button class="btn" id="btn-ver-anuncio" onclick="verAnuncio()">📺 Ver con anuncios</button>
             <button class="btn vip" onclick="activarVip()">💎 VIP</button>
             <button class="btn" style="background:#333;" onclick="cerrarModal()">⬅ Volver</button>
         </div>
@@ -860,6 +860,17 @@
             document.getElementById('modal').style.display = 'flex';
             modalActual = { tmdbQuery, type, nombreKV };
             document.getElementById('btn-trailer').style.display = 'block';
+            // Mostrar botones según tipo y si tiene contenido
+            if (type === 'tv' && nombreKV) {
+                document.getElementById('btn-episodios').style.display = 'block';
+                document.getElementById('btn-ver-anuncio').style.display = 'none';
+            } else if (type === 'movie' && nombreKV) {
+                document.getElementById('btn-episodios').style.display = 'none';
+                document.getElementById('btn-ver-anuncio').style.display = 'block';
+            } else {
+                document.getElementById('btn-episodios').style.display = 'none';
+                document.getElementById('btn-ver-anuncio').style.display = 'none';
+            }
         }
 
         async function verTrailer() {
@@ -943,6 +954,9 @@
 
             const ejecutar = async () => {
                 try {
+                    const userId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id
+                                || window.Telegram?.WebApp?.initData?.match(/user=%7B%22id%22%3A(\d+)/)?.[1]
+                                || null;
                     // Obtener la URL/file_id del contenido
                     const key = temporada 
                         ? `video:${nombre}:${temporada}:${episodio}`
@@ -971,7 +985,7 @@
                         const res2 = await fetch('/sendvideo', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId, nombre, temporada, episodio, tipo: 'serie' })
+                            body: JSON.stringify({ userId: userId, nombre, temporada, episodio, tipo: 'serie' })
                         });
                         const data2 = await res2.json();
                         if (data2.ok) {
