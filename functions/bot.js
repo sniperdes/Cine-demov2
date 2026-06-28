@@ -1,13 +1,10 @@
 // /functions/bot.js
-// El token y admin ID se leen desde variables de entorno de Cloudflare
-// Nunca se exponen en el código
-
 const ADMIN_ID = 1590059037;
 
 export async function onRequest(context) {
     const { request, env } = context;
 
-    const BOT_TOKEN = env.BOT_TOKEN; // Variable secreta en Cloudflare
+    const BOT_TOKEN = env.BOT_TOKEN;
     const BOT_API   = `https://api.telegram.org/bot${BOT_TOKEN}`;
 
     if (request.method !== 'POST') {
@@ -35,12 +32,64 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
+    // ─── DETECTAR VIDEO REENVIADO ─────────────────────────────────────────────
+    // Si el admin reenvía un video, el bot espera el siguiente comando para asociarlo
+    if (msg.video || msg.document) {
+        const fileId = msg.video?.file_id || msg.document?.file_id;
+        const fileName = msg.video?.file_name || msg.document?.file_name || 'video';
+        
+        // Guardar temporalmente el file_id esperando que el admin indique a qué serie pertenece
+        await env.PELICULAS_KV.put('temp:ultimo_file_id', fileId, { expirationTtl: 300 }); // expira en 5 min
+        await enviar(`✅ Video recibido!\n📁 ${fileName}\n\nAhora indicá a qué serie pertenece:\n\n/asignar serie kiralik-ask 1 1\n/asignar pelicula matrix 1`);
+        return new Response('OK');
+    }
+
+    // /asignar — asocia el último video recibido a una serie/película
+    if (texto.startsWith('/asignar')) {
+        const partes = texto.split(' ');
+        const tipo   = partes[1];
+
+        const fileId = await env.PELICULAS_KV.get('temp:ultimo_file_id');
+        if (!fileId) {
+            await enviar('❌ No hay video pendiente. Primero reenviame un video del canal.');
+            return new Response('OK');
+        }
+
+        if (tipo === 'serie') {
+            const [,, nombre, temporada, episodio] = partes;
+            if (!nombre || !temporada || !episodio) {
+                await enviar('❌ Formato: /asignar serie nombre temporada episodio');
+                return new Response('OK');
+            }
+            await env.PELICULAS_KV.put(`video:${nombre}:${temporada}:${episodio}`, fileId);
+            await env.PELICULAS_KV.delete('temp:ultimo_file_id');
+            await enviar(`✅ Asignado!\n📺 *${nombre}* T${temporada}E${episodio}\n🎬 file_id guardado`);
+
+        } else if (tipo === 'pelicula') {
+            const [,, nombre, parte] = partes;
+            if (!nombre || !parte) {
+                await enviar('❌ Formato: /asignar pelicula nombre parte');
+                return new Response('OK');
+            }
+            await env.PELICULAS_KV.put(`video:${nombre}:${parte}`, fileId);
+            await env.PELICULAS_KV.delete('temp:ultimo_file_id');
+            await enviar(`✅ Asignado!\n🎬 *${nombre}* Parte ${parte}\n🎬 file_id guardado`);
+
+        } else {
+            await enviar('❌ Tipo inválido. Usá: serie o pelicula');
+        }
+        return new Response('OK');
+    }
+
     if (texto === '/start') {
         await enviar(`👋 *Bot Admin Cine Demo*
 
-Comandos disponibles:
+*Para agregar video desde canal:*
+1. Reenviame el video del canal
+2. Bot te da el file_id
+3. Usá /asignar para asociarlo
 
-*Agregar:*
+*Para agregar link externo:*
 \`/agregar serie kiralik-ask 1 1 https://youtu.be/xxx\`
 \`/agregar pelicula matrix 1 https://servidor.com/matrix\`
 
