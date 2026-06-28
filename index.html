@@ -89,7 +89,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -993,10 +992,11 @@
                             else alert('Abrí desde Telegram.');
                             return;
                         }
+                        const tipo = temporada ? 'serie' : 'pelicula';
                         const res2 = await fetch('/sendvideo', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: userId, nombre, temporada, episodio, tipo: 'serie' })
+                            body: JSON.stringify({ userId: userId, nombre, temporada, episodio, parte: episodio, tipo })
                         });
                         const data2 = await res2.json();
                         if (data2.ok) {
