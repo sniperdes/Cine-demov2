@@ -83,7 +83,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -114,12 +113,15 @@
     <div id="player-modal" class="player-modal">
         <div class="player-header">
             <span id="player-title">Cargando...</span>
-            <span class="player-close" onclick="cerrarPlayer()">✖</span>
+            <div style="display:flex;gap:15px;align-items:center;">
+                <span style="color:white;font-size:20px;cursor:pointer;" onclick="fullscreenPlayer()" title="Pantalla completa">⛶</span>
+                <span class="player-close" onclick="cerrarPlayer()">✖</span>
+            </div>
         </div>
         <div id="player-episodios" class="player-episodios">
             <div class="ep-row" id="ep-row"></div>
         </div>
-        <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen"></iframe>
+        <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" webkitallowfullscreen mozallowfullscreen></iframe>
     </div>
 
     <!-- MODAL EPISODIOS -->
@@ -1166,6 +1168,18 @@
         function cerrarPlayer() {
             document.getElementById('player-frame').src = '';
             document.getElementById('player-modal').classList.remove('active');
+            if (document.fullscreenElement) document.exitFullscreen();
+        }
+
+        function fullscreenPlayer() {
+            const frame = document.getElementById('player-frame');
+            if (frame.requestFullscreen) {
+                frame.requestFullscreen();
+            } else if (frame.webkitRequestFullscreen) {
+                frame.webkitRequestFullscreen();
+            } else if (frame.mozRequestFullScreen) {
+                frame.mozRequestFullScreen();
+            }
         }
     </script>
 </body>
