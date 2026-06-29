@@ -89,7 +89,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -872,13 +871,12 @@
             modalActual = { tmdbQuery, type, nombreKV };
             document.getElementById('btn-trailer').style.display = 'block';
             // Mostrar botones según tipo
-            if (type === 'tv' && nombreKV) {
+            if (type === 'tv') {
+                // Series/Anime siempre muestran Ver Episodios
                 document.getElementById('btn-episodios').style.display = 'block';
                 document.getElementById('btn-ver-anuncio').style.display = 'none';
-            } else if (type === 'movie') {
-                document.getElementById('btn-episodios').style.display = 'none';
-                document.getElementById('btn-ver-anuncio').style.display = 'block';
             } else {
+                // Películas siempre muestran Ver con anuncios
                 document.getElementById('btn-episodios').style.display = 'none';
                 document.getElementById('btn-ver-anuncio').style.display = 'block';
             }
@@ -923,8 +921,8 @@
             const titulo = document.getElementById('modal-title').innerText;
 
             if (!nombre) {
-                if (tg) tg.showAlert('⚠️ Esta serie no tiene contenido disponible aún.');
-                else alert('Sin contenido disponible.');
+                if (tg) tg.showAlert('🔜 Contenido próximamente disponible.');
+                else alert('Próximamente disponible.');
                 return;
             }
 
