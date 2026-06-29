@@ -89,7 +89,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -915,6 +914,8 @@
         }
 
         // ─── EPISODIOS ────────────────────────────────────────────────────────────
+        let dataSerie = null; // guardamos los datos de la serie para navegar
+
         async function verEpisodios() {
             const tg     = window.Telegram?.WebApp;
             const nombre = modalActual.nombreKV;
@@ -928,7 +929,7 @@
 
             cerrarModal();
             document.getElementById('ep-modal-titulo').innerText = titulo;
-            document.getElementById('ep-modal-body').innerHTML = '<div class="ep-cargando">⏳ Cargando episodios...</div>';
+            document.getElementById('ep-modal-body').innerHTML = '<div class="ep-cargando">⏳ Cargando...</div>';
             document.getElementById('ep-modal').classList.add('active');
 
             try {
@@ -940,23 +941,47 @@
                     return;
                 }
 
-                let html = '';
-                const temporadas = Object.keys(data.temporadas).sort((a,b) => a-b);
-                for (const t of temporadas) {
-                    html += `<div class="ep-temporada"><h4>📺 Temporada ${t}</h4><div class="ep-lista">`;
-                    for (const ep of data.temporadas[t]) {
-                        html += `<div class="ep-item" onclick="reproducirEpisodio('${nombre}','${t}','${ep.episodio}')">
-                            <span>Episodio ${ep.episodio}</span>
-                            <span class="ep-play">▶</span>
-                        </div>`;
-                    }
-                    html += '</div></div>';
-                }
-                document.getElementById('ep-modal-body').innerHTML = html;
+                dataSerie = { nombre, titulo, data };
+                mostrarTemporadas();
 
             } catch {
-                document.getElementById('ep-modal-body').innerHTML = '<div class="ep-vacio">❌ Error al cargar episodios.</div>';
+                document.getElementById('ep-modal-body').innerHTML = '<div class="ep-vacio">❌ Error al cargar.</div>';
             }
+        }
+
+        function mostrarTemporadas() {
+            const { titulo, data } = dataSerie;
+            document.getElementById('ep-modal-titulo').innerText = titulo;
+            const temporadas = Object.keys(data.temporadas).sort((a,b) => a-b);
+
+            let html = '';
+            for (const t of temporadas) {
+                const total = data.temporadas[t].length;
+                html += `<div class="ep-item" onclick="mostrarEpisodiosDe('${t}')">
+                    <span>📺 Temporada ${t} <small style="color:#aaa;">(${total} ep)</small></span>
+                    <span class="ep-play">›</span>
+                </div>`;
+            }
+            document.getElementById('ep-modal-body').innerHTML = `<div class="ep-lista">${html}</div>`;
+        }
+
+        function mostrarEpisodiosDe(temporada) {
+            const { nombre, titulo, data } = dataSerie;
+            document.getElementById('ep-modal-titulo').innerText = `${titulo} · T${temporada}`;
+
+            const eps = data.temporadas[temporada];
+            let html = `<div class="ep-item" style="background:#1a1a1a;margin-bottom:10px;" onclick="mostrarTemporadas()">
+                <span>⬅ Volver a temporadas</span>
+            </div><div class="ep-lista">`;
+
+            for (const ep of eps) {
+                html += `<div class="ep-item" onclick="reproducirEpisodio('${nombre}','${temporada}','${ep.episodio}')">
+                    <span>Episodio ${ep.episodio}</span>
+                    <span class="ep-play">▶</span>
+                </div>`;
+            }
+            html += '</div>';
+            document.getElementById('ep-modal-body').innerHTML = html;
         }
 
         async function reproducirEpisodio(nombre, temporada, episodio) {
