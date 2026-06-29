@@ -89,8 +89,6 @@
         .grid-genero .card img { height:220px; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
 </head>
 <body>
 
@@ -170,6 +168,10 @@
             <div class="banner-dots">
                 <span class="dot active-dot"></span><span class="dot"></span>
                 <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div id="seccion-continuar" style="display:none;">
+                <div class="title">▶️ Continuar viendo</div>
+                <div class="row" id="contenedor-continuar"></div>
             </div>
             <div class="title">Tendencias</div>
             <div class="row" id="contenedor-tendencias"></div>
@@ -716,6 +718,55 @@
             }
         }
 
+
+        // ─── HISTORIAL ────────────────────────────────────────────────────────────
+        async function cargarHistorial() {
+            const tg     = window.Telegram?.WebApp;
+            const userId = tg?.initDataUnsafe?.user?.id;
+            if (!userId) return;
+
+            try {
+                const res  = await fetch(`/getvideourl?key=historial:${userId}`);
+                const data = await res.json();
+                if (!data.url) return;
+
+                const h = JSON.parse(data.url);
+                const seccion    = document.getElementById('seccion-continuar');
+                const contenedor = document.getElementById('contenedor-continuar');
+                if (!seccion || !contenedor) return;
+
+                seccion.style.display = 'block';
+
+                const label = h.tipo === 'serie'
+                    ? `T${h.temporada}E${h.episodio}`
+                    : '🎬 Película';
+
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'card pelicula';
+                tarjeta.style.minWidth = '200px';
+                tarjeta.innerHTML = `
+                    <div style="position:relative;">
+                        <img src="${h.poster || PLACEHOLDER}" style="width:100%;height:200px;object-fit:cover;">
+                        <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);padding:5px 8px;">
+                            <div style="color:#e50914;font-size:12px;font-weight:bold;">${label}</div>
+                        </div>
+                    </div>
+                    <p>${h.titulo}</p>
+                `;
+                tarjeta.onclick = () => {
+                    // Buscar la película/serie en la base de datos y abrir su modal
+                    const peli = baseDeDatosPeliculas.find(p => p.nombreKV === h.nombre)
+                               || baseDeDatosSeries?.find(p => p.nombreKV === h.nombre)
+                               || baseDeDatosAnime?.find(p => p.nombreKV === h.nombre);
+                    if (peli) {
+                        abrirModal(peli.titulo, h.poster || PLACEHOLDER, peli.info, peli.desc, peli.tmdbQuery, h.tipo === 'serie' ? 'tv' : 'movie', h.nombre);
+                    }
+                };
+                contenedor.appendChild(tarjeta);
+
+            } catch {}
+        }
+
         // ─── BANNER ───────────────────────────────────────────────────────────────
         const bannerUrls = [];
         let bannerIndex = 0;
@@ -848,6 +899,7 @@
             cargarDoramas();
             cargarTurcas();
             cargarRusas();
+            cargarHistorial();
             iniciarTemporizador();
             document.getElementById('banner-img').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
@@ -1019,11 +1071,13 @@
                             else alert('Abrí desde Telegram.');
                             return;
                         }
-                        const tipo = temporada ? 'serie' : 'pelicula';
+                        const tipo   = temporada ? 'serie' : 'pelicula';
+                        const titulo = modalActual.tmdbQuery ? document.getElementById('modal-title').innerText : nombre;
+                        const poster = document.getElementById('modal-img')?.src || null;
                         const res2 = await fetch('/sendvideo', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ userId: userId, nombre, temporada, episodio, parte: episodio, tipo })
+                            body: JSON.stringify({ userId: userId, nombre, temporada, episodio, parte: episodio, tipo, titulo, poster })
                         });
                         const data2 = await res2.json();
                         if (data2.ok) {
