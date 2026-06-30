@@ -23,18 +23,23 @@ export async function onRequest(context) {
     if (channelPost && (channelPost.video || channelPost.document)) {
         const fileId   = channelPost.video?.file_id || channelPost.document?.file_id;
         const fileName = channelPost.video?.file_name || channelPost.document?.file_name || 'video';
+        const caption  = channelPost.caption || null;
         const msgId    = channelPost.message_id;
 
         // Guardar en cola con ID único basado en el mensaje
         const colaKey = `cola:${msgId}`;
         await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 }); // 1 hora
 
+        // Acortar nombre de archivo si es muy largo, mostrar primeros 80 caracteres
+        const nombreCorto = fileName.length > 80 ? fileName.slice(0, 80) + '...' : fileName;
+        const tituloInfo = caption ? `📝 *${caption}*\n` : '';
+
         await fetch(`${BOT_API}/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 chat_id: ADMIN_ID,
-                text: `📹 *Video nuevo detectado!*\n📁 ${fileName}\n\nAsignalo con:\n\`/asignar serie nombre temp ep ${msgId}\`\n\`/asignar pelicula nombre parte ${msgId}\`\n\nO si es el único pendiente, podés omitir el ID:\n\`/asignar serie nombre temp ep\`\n\`/asignar pelicula nombre parte\``,
+                text: `📹 *Video nuevo detectado!* (ID: ${msgId})\n${tituloInfo}📁 ${nombreCorto}\n\nAsignalo con:\n\`/asignar serie nombre temp ep ${msgId}\`\n\`/asignar pelicula nombre parte ${msgId}\`\n\nO si es el único pendiente, podés omitir el ID:\n\`/asignar serie nombre temp ep\`\n\`/asignar pelicula nombre parte\``,
                 parse_mode: 'Markdown'
             })
         });
