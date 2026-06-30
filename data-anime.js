@@ -1,0 +1,23 @@
+// ─── BASE DE DATOS ANIME ──────────────────────────────────────────────────
+        const baseDeDatosAnime = [
+            { titulo:'Attack on Titan',           tmdbQuery:'Attack on Titan 2013',          info:'⭐ 9.0 | 🎌 Anime | 📺 4 temporadas',   desc:'La humanidad lucha por sobrevivir contra gigantes devoradores.' },
+            { titulo:'Demon Slayer',              tmdbQuery:'Demon Slayer 2019',             info:'⭐ 8.7 | 🎌 Anime | 📺 4 temporadas',   desc:'Un joven busca vengar a su familia y curar a su hermana.' },
+            { titulo:'Naruto',                    tmdbQuery:'Naruto 2002',                   info:'⭐ 8.4 | 🎌 Anime | 📺 5 temporadas',   desc:'Un joven ninja busca convertirse en el líder de su aldea.' },
+            { titulo:'Dragon Ball Z',             tmdbQuery:'Dragon Ball Z 1989',            info:'⭐ 8.8 | 🎌 Anime | 📺 9 temporadas',   desc:'Goku defiende la Tierra de enemigos cada vez más poderosos.' },
+            { titulo:'Death Note',                tmdbQuery:'Death Note 2006',               info:'⭐ 9.0 | 🎌 Anime | 📺 1 temporada',    desc:'Un estudiante usa un cuaderno mágico para matar criminales.' },
+            { titulo:'One Piece',                 tmdbQuery:'One Piece 1999',                info:'⭐ 8.9 | 🎌 Anime | 📺 20+ temporadas', desc:'Luffy y su tripulación buscan el tesoro más grande del mundo.' },
+            { titulo:'Fullmetal Alchemist',       tmdbQuery:'Fullmetal Alchemist Brotherhood 2009', info:'⭐ 9.1 | 🎌 Anime | 📺 1 temporada', desc:'Dos hermanos buscan la piedra filosofal para recuperar sus cuerpos.' },
+            { titulo:'Tokyo Ghoul',               tmdbQuery:'Tokyo Ghoul 2014',              info:'⭐ 7.8 | 🎌 Anime | 📺 4 temporadas',   desc:'Un estudiante se convierte en mitad ghoul tras un ataque.' },
+            { titulo:'Hunter x Hunter',           tmdbQuery:'Hunter x Hunter 2011',          info:'⭐ 9.0 | 🎌 Anime | 📺 6 temporadas',   desc:'Un niño busca a su padre convirtiéndose en cazador.' },
+            { titulo:'My Hero Academia',          tmdbQuery:'My Hero Academia 2016',         info:'⭐ 8.4 | 🎌 Anime | 📺 7 temporadas',   desc:'Un mundo de superhéroes donde un chico sin poderes lucha por ser el mejor.' },
+            { titulo:'Bleach',                    tmdbQuery:'Bleach 2004',                   info:'⭐ 8.2 | 🎌 Anime | 📺 16 temporadas',  desc:'Un adolescente se convierte en sustituto de los shinigami.' },
+            { titulo:'Jujutsu Kaisen',            tmdbQuery:'Jujutsu Kaisen 2020',           info:'⭐ 8.6 | 🎌 Anime | 📺 2 temporadas',   desc:'Un estudiante ingiere un dedo maldito y combate espíritus malignos.' },
+            { titulo:'One Punch Man',             tmdbQuery:'One Punch Man 2015',            info:'⭐ 8.8 | 🎌 Anime | 📺 2 temporadas',   desc:'Un héroe que derrota a cualquier enemigo de un solo golpe.' },
+            { titulo:'Vinland Saga',              tmdbQuery:'Vinland Saga 2019',             info:'⭐ 8.8 | 🎌 Anime | 📺 2 temporadas',   desc:'Un joven vikingo busca vengar la muerte de su padre.' },
+            { titulo:'Spy x Family',              tmdbQuery:'Spy x Family 2022',             info:'⭐ 8.5 | 🎌 Anime | 📺 2 temporadas',   desc:'Un espía forma una familia falsa sin que ninguno sepa la verdad.' },
+            { titulo:'Chainsaw Man',              tmdbQuery:'Chainsaw Man 2022',             info:'⭐ 8.5 | 🎌 Anime | 📺 1 temporada',    desc:'Un joven fusionado con un demonio trabaja como cazador de demonios.' },
+            { titulo:'Sword Art Online',          tmdbQuery:'Sword Art Online 2012',         info:'⭐ 7.5 | 🎌 Anime | 📺 3 temporadas',   desc:'Jugadores atrapados en un videojuego de realidad virtual.' },
+            { titulo:'Cowboy Bebop',              tmdbQuery:'Cowboy Bebop 1998',             info:'⭐ 8.9 | 🎌 Anime | 📺 1 temporada',    desc:'Cazarrecompensas viajan por el espacio en el año 2071.' },
+            { titulo:'Re:Zero',                   tmdbQuery:'Re Zero 2016',                  info:'⭐ 8.3 | 🎌 Anime | 📺 3 temporadas',   desc:'Un joven revive una y otra vez tras morir en un mundo de fantasía.' },
+            { titulo:'Neon Genesis Evangelion',   tmdbQuery:'Neon Genesis Evangelion 1995',  info:'⭐ 8.5 | 🎌 Anime | 📺 1 temporada',    desc:'Jóvenes pilotan robots gigantes para salvar a la humanidad.' },
+        ];
