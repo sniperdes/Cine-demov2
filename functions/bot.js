@@ -178,42 +178,11 @@ export async function onRequest(context) {
     }
 
     if (msg.video || msg.document) {
-
-    const fileId =
-        msg.video?.file_id ||
-        msg.document?.file_id;
-
-    const fileName =
-        msg.video?.file_name ||
-        msg.document?.file_name ||
-        msg.caption ||
-        '';
-
-    const deteccion = detectarSerie(fileName);
-
-    if (deteccion.nombreKV && deteccion.episodio) {
-
-        await env.PELICULAS_KV.put(
-            `video:${deteccion.nombreKV}:${deteccion.temporada}:${deteccion.episodio}`,
-            fileId
-        );
-
-        await enviar(`✅ Subido automático
-
-📺 ${deteccion.nombreKV}
-📀 T${deteccion.temporada}E${deteccion.episodio}`);
-
+        const fileId = msg.video?.file_id || msg.document?.file_id;
+        await env.PELICULAS_KV.put('temp:file_id', fileId, { expirationTtl: 300 });
+        await enviar(`✅ Video recibido!\n\nAhora usá:\n/asignar serie kiralik-ask 1 1\n/asignar pelicula matrix 1`);
         return new Response('OK');
     }
-
-    // fallback manual
-    await enviar(`❌ No detectado
-
-Usá:
-/asignar serie nombre temp ep`);
-
-    return new Response('OK');
-}
 
     if (texto.startsWith('/start')) {
         await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
