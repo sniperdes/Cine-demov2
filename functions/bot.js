@@ -179,12 +179,18 @@ export async function onRequest(context) {
 
     if (msg.video || msg.document) {
 
-    const fileId = msg.video?.file_id || msg.document?.file_id;
-    const fileName = msg.video?.file_name || msg.document?.file_name || '';
+    const fileId =
+        msg.video?.file_id ||
+        msg.document?.file_id;
+
+    const fileName =
+        msg.video?.file_name ||
+        msg.document?.file_name ||
+        msg.caption ||
+        '';
 
     const deteccion = detectarSerie(fileName);
 
-    // Si detecta serie y episodio → automático
     if (deteccion.nombreKV && deteccion.episodio) {
 
         await env.PELICULAS_KV.put(
@@ -192,23 +198,19 @@ export async function onRequest(context) {
             fileId
         );
 
-        await enviar(`✅ Subido automáticamente
+        await enviar(`✅ Subido automático
 
 📺 ${deteccion.nombreKV}
-📀 Temporada ${deteccion.temporada}
-🎬 Capítulo ${deteccion.episodio}`);
+📀 T${deteccion.temporada}E${deteccion.episodio}`);
 
         return new Response('OK');
     }
 
-    // Si NO detecta → comportamiento viejo (manual)
-    await env.PELICULAS_KV.put('temp:file_id', fileId, { expirationTtl: 300 });
+    // fallback manual
+    await enviar(`❌ No detectado
 
-    await enviar(`❌ No pude detectar la serie.
-
-Ahora usá:
-/asignar serie nombre temp ep
-/asignar pelicula nombre parte`);
+Usá:
+/asignar serie nombre temp ep`);
 
     return new Response('OK');
 }
