@@ -49,43 +49,41 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
-    // ─── VIDEO EN EL CANAL ──────────────────────────────────────────────────────
+        // ─── VIDEO EN EL CANAL ──────────────────────────────────────────────────────
     const channelPost = update?.channel_post;
     if (channelPost && (channelPost.video || channelPost.document)) {
         const fileId   = channelPost.video?.file_id || channelPost.document?.file_id;
         const fileName = channelPost.video?.file_name || channelPost.document?.file_name || 'video';
         const msgId    = channelPost.message_id;
 
-        const colaKey = `cola:${msgId}`;
-        await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 });
-
         const nombreCorto = fileName.length > 80 ? fileName.slice(0, 80) + '...' : fileName;
         const deteccion = detectarSerie(fileName);
 
         let texto = `📹 *Video nuevo detectado!* (ID: ${msgId})\n📁 ${nombreCorto}\n\n`;
 
-        // Si pudimos detectar serie y episodio, mostrar botones de confirmación
+        // SI DETECTA LA SERIE Y EL EPISODIO, SE GUARDA EN AUTOMÁTICO SIN PREGUNTAR 🚀
         if (deteccion.nombreKV && deteccion.episodio) {
-            texto += `🔎 Detecté:\n👉 *${deteccion.nombreKV}* T${deteccion.temporada}E${deteccion.episodio}\n\nConfirmá o corregí abajo:`;
+            // Guardar directo en la base de datos KV definitiva
+            await env.PELICULAS_KV.put(`video:${deteccion.nombreKV}:${deteccion.temporada}:${deteccion.episodio}`, fileId);
 
+            texto += `🚀 *¡Guardado Automáticamente!*\n📂 Serie: *${deteccion.nombreKV}*\n🎬 Temporada: ${deteccion.temporada} | Episodio: ${deteccion.episodio}`;
+
+            // Te avisa al privado que ya lo guardó solo
             await fetch(`${BOT_API}/sendMessage`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: ADMIN_ID,
                     text: texto,
-                    parse_mode: 'Markdown',
-                    reply_markup: {
-                        inline_keyboard: [[
-                            { text: '✅ Confirmar', callback_data: `conf:${msgId}:${deteccion.nombreKV}:${deteccion.temporada}:${deteccion.episodio}` },
-                            { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
-                        ]]
-                    }
+                    parse_mode: 'Markdown'
                 })
             });
         } else {
-            // No se pudo detectar, pedir comando manual
-            texto += `Asignalo con:\n\`/asignar serie nombre temp ep ${msgId}\`\n\`/asignar pelicula nombre parte ${msgId}\`\n\nO si es el único pendiente:\n\`/asignar serie nombre temp ep\`\n\`/asignar pelicula nombre parte\``;
+            // Si NO se pudo detectar, se guarda en la cola temporal y te pide comando manual como antes
+            const colaKey = `cola:${msgId}`;
+            await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 });
+
+            texto += `⚠️ *No pude reconocer la serie.*\n\nAsignalo con:\n\`/asignar serie nombre temp ep ${msgId}\`\n\`/asignar pelicula nombre parte ${msgId}\``;
 
             await fetch(`${BOT_API}/sendMessage`, {
                 method: 'POST',
@@ -95,6 +93,7 @@ export async function onRequest(context) {
         }
         return new Response('OK');
     }
+
 
     // ─── BOTONES (callback_query) ───────────────────────────────────────────────
     const callback = update?.callback_query;
