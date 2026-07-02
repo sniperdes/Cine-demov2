@@ -14,78 +14,79 @@ export async function onRequest(context) {
         return new Response(null, { headers: corsHeaders });
     }
 
-    // =========================================================================
-    // GUARDADO AUTOMÁTICO INTELIGENTE (MÉTODO POST)
-    // =========================================================================
-    if (request.method === 'POST') {
-        try {
-            const data = await request.json();
-            const { title, type } = data; // Recibe el título largo de tu PC
+    
+// =========================================================================
+// BLOQUE POST: GUARDADO AUTOMÁTICO DESDE TU PC (.BAT + PYTHON)
+// =========================================================================
+if (request.method === 'POST') {
+    try {
+        const data = await request.json();
+        const { title, type } = data; 
 
-            if (!title) {
-                return new Response(JSON.stringify({ error: 'Falta el titulo' }), { status: 400, headers: corsHeaders });
-            }
-
-            let textoLimpio = title.toLowerCase();
-            let nombreSerie = "serie_desconocida";
-            let temporada = "1";
-            let episodic = "1";
-
-            // 1. EXTRAER EL ID MEDIANTE TU BASE DE DATOS DE ALIAS
-            // Definimos tu lista de series exactamente como la tienes en tu .js
-            const baseDeDatosTurcas = [
-                { nombreKV:'kiralik-ask', alias:['te alquilo mi amor','amor en alquiler','kiralik ask'] },
-                { nombreKV:'erkenci-kus', alias:['erkenci kus','pajaro soñador'] },
-                { nombreKV:'sen-cal-kapimi', alias:['sen cal kapimi','love is in the air'] }
-                // Cuando agregues series nuevas en tu web, solo pon el nombreKV y sus alias aquí
-            ];
-
-            // El sistema busca solo si el título del video coincide con algún alias
-            for (const serie of baseDeDatosTurcas) {
-                const coincide = serie.alias.some(a => textoLimpio.includes(a));
-                if (coincide) {
-                    nombreSerie = serie.nombreKV; // Asigna automáticamente 'kiralik-ask'
-                    break;
-                }
-            }
-
-            // Si no encontró ningún alias, usa el título limpio como respaldo
-            if (nombreSerie === "serie_desconocida") {
-                nombreSerie = title.split('-')[0].trim().toLowerCase().replace(/\s+/g, '-');
-            }
-
-            // 2. EXTRAER TEMPORADA Y CAPÍTULO DEL TEXTO DEL .BAT
-            if (title.includes('-')) {
-                const regexEp = /(?:Capítulo|Capitulo|Cap|Episodio|Ep)\s*(\d+)/i;
-                const matchEp = title.match(regexEp);
-                if (matchEp) episodic = matchEp[1];
-
-                const regexTemp = /(?:Temporada|Temp|T)\s*(\d+)/i;
-                const matchTemp = title.match(regexTemp);
-                if (matchTemp) temporada = matchTemp[1];
-            }
-
-            // 3. ARMAR LA CLAVE PARA EL KV DE CLOUDFLARE
-            let kvKey = `video:${nombreSerie}:${temporada}:${episodic}`;
-            if (type === 'peliculas') {
-                kvKey = `video:${nombreSerie}:pelicula:1`;
-            }
-
-            // 4. GUARDAR EN TU TABLA PELICULAS_KV
-            const datosGuardar = JSON.stringify({
-                title: title,
-                status: "disponible",
-                date: new Date().toISOString()
-            });
-
-            await env.PELICULAS_KV.put(kvKey, datosGuardar);
-
-            return new Response(JSON.stringify({ success: true, guardado_en: kvKey }), { status: 201, headers: corsHeaders });
-
-        } catch (err) {
-            return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
+        if (!title) {
+            return new Response(JSON.stringify({ error: 'Falta el titulo' }), { status: 400, headers: corsHeaders });
         }
+
+        let textoLimpio = title.toLowerCase();
+        let nombreSerie = "";
+        let temporada = "1";
+        let episodio = "1";
+
+        // 1. DICCIONARIO DE ID REALES (Aquí conectamos tu .bat con tus archivos .js)
+        // Buscamos si el título de YouTube contiene alguno de tus alias conocidos
+        if (textoLimpio.includes("alquilo mi amor") || textoLimpio.includes("kiralik") || textoLimpio.includes("ask")) {
+            nombreSerie = "kiralik-ask"; // ID exacto de tu data-turcas.js y de tu KV
+        } else if (textoLimpio.includes("erkenci") || textoLimpio.includes("soñador")) {
+            nombreSerie = "erkenci-kus";
+        } else if (textoLimpio.includes("kapimi") || textoLimpio.includes("air")) {
+            nombreSerie = "sen-cal-kapimi";
+        } else {
+            // Si es una serie nueva que no está en la lista, limpia el nombre con guiones medios
+            nombreSerie = textoLimpio.split('-')[0].trim().replace(/\s+/g, '-');
+        }
+
+        // 2. EXTRAER EL NÚMERO DE CAPÍTULO (Busca números después de "Capítulo", "Cap" o "Ep")
+        const regexEp = /(?:capítulo|capitulo|cap|ep|episodio)\s*(\d+)/i;
+        const matchEp = textoLimpio.match(regexEp);
+        if (matchEp) {
+            episodio = matchEp[1];
+        } else {
+            // Si no encuentra la palabra "Capítulo", busca el primer número suelto que vea en el título
+            const regexNumeroSuelto = /\b(\d+)\b/;
+            const matchSuelto = textoLimpio.match(regexNumeroSuelto);
+            if (matchSuelto) episodio = matchSuelto[1];
+        }
+
+        // 3. EXTRAER TEMPORADA (Si el título dice "T2" o "Temporada 2", por defecto es 1)
+        const regexTemp = /(?:temporada|temp|t)\s*(\d+)/i;
+        const matchTemp = textoLimpio.match(regexTemp);
+        if (matchTemp) temporada = matchTemp[1];
+
+        // 4. ARMAR LA CLAVE MAESTRA QUE TU APP LEE
+        // Formato exacto: video:kiralik-ask:1:34
+        let kvKey = `video:${nombreSerie}:${temporada}:${episodio}`;
+        
+        if (type === 'peliculas') {
+            kvKey = `video:${nombreSerie}:pelicula:1`;
+        }
+
+        // 5. GUARDAR EN EL KV (Guardamos la estructura idéntica a tus claves hist...)
+        const datosGuardar = JSON.stringify({
+            title: title,
+            status: "disponible",
+            date: new Date().toISOString()
+        });
+
+        // Guardamos físicamente el capítulo en la base de datos
+        await env.PELICULAS_KV.put(kvKey, datosGuardar);
+
+        return new Response(JSON.stringify({ success: true, guardado_en: kvKey }), { status: 201, headers: corsHeaders });
+
+    } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
     }
+}
+    
 
     // =========================================================================
     // TU LÓGICA ORIGINAL DE LECTURA (MÉTODO GET)
