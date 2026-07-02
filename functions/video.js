@@ -1,5 +1,5 @@
 // /functions/video.js
-// Maneja la lectura (GET) y el guardado automático desde el .bat (POST)
+// Cruza los datos del .bat con tu archivo data-turcas.js de forma automática
 
 export async function onRequest(context) {
     const { request, env } = context;
@@ -15,66 +15,72 @@ export async function onRequest(context) {
     }
 
     // =========================================================================
-    // LÓGICA DE GUARDADO AUTOMÁTICO (MÉTODO POST) - EJECUTADO POR TU .BAT
+    // GUARDADO AUTOMÁTICO INTELIGENTE (MÉTODO POST)
     // =========================================================================
     if (request.method === 'POST') {
         try {
             const data = await request.json();
-            const { title, type, file_id } = data; 
+            const { title, type } = data; // Recibe el título largo de tu PC
 
             if (!title) {
-                return new Response(JSON.stringify({ error: 'Falta el título' }), { status: 400, headers: corsHeaders });
+                return new Response(JSON.stringify({ error: 'Falta el titulo' }), { status: 400, headers: corsHeaders });
             }
 
-            // 1. Procesamiento automático del título
-            let nombreSerie = title.trim().toLowerCase().replace(/\s+/g, '_');
+            let textoLimpio = title.toLowerCase();
+            let nombreSerie = "serie_desconocida";
             let temporada = "1";
-            let episodio = "1";
+            let episodic = "1";
 
+            // 1. EXTRAER EL ID MEDIANTE TU BASE DE DATOS DE ALIAS
+            // Definimos tu lista de series exactamente como la tienes en tu .js
+            const baseDeDatosTurcas = [
+                { nombreKV:'kiralik-ask', alias:['te alquilo mi amor','amor en alquiler','kiralik ask'] },
+                { nombreKV:'erkenci-kus', alias:['erkenci kus','pajaro soñador'] },
+                { nombreKV:'sen-cal-kapimi', alias:['sen cal kapimi','love is in the air'] }
+                // Cuando agregues series nuevas en tu web, solo pon el nombreKV y sus alias aquí
+            ];
+
+            // El sistema busca solo si el título del video coincide con algún alias
+            for (const serie of baseDeDatosTurcas) {
+                const coincide = serie.alias.some(a => textoLimpio.includes(a));
+                if (coincide) {
+                    nombreSerie = serie.nombreKV; // Asigna automáticamente 'kiralik-ask'
+                    break;
+                }
+            }
+
+            // Si no encontró ningún alias, usa el título limpio como respaldo
+            if (nombreSerie === "serie_desconocida") {
+                nombreSerie = title.split('-')[0].trim().toLowerCase().replace(/\s+/g, '-');
+            }
+
+            // 2. EXTRAER TEMPORADA Y CAPÍTULO DEL TEXTO DEL .BAT
             if (title.includes('-')) {
-                const partes = title.split('-');
-                nombreSerie = partes[0].trim().toLowerCase().replace(/\s+/g, '_');
-                
                 const regexEp = /(?:Capítulo|Capitulo|Cap|Episodio|Ep)\s*(\d+)/i;
                 const matchEp = title.match(regexEp);
-                if (matchEp) episodio = matchEp[1];
+                if (matchEp) episodic = matchEp[1];
 
                 const regexTemp = /(?:Temporada|Temp|T)\s*(\d+)/i;
                 const matchTemp = title.match(regexTemp);
                 if (matchTemp) temporada = matchTemp[1];
             }
 
-            // 2. Definimos la KEY exacta para tu base de datos
-            let kvKey = `video:${nombreSerie}:${temporada}:${episodio}`;
+            // 3. ARMAR LA CLAVE PARA EL KV DE CLOUDFLARE
+            let kvKey = `video:${nombreSerie}:${temporada}:${episodic}`;
             if (type === 'peliculas') {
                 kvKey = `video:${nombreSerie}:pelicula:1`;
             }
 
-            // 3. Generamos la URL de streaming automática de Telegram
-            // Reemplaza 'TU_BOT_TOKEN' por el token real de tu bot de Telegram
-            const BOT_TOKEN = "TU_BOT_TOKEN_AQUÍ";
-            let urlStreaming = "";
-            
-            if (file_id) {
-                // Si el .bat logra enviarnos el file_id, generamos el enlace directo del servidor de Telegram
-                const resTelegram = await fetch(`https://telegram.org{BOT_TOKEN}/getFile?file_id=${file_id}`);
-                const dataTelegram = await resTelegram.json();
-                if (dataTelegram.ok) {
-                    urlStreaming = `https://telegram.org{BOT_TOKEN}/${dataTelegram.result.file_path}`;
-                }
-            }
-
-            // 4. Guardamos el objeto en tu KV en formato JSON plano (igual que tus claves hist...)
-            const valorGuardar = JSON.stringify({
-                titulo: title,
-                url: urlStreaming, // Este enlace alimenta directamente a tu reproductor web
-                file_id: file_id || "",
-                fecha: new Date().toLocaleDateString()
+            // 4. GUARDAR EN TU TABLA PELICULAS_KV
+            const datosGuardar = JSON.stringify({
+                title: title,
+                status: "disponible",
+                date: new Date().toISOString()
             });
 
-            await env.PELICULAS_KV.put(kvKey, valorGuardar);
+            await env.PELICULAS_KV.put(kvKey, datosGuardar);
 
-            return new Response(JSON.stringify({ success: true, key_creada: kvKey }), { status: 201, headers: corsHeaders });
+            return new Response(JSON.stringify({ success: true, guardado_en: kvKey }), { status: 201, headers: corsHeaders });
 
         } catch (err) {
             return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: corsHeaders });
@@ -82,7 +88,7 @@ export async function onRequest(context) {
     }
 
     // =========================================================================
-    // TU LÓGICA ORIGINAL DE LECTURA (MÉTODO GET) - SIN MODIFICACIONES
+    // TU LÓGICA ORIGINAL DE LECTURA (MÉTODO GET)
     // =========================================================================
     const url    = new URL(request.url);
     const nombre = url.searchParams.get('nombre');
@@ -102,14 +108,14 @@ export async function onRequest(context) {
         const temporadas = {};
         for (const k of lista.keys) {
             const partes     = k.name.split(':'); 
-            const temporada  = partes[2];
-            const episodio   = partes[3];
+            const temp       = partes[2];
+            const ep         = partes[3];
             
-            if (!temporada || !episodio) continue; 
+            if (!temp || !ep) continue; 
 
-            if (!temporadas[temporada]) temporadas[temporada] = [];
-            temporadas[temporada].push({
-                episodio: parseInt(episodio) || 0,
+            if (!temporadas[temp]) temporadas[temp] = [];
+            temporadas[temp].push({
+                episodio: parseInt(ep) || 0,
                 key: k.name
             });
         }
@@ -135,5 +141,4 @@ export async function onRequest(context) {
     }
 
     return new Response(JSON.stringify({ error: 'tipo inválido' }), { status: 400, headers: corsHeaders });
-    }
-                
+        }
