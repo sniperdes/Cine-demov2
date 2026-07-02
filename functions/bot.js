@@ -9,24 +9,30 @@ const SERIES_CONOCIDAS = {
     'kiralık aşk': 'kiralik-ask',
 };
 
-function detectarSerie(nombreArchivo) {
-    const nombreLower = nombreArchivo.toLowerCase();
+function detectarSerie(texto) {
+    // Limpiar el texto de caracteres especiales y normalizar
+    const limpio = texto
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar acentos
+        .toLowerCase()
+        .replace(/[|\[\]{}()]/g, ' ') // quitar caracteres especiales
+        .replace(/\s+/g, ' ').trim();
 
     // Buscar coincidencia de serie conocida
     let nombreKV = null;
     for (const [patron, kv] of Object.entries(SERIES_CONOCIDAS)) {
-        if (nombreLower.includes(patron)) {
+        const patronLimpio = patron.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+        if (limpio.includes(patronLimpio)) {
             nombreKV = kv;
             break;
         }
     }
 
-    // Buscar número de capítulo (Capítulo 20, Cap 20, Episodio 20, Ep20, etc)
-    const match = nombreArchivo.match(/cap[ií]tulo\s*(\d+)|cap\.?\s*(\d+)|epi?sodio\s*(\d+)|ep\.?\s*(\d+)/i);
+    // Buscar número de capítulo
+    const match = limpio.match(/cap[i]?tulo\s*(\d+)|cap\.?\s*(\d+)|episodio\s*(\d+)|ep\.?\s*(\d+)/i);
     const episodio = match ? (match[1] || match[2] || match[3] || match[4]) : null;
 
-    // Buscar temporada (Temporada 2, T2, Season 2)
-    const matchTemp = nombreArchivo.match(/temporada\s*(\d+)|season\s*(\d+)|\bt(\d+)\b/i);
+    // Buscar temporada
+    const matchTemp = limpio.match(/temporada\s*(\d+)|season\s*(\d+)|\bt(\d+)\b/i);
     const temporada = matchTemp ? (matchTemp[1] || matchTemp[2] || matchTemp[3]) : '1';
 
     return { nombreKV, episodio, temporada };
@@ -60,7 +66,9 @@ export async function onRequest(context) {
         await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 });
 
         const nombreCorto = fileName.length > 80 ? fileName.slice(0, 80) + '...' : fileName;
-        const deteccion = detectarSerie(fileName);
+        // Usar caption si existe (más descriptivo), sino el nombre del archivo
+        const textoDeteccion = caption || fileName;
+        const deteccion = detectarSerie(textoDeteccion);
 
         let texto = `📹 *Video nuevo detectado!* (ID: ${msgId})\n📁 ${nombreCorto}\n\n`;
 
