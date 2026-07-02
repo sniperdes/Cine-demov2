@@ -66,6 +66,7 @@
             { titulo:'Amor sin Escalas',         tmdbQuery:'Up in the Air 2009',        genero:'romance',  info:'⭐ 7.4 | 🎭 Romance | 🕒 109 min', desc:'Un hombre sin raíces descubre el valor de los vínculos.' },
             // AVENTURA
             { titulo:'Avatar',                   tmdbQuery:'Avatar 2009',               genero:'aventura', info:'⭐ 7.9 | 🎭 Aventura | 🕒 162 min', desc:'Explorando el planeta Pandora y sus criaturas.' },
+            { titulo:'Azul Extremo 2',           tmdbQuery:'Blue Crush 2 2011',         nombreKV:'azul-extremo-2', genero:'aventura', info:'⭐ 5.3 | 🎭 Aventura | 🕒 113 min', desc:'Una joven viaja a Sudáfrica para cumplir el sueño de surf de su madre.' },  
             { titulo:'Jurassic Park',            tmdbQuery:'Jurassic Park 1993',        genero:'aventura', info:'⭐ 8.2 | 🎭 Aventura | 🕒 127 min', desc:'Un parque donde los dinosaurios vuelven a vivir.' },
             { titulo:'Indiana Jones',            tmdbQuery:'Raiders of the Lost Ark',   genero:'aventura', info:'⭐ 8.4 | 🎭 Aventura | 🕒 115 min', desc:'En busca del arca perdida.' },
             { titulo:'Interstellar',             tmdbQuery:'Interstellar 2014',         genero:'aventura', info:'⭐ 8.6 | 🎭 Ciencia Ficción | 🕒 169 min', desc:'Un viaje espacial para salvar a la humanidad.' },
