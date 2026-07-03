@@ -64,7 +64,7 @@ export async function onRequest(context) {
 
         const nombreCorto = fileName.length > 80 ? fileName.slice(0, 80) + '...' : fileName;
         // Usar caption si existe (más descriptivo), sino el nombre del archivo
-        const textoDeteccion = caption || fileName;
+        const textoDeteccion = channelPost.caption || fileName;
         const deteccion = detectarSerie(textoDeteccion);
 
         let texto = `📹 *Video nuevo detectado!* (ID: ${msgId})\n📁 ${nombreCorto}\n\n`;
