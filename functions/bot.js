@@ -81,7 +81,7 @@ export async function onRequest(context) {
         const msgId    = channelPost.message_id;
 
         const colaKey = `cola:${msgId}`;
-        await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 });
+        await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 43200 }); // 12 horas
 
         const nombreCorto = fileName.replace(/[_*`]/g, ' ').length > 80
             ? fileName.replace(/[_*`]/g, ' ').slice(0, 80) + '...'
