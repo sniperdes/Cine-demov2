@@ -83,7 +83,9 @@ export async function onRequest(context) {
         const colaKey = `cola:${msgId}`;
         await env.PELICULAS_KV.put(colaKey, fileId, { expirationTtl: 3600 });
 
-        const nombreCorto = fileName.length > 80 ? fileName.slice(0, 80) + '...' : fileName;
+        const nombreCorto = fileName.replace(/[_*`]/g, ' ').length > 80
+            ? fileName.replace(/[_*`]/g, ' ').slice(0, 80) + '...'
+            : fileName.replace(/[_*`]/g, ' ');
         // Usar caption si existe (más descriptivo), sino el nombre del archivo
         const textoDeteccion = channelPost.caption || fileName;
         const deteccion = detectarSerie(textoDeteccion);
