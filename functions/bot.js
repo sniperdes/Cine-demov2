@@ -53,7 +53,7 @@ export async function onRequest(context) {
     }
 
     // ─── VIDEO EN EL CANAL ──────────────────────────────────────────────────────
-    const channelPost = update?.channel_post;
+    const channelPost = update?.channel_post || update?.edited_channel_post;
     if (channelPost && (channelPost.video || channelPost.document)) {
         const fileId   = channelPost.video?.file_id || channelPost.document?.file_id;
         const fileName = channelPost.video?.file_name || channelPost.document?.file_name || 'video';
