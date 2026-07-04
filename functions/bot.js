@@ -53,7 +53,7 @@ export async function onRequest(context) {
     }
 
     // ─── DEBUG TEMPORAL: manda el update crudo y cualquier error al admin ───────
-    const DEBUG = true; // poner en false cuando ya esté resuelto
+    const DEBUG = false; // ya resuelto, dejar en false
 
     const avisarAdmin = async (texto) => {
         try {
