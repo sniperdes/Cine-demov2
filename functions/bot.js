@@ -52,6 +52,27 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
+    // ─── DEBUG TEMPORAL: manda el update crudo y cualquier error al admin ───────
+    const DEBUG = true; // poner en false cuando ya esté resuelto
+
+    const avisarAdmin = async (texto) => {
+        try {
+            await fetch(`${BOT_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: ADMIN_ID, text: texto.slice(0, 3900) })
+            });
+        } catch (e) {
+            // si esto falla no podemos hacer nada más, no reventar por esto
+        }
+    };
+
+    if (DEBUG && (update?.channel_post || update?.edited_channel_post)) {
+        await avisarAdmin('🐛 DEBUG update recibido:\n' + JSON.stringify(update, null, 1));
+    }
+
+    try {
+
     // ─── VIDEO EN EL CANAL ──────────────────────────────────────────────────────
     const channelPost = update?.channel_post || update?.edited_channel_post;
     if (channelPost && (channelPost.video || channelPost.document)) {
@@ -283,4 +304,9 @@ export async function onRequest(context) {
 
     await enviar('❓ Comando no reconocido. Escribí /start');
     return new Response('OK');
+
+    } catch (error) {
+        await avisarAdmin('❌ ERROR en bot.js:\n' + (error?.stack || error?.message || String(error)));
+        return new Response('OK'); // devolvemos OK para que Telegram no reintente en loop
+    }
 }
