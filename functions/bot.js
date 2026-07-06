@@ -40,6 +40,73 @@ const SERIES_CONOCIDAS = {
     'i̇çerde': 'icerde',
 };
 
+// TMDB (misma key que usa poster.js)
+const TMDB_KEY = 'acd65342b986ff7dad902ea7412fc003';
+
+// Saca un título aproximado del texto, quitando temporada/episodio/códigos
+function extraerTituloGuess(texto) {
+    let t = texto
+        .replace(/\.(mp4|mkv|avi)$/i, '')
+        .replace(/\[[^\]]*\]/g, ' ')
+        .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
+    return t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
+async function buscarSugerenciaTMDB(tituloGuess) {
+    if (!tituloGuess || tituloGuess.length < 2) return null;
+
+    const buscar = async (tipo) => {
+        const endpoint = tipo === 'tv' ? 'search/tv' : 'search/movie';
+        try {
+            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&query=${encodeURIComponent(tituloGuess)}`);
+            const data = await res.json();
+            return data?.results?.[0] || null;
+        } catch { return null; }
+    };
+
+    let resultado = await buscar('tv');
+    let tipo = 'tv';
+    if (!resultado) { resultado = await buscar('movie'); tipo = 'movie'; }
+    if (!resultado) return null;
+
+    const titulo = resultado.title || resultado.name || tituloGuess;
+    const fecha  = resultado.release_date || resultado.first_air_date || '';
+    const anio   = fecha ? fecha.slice(0, 4) : '';
+    const overview = (resultado.overview || 'Sin sinopsis disponible.').slice(0, 160);
+    const idioma = resultado.original_language || '';
+    const esAnimacion = (resultado.genre_ids || []).includes(16);
+    const nombreKVsugerido = tituloGuess.toLowerCase()
+        .replace(/[^a-z0-9áéíóúñü ]/gi, '')
+        .replace(/\s+/g, '-');
+
+    // Heurística de categoría según idioma original y si es serie o película
+    let archivoSugerido, generoSugerido;
+    if (idioma === 'tr') {
+        archivoSugerido = 'data-turcas.js';
+        generoSugerido = 'turca-drama (o turca-romance/turca-accion, ajustá)';
+    } else if (idioma === 'ru') {
+        archivoSugerido = 'data-rusas.js';
+        generoSugerido = 'rusa-drama (o rusa-accion/rusa-thriller, ajustá)';
+    } else if (idioma === 'ja' && esAnimacion) {
+        archivoSugerido = 'data-anime.js';
+        generoSugerido = '(anime no usa género, revisá el formato de data-anime.js)';
+    } else if (idioma === 'ko' || (idioma === 'ja' && tipo === 'tv')) {
+        archivoSugerido = 'data-doramas.js';
+        generoSugerido = 'dorama-drama (o dorama-romance/dorama-accion, ajustá)';
+    } else if (tipo === 'tv') {
+        archivoSugerido = 'data-series.js';
+        generoSugerido = 'drama (o comedia/accion-serie, ajustá)';
+    } else {
+        archivoSugerido = 'data-peliculas.js';
+        generoSugerido = 'accion (o terror/romance/aventura, ajustá)';
+    }
+
+    const bloque = `{ titulo:'${titulo}', tmdbQuery:'${titulo} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
+
+    return `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)`;
+}
+
 function detectarSerie(texto) {
     try {
         const limpio = texto.toLowerCase()
@@ -57,8 +124,28 @@ function detectarSerie(texto) {
         const match = limpio.match(/cap[ií]tulo\s*(\d+)|capitulo\s*(\d+)|cap\.?\s*(\d+)|episodio\s*(\d+)|ep\.?\s*(\d+)/i);
         const episodio = match ? (match[1] || match[2] || match[3] || match[4] || match[5]) : null;
 
+        const ORDINALES = {
+            'primera': 1, 'segunda': 2, 'tercera': 3, 'cuarta': 4, 'quinta': 5,
+            'sexta': 6, 'séptima': 7, 'septima': 7, 'octava': 8, 'novena': 9, 'décima': 10, 'decima': 10
+        };
+        const CARDINALES = {
+            'uno': 1, 'una': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5,
+            'seis': 6, 'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10
+        };
+
+        let temporada = '1';
         const matchTemp = limpio.match(/temporada\s*(\d+)|season\s*(\d+)/i);
-        const temporada = matchTemp ? (matchTemp[1] || matchTemp[2]) : '1';
+        if (matchTemp) {
+            temporada = matchTemp[1] || matchTemp[2];
+        } else {
+            const matchOrdinal = limpio.match(/(primera|segunda|tercera|cuarta|quinta|sexta|séptima|septima|octava|novena|décima|decima)\s*temporada/i);
+            const matchCardinal = limpio.match(/temporada\s*(uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/i);
+            if (matchOrdinal) {
+                temporada = String(ORDINALES[matchOrdinal[1].toLowerCase()] || 1);
+            } else if (matchCardinal) {
+                temporada = String(CARDINALES[matchCardinal[1].toLowerCase()] || 1);
+            }
+        }
 
         return { nombreKV, episodio, temporada };
     } catch(e) {
@@ -151,6 +238,21 @@ export async function onRequest(context) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: ADMIN_ID, text: texto, parse_mode: 'Markdown' })
             });
+
+            // Intentar sugerir el título vía TMDB, sin bloquear el flujo si falla
+            try {
+                const tituloGuess = extraerTituloGuess(channelPost.caption || fileName);
+                const sugerencia = await buscarSugerenciaTMDB(tituloGuess);
+                if (sugerencia) {
+                    await fetch(`${BOT_API}/sendMessage`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ chat_id: ADMIN_ID, text: sugerencia })
+                    });
+                }
+            } catch (e) {
+                // no rompemos el flujo si TMDB falla
+            }
         }
         return new Response('OK');
     }
