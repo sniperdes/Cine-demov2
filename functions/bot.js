@@ -9,6 +9,7 @@ const SERIES_CONOCIDAS = {
     'kiralık aşk': 'kiralik-ask',
     'erkenci kus': 'erkenci-kus',
     'erkenci kuş': 'erkenci-kus',
+    'llamas a mi puerta':
     'sen cal kapimi': 'sen-cal-kapimi',
     'sen çal kapımı': 'sen-cal-kapimi',
     'medcezir': 'medcezir',
