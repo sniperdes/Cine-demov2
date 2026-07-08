@@ -9,7 +9,6 @@ const SERIES_CONOCIDAS = {
     'kiralık aşk': 'kiralik-ask',
     'erkenci kus': 'erkenci-kus',
     'erkenci kuş': 'erkenci-kus',
-    'llamas a mi puerta':
     'sen cal kapimi': 'sen-cal-kapimi',
     'sen çal kapımı': 'sen-cal-kapimi',
     'medcezir': 'medcezir',
@@ -50,7 +49,12 @@ function extraerTituloGuess(texto) {
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
-    return t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
+    t = t.replace(/^(ver|pelicula|película|película completa|pelicula completa)\s+/i, '');
+    // Quitar códigos numéricos largos sueltos (IDs de video, no parte del título)
+    t = t.replace(/\b\d{5,}\b/g, ' ').replace(/\s+/g, ' ').trim();
+    return t;
 }
 
 // Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
