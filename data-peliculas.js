@@ -26,7 +26,7 @@
            //ciencia-ficcion
                 
            // TERROR
-            { titulo:'ABC Nunca Mas',            tmdbQuery:'ABC Nunca Mas 2013',        nombreKV:'abc-nunca-mas', genero:'terror/documental', info:'⭐ 7.5 | 📺', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
+            
             { titulo:'IT (Eso)',                 tmdbQuery:'It 2017',                   genero:'terror',   info:'⭐ 7.9 | 🎭 Terror | 🕒 135 min', desc:'El payaso maldito que acecha a los niños de Derry.' },
             { titulo:'El Conjuro',               tmdbQuery:'The Conjuring 2013',        genero:'terror',   info:'⭐ 7.5 | 🎭 Terror | 🕒 112 min', desc:'Investigación paranormal en una granja.' },
             { titulo:'Actividad Paranormal',     tmdbQuery:'Paranormal Activity 2007',  genero:'terror',   info:'⭐ 6.3 | 🎭 Terror | 🕒 86 min',  desc:'Cámaras caseras capturan algo aterrador.' },
@@ -47,6 +47,8 @@
             { titulo:'Halloween',                tmdbQuery:'Halloween 1978',            genero:'terror',   info:'⭐ 7.7 | 🎭 Terror | 🕒 91 min',  desc:'Michael Myers regresa en la noche de brujas.' },
             { titulo:'Viernes 13',               tmdbQuery:'Friday the 13th 1980',      genero:'terror',   info:'⭐ 6.4 | 🎭 Terror | 🕒 95 min',  desc:'Un campamento de verano se convierte en pesadilla.' },
             { titulo:'La Momia',                 tmdbQuery:'The Mummy 1999',            genero:'terror',   info:'⭐ 6.5 | 🎭 Terror | 🕒 110 min', desc:'Una maldición milenaria despertada en el desierto.' },
+            { titulo:'ABC Nunca Mas',            tmdbQuery:'ABC Nunca Mas 2013',        nombreKV:'abc-nunca-mas', genero:'terror/documental', info:'⭐ 7.5 | 📺', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
+            
             // ROMANCE
             { titulo:'Titanic',                  tmdbQuery:'Titanic 1997',              genero:'romance',  info:'⭐ 7.9 | 🎭 Romance | 🕒 194 min', desc:'Un amor imposible a bordo del barco más famoso.' },
             { titulo:'Diario de una Pasión',     tmdbQuery:'The Notebook 2004',         genero:'romance',  info:'⭐ 7.8 | 🎭 Romance | 🕒 123 min', desc:'La historia de Allie y Noah a través del tiempo.' },
