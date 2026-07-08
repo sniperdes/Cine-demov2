@@ -48,7 +48,7 @@
             { titulo:'Halloween',                tmdbQuery:'Halloween 1978',            genero:'terror',   info:'⭐ 7.7 | 🎭 Terror | 🕒 91 min',  desc:'Michael Myers regresa en la noche de brujas.' },
             { titulo:'Viernes 13',               tmdbQuery:'Friday the 13th 1980',      genero:'terror',   info:'⭐ 6.4 | 🎭 Terror | 🕒 95 min',  desc:'Un campamento de verano se convierte en pesadilla.' },
             { titulo:'La Momia',                 tmdbQuery:'The Mummy 1999',            genero:'terror',   info:'⭐ 6.5 | 🎭 Terror | 🕒 110 min', desc:'Una maldición milenaria despertada en el desierto.' },
-            { titulo:'ABC Nunca Mas',            tmdbQuery:'ABC Nunca Mas 2013',        nombreKV:'abc-nunca-mas', genero:'terror/documental', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
+            { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'terror/documental', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
             
             // ROMANCE
             { titulo:'Titanic',                  tmdbQuery:'Titanic 1997',              genero:'romance',  info:'⭐ 7.9 | 🎭 Romance | 🕒 194 min', desc:'Un amor imposible a bordo del barco más famoso.' },
