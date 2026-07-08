@@ -26,7 +26,7 @@
            //ciencia-ficcion
                 
            // TERROR
-            { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más 2013',        nombreKV:'abc-nunca-más', genero:'terror , documental', info:'⭐ 7.5 | 📺', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that' },
+            { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más 2013',        nombreKV:'abc-nunca-más', genero:'terror/documental', info:'⭐ 7.5 | 📺', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that' },
             { titulo:'IT (Eso)',                 tmdbQuery:'It 2017',                   genero:'terror',   info:'⭐ 7.9 | 🎭 Terror | 🕒 135 min', desc:'El payaso maldito que acecha a los niños de Derry.' },
             { titulo:'El Conjuro',               tmdbQuery:'The Conjuring 2013',        genero:'terror',   info:'⭐ 7.5 | 🎭 Terror | 🕒 112 min', desc:'Investigación paranormal en una granja.' },
             { titulo:'Actividad Paranormal',     tmdbQuery:'Paranormal Activity 2007',  genero:'terror',   info:'⭐ 6.3 | 🎭 Terror | 🕒 86 min',  desc:'Cámaras caseras capturan algo aterrador.' },
