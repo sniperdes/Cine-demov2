@@ -22,7 +22,7 @@
             { titulo:'Skyfall',                  tmdbQuery:'Skyfall 2012',              genero:'accion',   info:'⭐ 7.8 | 🎭 Acción | 🕒 143 min', desc:'James Bond enfrenta a su enemigo más personal.' },
             { titulo:'The Avengers',             tmdbQuery:'The Avengers 2012',         genero:'accion',   info:'⭐ 8.0 | 🎭 Acción | 🕒 143 min', desc:'Los héroes más poderosos unidos.' },
             { titulo:'Ip Man',                   tmdbQuery:'Ip Man 2008',               genero:'accion',   info:'⭐ 8.0 | 🎭 Artes Marciales | 🕒 106 min', desc:'El gran maestro del Wing Chun.' },
-            { titulo:'Equipaje De Mano',         tmdbQuery:'Carry-On 2024',      nombreKV:'equipaje de mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
+            { titulo:'Equipaje De Mano',         tmdbQuery:'equipaje de mano 2024',      nombreKV:'equipaje de mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
             // TERROR
             { titulo:'IT (Eso)',                 tmdbQuery:'It 2017',                   genero:'terror',   info:'⭐ 7.9 | 🎭 Terror | 🕒 135 min', desc:'El payaso maldito que acecha a los niños de Derry.' },
             { titulo:'El Conjuro',               tmdbQuery:'The Conjuring 2013',        genero:'terror',   info:'⭐ 7.5 | 🎭 Terror | 🕒 112 min', desc:'Investigación paranormal en una granja.' },
