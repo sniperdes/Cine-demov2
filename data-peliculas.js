@@ -23,6 +23,7 @@
             { titulo:'The Avengers',             tmdbQuery:'The Avengers 2012',         genero:'accion',   info:'⭐ 8.0 | 🎭 Acción | 🕒 143 min', desc:'Los héroes más poderosos unidos.' },
             { titulo:'Ip Man',                   tmdbQuery:'Ip Man 2008',               genero:'accion',   info:'⭐ 8.0 | 🎭 Artes Marciales | 🕒 106 min', desc:'El gran maestro del Wing Chun.' },
             { titulo:'Equipaje De Mano',         tmdbQuery:'equipaje de mano 2024',     nombreKV:'equipaje-de-mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
+           
            //ciencia-ficcion
                 
            // TERROR
