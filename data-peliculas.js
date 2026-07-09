@@ -28,6 +28,9 @@
             //ciencia-ficcion
                 
             { titulo:'Catastrofe helada',        tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'ciencia-ficcion', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
+      
+           //comedia   
+
                 
            //suspenso  
    
