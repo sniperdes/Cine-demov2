@@ -205,6 +205,10 @@
             <div class="genero-header"><h3>🎥 Documental</h3></div>
             <div class="row" id="slider-documental"></div>
         </div>
+        <div id="seccion-comedia-pelicula" class="genero-seccion">
+            <div class="genero-header"><h3>😂 Comedia</h3></div>
+            <div class="row" id="slider-comedia-pelicula"></div>
+        </div>
         <div id="seccion-terror" class="genero-seccion">
             <div class="genero-header"><h3>👻 Terror</h3></div>
             <div class="row" id="slider-terror"></div>
@@ -238,6 +242,11 @@
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
         <div class="title">🎥 Todos los Documentales</div>
         <div class="grid-genero" id="contenedor-documental"></div>
+    </div>
+    <div id="comedia-pelicula" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
+        <div class="title">😂 Todas las de Comedia</div>
+        <div class="grid-genero" id="contenedor-comedia-pelicula"></div>
     </div>
     <div id="terror" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
@@ -645,7 +654,7 @@
         const SLIDER_MAX = 8; // máximo en el slider
 
         async function cargarCatalogo() {
-            const generos = ['accion', 'ciencia-ficcion', 'suspenso', 'documental', 'terror', 'romance', 'aventura'];
+            const generos = ['accion', 'ciencia-ficcion', 'suspenso', 'documental', 'comedia-pelicula', 'terror', 'romance', 'aventura'];
 
             for (const genero of generos) {
                 const slider    = document.getElementById(`slider-${genero}`);
