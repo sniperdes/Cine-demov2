@@ -27,6 +27,8 @@
             
                 
             // TERROR
+            { titulo:'The Grudge',                tmdbQuery:'The Grudge',                 nombreKV:'el-grito', genero:'terror', info:'⭐ 5.9| 📺1h 32min', desc:'La aparente normalidad de la fachada de una modesta casa de Tokio oculta el horror que se encuentra en su interior. La vivienda está poseída por una violenta plaga que destruye las vidas de todos los que entran en ella.' },
+
             { titulo:'The Haunting in Connecticut',        tmdbQuery:'The Haunting in Connecticut',      nombreKV:'extrañas-apariciones', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Tras recibir la noticia de que su hijo adolescente, Matt, tiene cáncer, Sarah y Peter Campbell deciden trasladar a toda la familia cerca de la clínica dónde Matt está siendo tratado. El lugar elegido es una imponente casa de estilo victoriano que oculta un oscuro pasado como antigua funeraria en la que sucedieron terribles acontecimientos. La familia empieza a presenciar violentos y extraños fenómenos que, al principio, asocian con el estrés provocado por la enfermedad. Pronto se darán cuenta de que se enfrentan a oscuras y terroríficas fuerzas de origen sobrenatural.' },
 
             { titulo:'no te muevas 2024',        tmdbQuery:'No Te Muevas 2024',      nombreKV:'no-te-muevas', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Una mujer destrozada topa en un bosque apartado con un asesino que le inyecta una droga paralizante. Mientras su cuerpo sucumbe, empieza su lucha por sobrevivir.' },
