@@ -59,7 +59,26 @@ function extraerTituloGuess(texto) {
 }
 
 // Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
-async function buscarSugerenciaTMDB(tituloGuess, textoOriginal) {
+// Mapea los genre_ids de TMDB a los géneros válidos de tu catálogo de películas
+function generoTMDBaGeneroApp(genreIds) {
+    const mapa = [
+        [878, 'ciencia-ficcion'],
+        [53, 'suspenso'],
+        [9648, 'suspenso'],
+        [99, 'documental'],
+        [35, 'comedia-pelicula'],
+        [27, 'terror'],
+        [10749, 'romance'],
+        [12, 'aventura'],
+        [28, 'accion'],
+    ];
+    for (const [id, genero] of mapa) {
+        if ((genreIds || []).includes(id)) return genero;
+    }
+    return 'accion'; // default si no coincide con ninguno
+}
+
+async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     if (!tituloGuess || tituloGuess.length < 2) return null;
 
     // Si el texto original trae un año (2019, 2024, etc.), lo usamos para afinar la búsqueda
@@ -107,26 +126,58 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal) {
         .replace(/[^a-z0-9áéíóúñü ]/gi, '')
         .replace(/\s+/g, '-');
 
-    // Heurística de categoría según idioma original y si es serie o película
+    const esTurca = idioma === 'tr';
+    const esRusa  = idioma === 'ru';
+    const esAnime = idioma === 'ja' && esAnimacion;
+    const esDorama = idioma === 'ko' || (idioma === 'ja' && tipo === 'tv');
+    const esPeliculaNormal = tipo === 'movie' && !esTurca && !esRusa && !esAnime && !esDorama;
+
+    // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
+    if (esPeliculaNormal && env) {
+        const generoFinal = generoTMDBaGeneroApp(resultado.genre_ids);
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+            const catalogo = raw ? JSON.parse(raw) : [];
+
+            const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
+            if (yaExiste) {
+                return `🎬 "${titulo}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`;
+            }
+
+            catalogo.push({
+                titulo,
+                tmdbQuery: `${titulo} ${anio}`,
+                nombreKV: nombreKVsugerido,
+                genero: generoFinal,
+                info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 🎬`,
+                desc: overview,
+            });
+
+            await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
+
+            return `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Género: ${generoFinal}\n🔑 nombreKV: ${nombreKVsugerido}\n\nYa la podés asignar con:\n/asignar pelicula ${nombreKVsugerido} 1`;
+        } catch (e) {
+            // Si falla el guardado automático, caemos al mensaje de copiar/pegar de siempre
+        }
+    }
+
+    // Para el resto (series, turcas, rusas, anime, doramas) seguimos con el bloque para copiar/pegar
     let archivoSugerido, generoSugerido;
-    if (idioma === 'tr') {
+    if (esTurca) {
         archivoSugerido = 'data-turcas.js';
         generoSugerido = 'turca-drama (o turca-romance/turca-accion, ajustá)';
-    } else if (idioma === 'ru') {
+    } else if (esRusa) {
         archivoSugerido = 'data-rusas.js';
         generoSugerido = 'rusa-drama (o rusa-accion/rusa-thriller, ajustá)';
-    } else if (idioma === 'ja' && esAnimacion) {
+    } else if (esAnime) {
         archivoSugerido = 'data-anime.js';
         generoSugerido = '(anime no usa género, revisá el formato de data-anime.js)';
-    } else if (idioma === 'ko' || (idioma === 'ja' && tipo === 'tv')) {
+    } else if (esDorama) {
         archivoSugerido = 'data-doramas.js';
         generoSugerido = 'dorama-drama (o dorama-romance/dorama-accion, ajustá)';
-    } else if (tipo === 'tv') {
+    } else {
         archivoSugerido = 'data-series.js';
         generoSugerido = 'drama (o comedia/accion-serie, ajustá)';
-    } else {
-        archivoSugerido = 'data-peliculas.js';
-        generoSugerido = 'accion (o terror/romance/aventura, ajustá)';
     }
 
     const bloque = `{ titulo:'${titulo}', tmdbQuery:'${titulo} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
@@ -270,7 +321,7 @@ export async function onRequest(context) {
             try {
                 const textoOriginal = channelPost.caption || fileName;
                 const tituloGuess = extraerTituloGuess(textoOriginal);
-                const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal);
+                const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal, env);
                 if (sugerencia) {
                     await fetch(`${BOT_API}/sendMessage`, {
                         method: 'POST',
