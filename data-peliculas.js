@@ -5,6 +5,8 @@
             { titulo:'John Wick',               tmdbQuery:'John Wick 2014',            nombreKV:'john-wick', genero:'accion',   info:'⭐ 8.5 | 🎭 Acción | 🕒 101 min', desc:'Un asesino legendario vuelve del retiro para buscar venganza.' },
             { titulo:'Equipaje De Mano',         tmdbQuery:'equipaje de mano 2024',     nombreKV:'equipaje-de-mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
             { titulo:'Catastrofe helada',        tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'accion', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
+            { titulo:'hawai en llamas',          tmdbQuery:'hawai en llamas',               nombreKV:'hawai-en-llamas', genero:'accion', info:'⭐ 5.6| 📺1h 26min', desc:'Cuando un supervolcán amenaza la isla de Hawái, un equipo de expertos debe correr contrarreloj para salvar a quienes se encuentran en el camino de la lava fundida y detenerla para siempre.' },
+
                 
             //ciencia-ficcion
                 
