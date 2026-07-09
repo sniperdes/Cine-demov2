@@ -27,7 +27,8 @@
             
                 
             // TERROR
-            
+            { titulo:'The Haunting in Connecticut',        tmdbQuery:'The Haunting in Connecticut',      nombreKV:'extrañas-apariciones', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Tras recibir la noticia de que su hijo adolescente, Matt, tiene cáncer, Sarah y Peter Campbell deciden trasladar a toda la familia cerca de la clínica dónde Matt está siendo tratado. El lugar elegido es una imponente casa de estilo victoriano que oculta un oscuro pasado como antigua funeraria en la que sucedieron terribles acontecimientos. La familia empieza a presenciar violentos y extraños fenómenos que, al principio, asocian con el estrés provocado por la enfermedad. Pronto se darán cuenta de que se enfrentan a oscuras y terroríficas fuerzas de origen sobrenatural.' },
+
             { titulo:'no te muevas 2024',        tmdbQuery:'No Te Muevas 2024',      nombreKV:'no-te-muevas', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Una mujer destrozada topa en un bosque apartado con un asesino que le inyecta una droga paralizante. Mientras su cuerpo sucumbe, empieza su lucha por sobrevivir.' },
 
             { titulo:'alucinaciones',            tmdbQuery:'alucinaciones 2018',    nombreKV:'alucinaciones', genero:'terror', info:'⭐ 5.7| 📺1h 24min', desc:'Un hombre recientemente liberado de un instituto mental hereda una mansión después de que sus padres mueren. Después de una serie de eventos perturbadores, llega a creer que está embrujado.' },
