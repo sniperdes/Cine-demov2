@@ -654,6 +654,20 @@
         const SLIDER_MAX = 8; // máximo en el slider
 
         async function cargarCatalogo() {
+            // Combina el catálogo fijo (data-peliculas.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=peliculas');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosPeliculas.map(p => p.nombreKV));
+                    for (const peli of dinamico) {
+                        if (!nombresExistentes.has(peli.nombreKV)) {
+                            baseDeDatosPeliculas.push(peli);
+                        }
+                    }
+                }
+            } catch {}
+
             const generos = ['accion', 'ciencia-ficcion', 'suspenso', 'documental', 'comedia-pelicula', 'terror', 'romance', 'aventura'];
 
             for (const genero of generos) {
