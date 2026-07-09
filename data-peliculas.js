@@ -33,7 +33,8 @@
    
            { titulo:'La torre del infierno',     tmdbQuery:'La Tour (Lockdown Tower) 2023', nombreKV:'la-torre-del-infierno', genero:'suspenso', info:'⭐ 6.0 | 🕐1h 30min', desc:'Los habitantes de un bloque de pisos se despiertan una mañana con un niebla opaca que envuelve todo el edificio, obstruyendo puertas y ventanas y que devora a todo aquel que la traspase. Atrapados, intentarán organizarse por si mismos, pero a medida que pase el tiempo, el instinto de supervivencia sacará a relucir sus instintos más primarios.' },
            { titulo:'Alerta Amber',              tmdbQuery:'Alerta amber 2024',        nombreKV:'alerta-amber', genero:'suspenso',      info:'⭐ 6.7 | 🕐1h 30min', desc:'Un conductor de viajes compartidos se ve involuntariamente atrapado en un juego peligroso cuando su vehículo coincide con una alerta AMBER, llevando a una persecución de alto riesgo.' },    
-       
+           { titulo:'El exorcismo de Eastfield', tmdbQuery:'El exorcismo de Eastfield 2023', nombreKV:'el-exorcismo-de-eastfield', genero:'suspenso', info:'⭐ 6.6 | 📺1h 31min', desc:'Lara es una mujer atormentada, dividida entre la ciencia y la fe. Empujada por su marido a buscar tratamiento de una congregación de fanáticos, una exorcista de.' },
+                
            //documental 
 
                 
@@ -60,7 +61,8 @@
             { titulo:'Viernes 13',               tmdbQuery:'Friday the 13th 1980',      genero:'terror',   info:'⭐ 6.4 | 🎭 Terror | 🕒 95 min',  desc:'Un campamento de verano se convierte en pesadilla.' },
             { titulo:'La Momia',                 tmdbQuery:'The Mummy 1999',            genero:'terror',   info:'⭐ 6.5 | 🎭 Terror | 🕒 110 min', desc:'Una maldición milenaria despertada en el desierto.' },
             { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'terror', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
-            
+            { titulo:'El exorcismo de Eastfield', tmdbQuery:'El exorcismo de Eastfield 2023', nombreKV:'el-exorcismo-de-eastfield', genero:'terror', info:'⭐ 6.6 | 📺1h 31min', desc:'Lara es una mujer atormentada, dividida entre la ciencia y la fe. Empujada por su marido a buscar tratamiento de una congregación de fanáticos, una exorcista de.' },
+                
             // ROMANCE
             { titulo:'Titanic',                  tmdbQuery:'Titanic 1997',              genero:'romance',  info:'⭐ 7.9 | 🎭 Romance | 🕒 194 min', desc:'Un amor imposible a bordo del barco más famoso.' },
             { titulo:'Diario de una Pasión',     tmdbQuery:'The Notebook 2004',         genero:'romance',  info:'⭐ 7.8 | 🎭 Romance | 🕒 123 min', desc:'La historia de Allie y Noah a través del tiempo.' },
