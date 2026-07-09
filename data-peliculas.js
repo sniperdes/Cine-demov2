@@ -23,10 +23,10 @@
             { titulo:'The Avengers',             tmdbQuery:'The Avengers 2012',         genero:'accion',   info:'⭐ 8.0 | 🎭 Acción | 🕒 143 min', desc:'Los héroes más poderosos unidos.' },
             { titulo:'Ip Man',                   tmdbQuery:'Ip Man 2008',               genero:'accion',   info:'⭐ 8.0 | 🎭 Artes Marciales | 🕒 106 min', desc:'El gran maestro del Wing Chun.' },
             { titulo:'Equipaje De Mano',         tmdbQuery:'equipaje de mano 2024',     nombreKV:'equipaje-de-mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
-            { titulo:'Catastrofe helada', tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'accion', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se ' },
+            { titulo:'Catastrofe helada', tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'accion', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
                 
             //ciencia-ficcion
-            { titulo:'Catastrofe helada', tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'ciencia-ficción', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se ' },
+            { titulo:'Catastrofe helada', tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'ciencia-ficción', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
                 
            //suspenso  
    
