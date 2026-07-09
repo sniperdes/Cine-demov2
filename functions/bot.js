@@ -48,6 +48,7 @@ function extraerTituloGuess(texto) {
     let t = texto
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
+        .replace(/\([^)]*\)/g, ' ')
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
