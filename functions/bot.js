@@ -58,22 +58,43 @@ function extraerTituloGuess(texto) {
 }
 
 // Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
-async function buscarSugerenciaTMDB(tituloGuess) {
+async function buscarSugerenciaTMDB(tituloGuess, textoOriginal) {
     if (!tituloGuess || tituloGuess.length < 2) return null;
+
+    // Si el texto original trae un año (2019, 2024, etc.), lo usamos para afinar la búsqueda
+    const matchAnio = (textoOriginal || '').match(/\b(19\d{2}|20\d{2})\b/);
+    const anioParam = matchAnio ? matchAnio[1] : null;
 
     const buscar = async (tipo) => {
         const endpoint = tipo === 'tv' ? 'search/tv' : 'search/movie';
+        const yearParam = anioParam
+            ? (tipo === 'tv' ? `&first_air_date_year=${anioParam}` : `&year=${anioParam}`)
+            : '';
         try {
-            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&query=${encodeURIComponent(tituloGuess)}`);
+            const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
             const data = await res.json();
             return data?.results?.[0] || null;
         } catch { return null; }
     };
 
-    let resultado = await buscar('tv');
-    let tipo = 'tv';
-    if (!resultado) { resultado = await buscar('movie'); tipo = 'movie'; }
-    if (!resultado) return null;
+    // Buscamos en los dos tipos a la vez, sin asumir de antemano si es serie o película
+    const [resultadoTv, resultadoMovie] = await Promise.all([buscar('tv'), buscar('movie')]);
+
+    // Nos quedamos con el más relevante según la popularidad que da TMDB
+    let resultado, tipo;
+    if (resultadoTv && resultadoMovie) {
+        if ((resultadoMovie.popularity || 0) >= (resultadoTv.popularity || 0)) {
+            resultado = resultadoMovie; tipo = 'movie';
+        } else {
+            resultado = resultadoTv; tipo = 'tv';
+        }
+    } else if (resultadoMovie) {
+        resultado = resultadoMovie; tipo = 'movie';
+    } else if (resultadoTv) {
+        resultado = resultadoTv; tipo = 'tv';
+    } else {
+        return null;
+    }
 
     const titulo = resultado.title || resultado.name || tituloGuess;
     const fecha  = resultado.release_date || resultado.first_air_date || '';
@@ -246,8 +267,9 @@ export async function onRequest(context) {
 
             // Intentar sugerir el título vía TMDB, sin bloquear el flujo si falla
             try {
-                const tituloGuess = extraerTituloGuess(channelPost.caption || fileName);
-                const sugerencia = await buscarSugerenciaTMDB(tituloGuess);
+                const textoOriginal = channelPost.caption || fileName;
+                const tituloGuess = extraerTituloGuess(textoOriginal);
+                const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal);
                 if (sugerencia) {
                     await fetch(`${BOT_API}/sendMessage`, {
                         method: 'POST',
