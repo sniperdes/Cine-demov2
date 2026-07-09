@@ -25,7 +25,9 @@
             { titulo:'Equipaje De Mano',         tmdbQuery:'equipaje de mano 2024',     nombreKV:'equipaje-de-mano',       genero:'accion',   info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
            
            //ciencia-ficcion
-                
+        
+           //suspenso
+            { titulo:'Amber alert', tmdbQuery:'Amber alerta  2024', nombreKV:'alerta-amber', genero:'suspenso', info:'⭐ 6.7 | 🕐1h 30min', desc:'Un conductor de viajes compartidos se ve involuntariamente atrapado en un juego peligroso cuando su vehículo coincide con una alerta AMBER, llevando a una persecución de alto riesgo.' },    
            // TERROR
             
             { titulo:'IT (Eso)',                 tmdbQuery:'It 2017',                   genero:'terror',   info:'⭐ 7.9 | 🎭 Terror | 🕒 135 min', desc:'El payaso maldito que acecha a los niños de Derry.' },
