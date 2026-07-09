@@ -31,7 +31,8 @@
                 
            //suspenso  
    
-            { titulo:'Alerta Amber',              tmdbQuery:'Alerta amber 2024',        nombreKV:'alerta-amber', genero:'suspenso',      info:'⭐ 6.7 | 🕐1h 30min', desc:'Un conductor de viajes compartidos se ve involuntariamente atrapado en un juego peligroso cuando su vehículo coincide con una alerta AMBER, llevando a una persecución de alto riesgo.' },    
+           { titulo:'La torre del infierno',     tmdbQuery:'La Tour (Lockdown Tower) 2023', nombreKV:'la-torre-del-infierno', genero:'suspenso', info:'⭐ 6.0 | 🕐1h 30min', desc:'Los habitantes de un bloque de pisos se despiertan una mañana con un niebla opaca que envuelve todo el edificio, obstruyendo puertas y ventanas y que devora a todo aquel que la traspase. Atrapados, intentarán organizarse por si mismos, pero a medida que pase el tiempo, el instinto de supervivencia sacará a relucir sus instintos más primarios.' },
+           { titulo:'Alerta Amber',              tmdbQuery:'Alerta amber 2024',        nombreKV:'alerta-amber', genero:'suspenso',      info:'⭐ 6.7 | 🕐1h 30min', desc:'Un conductor de viajes compartidos se ve involuntariamente atrapado en un juego peligroso cuando su vehículo coincide con una alerta AMBER, llevando a una persecución de alto riesgo.' },    
        
            //documental 
 
