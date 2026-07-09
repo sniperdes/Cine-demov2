@@ -135,6 +135,19 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
     if (esPeliculaNormal && env) {
         const generoFinal = generoTMDBaGeneroApp(resultado.genre_ids);
+
+        // Consulta extra al detalle para conseguir la duración (no viene en la búsqueda)
+        let duracionTexto = '';
+        try {
+            const detalleRes = await fetch(`https://api.themoviedb.org/3/movie/${resultado.id}?api_key=${TMDB_KEY}&language=es-ES`);
+            const detalle = await detalleRes.json();
+            if (detalle?.runtime) {
+                const h = Math.floor(detalle.runtime / 60);
+                const m = detalle.runtime % 60;
+                duracionTexto = h > 0 ? ` | 🕐${h}h ${m}min` : ` | 🕐${m}min`;
+            }
+        } catch { /* si falla, seguimos sin duración */ }
+
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
             const catalogo = raw ? JSON.parse(raw) : [];
@@ -149,7 +162,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 tmdbQuery: `${titulo} ${anio}`,
                 nombreKV: nombreKVsugerido,
                 genero: generoFinal,
-                info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 🎬`,
+                info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'}${duracionTexto}`,
                 desc: overview,
             });
 
