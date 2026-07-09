@@ -36,7 +36,7 @@
            { titulo:'El exorcismo de Eastfield', tmdbQuery:'El exorcismo de Eastfield 2023', nombreKV:'el-exorcismo-de-eastfield', genero:'suspenso', info:'⭐ 6.6 | 📺1h 31min', desc:'Lara es una mujer atormentada, dividida entre la ciencia y la fe. Empujada por su marido a buscar tratamiento de una congregación de fanáticos, una exorcista de.' },
                 
            //documental 
-           { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'terror', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
+           { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'documental', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
             
                 
             // TERROR
