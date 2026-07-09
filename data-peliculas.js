@@ -30,7 +30,7 @@
             { titulo:'Catastrofe helada',        tmdbQuery:'Catastrofe helada 2014',           nombreKV:'catastrofe-helada',      genero:'ciencia-ficcion', info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
       
            //comedia   
-
+          { titulo:'Desmadre de padre',        tmdbQuery:'Desmadre de padre 2012',           nombreKV:'ese-es-mi-hijo',      genero:'comedia-pelicula', info:'⭐ 5.8 | 🕐1h 54min', desc:'Un padre que pretende controlar la inminente boda de su hijo se muda a vivir con él y su novia.. ' },
                 
            //suspenso  
    
