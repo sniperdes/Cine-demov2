@@ -28,7 +28,7 @@
                 
             // TERROR
             
-            { titulo:'no te muevas 2024'',             tmdbQuery:'Don''t Move 2024'',          nombreKV:'no-te-muevas', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Una mujer destrozada topa en un bosque apartado con un asesino que le inyecta una droga paralizante. Mientras su cuerpo sucumbe, empieza su lucha por sobrevivir.' },
+            { titulo:'no te muevas 2024'',        tmdbQuery:'Don''t Move 2024',      nombreKV:'no-te-muevas', genero:'terror', info:'⭐ 6.3| 📺1h 32min', desc:'Una mujer destrozada topa en un bosque apartado con un asesino que le inyecta una droga paralizante. Mientras su cuerpo sucumbe, empieza su lucha por sobrevivir.' },
 
             { titulo:'alucinaciones',            tmdbQuery:'alucinaciones 2018',    nombreKV:'alucinaciones', genero:'terror', info:'⭐ 5.7| 📺1h 24min', desc:'Un hombre recientemente liberado de un instituto mental hereda una mansión después de que sus padres mueren. Después de una serie de eventos perturbadores, llega a creer que está embrujado.' },
             { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'terror', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
