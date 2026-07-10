@@ -7,7 +7,7 @@ const SERIES_CONOCIDAS = {
     'te alquilo mi amor': 'kiralik-ask',
     'kiralik ask': 'kiralik-ask',
     'kiralık aşk': 'kiralik-ask',
-    'Pájaro Soñador':'erkenci kus': 'erkenci-kus',
+    'pájaro soñador': 'erkenci-kus',
     'erkenci kuş': 'erkenci-kus',
     'sen cal kapimi': 'sen-cal-kapimi',
     'sen çal kapımı': 'sen-cal-kapimi',
