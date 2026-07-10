@@ -2,7 +2,7 @@
         const baseDeDatosTurcas = [
             // ROMANCE
             { titulo:'Erkenci Kus',             tmdbQuery:'Erkenci Kus 2018',           nombreKV:'erkenci-kus', genero:'turca-romance', info:'⭐ 8.5 | 🌙 Turca | 📺 51 ep', desc:'Una joven soñadora se enamora de su jefe.' },
-            { titulo:'Sen Cal Kapimi',           tmdbQuery:'Sen Cal Kapimi 2020',        nombreKV:'sen-cal-kapimi', genero:'turca-romance', info:'⭐ 8.6 | 🌙 Turca | 📺 52 ep', desc:'Una estudiante firma un contrato de amor falso con un millonario.' },
+            { titulo:'Sen Cal Kapimi', alias:['Llamas A Mi Puerta'],          tmdbQuery:'Sen Cal Kapimi 2020',        nombreKV:'sen-cal-kapimi', genero:'turca-romance', info:'⭐ 8.6 | 🌙 Turca | 📺 52 ep', desc:'Una estudiante firma un contrato de amor falso con un millonario.' },
             { titulo:'Kiralik Ask',alias:['Te alquilo mi amor','Amor en alquiler','Kiralik Ask'], tmdbQuery:'Kiralik Ask 2015',           nombreKV:'kiralik-ask', genero:'turca-romance', info:'⭐ 8.2 | 🌙 Turca | 📺 68 ep', desc:'Un millonario contrata a una chica para que finja ser su novia.' },
             { titulo:'Medcezir',                 tmdbQuery:'Medcezir 2013',              nombreKV:'medcezir', genero:'turca-romance', info:'⭐ 8.1 | 🌙 Turca | 📺 72 ep', desc:'Adaptación turca de The OC.' },
             { titulo:'Kara Sevda',               tmdbQuery:'Kara Sevda 2015',            nombreKV:'kara-sevda', genero:'turca-romance', info:'⭐ 8.4 | 🌙 Turca | 📺 74 ep', desc:'Un amor imposible entre dos familias rivales.' },
