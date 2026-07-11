@@ -7,7 +7,7 @@ const SERIES_CONOCIDAS = {
     'te alquilo mi amor': 'kiralik-ask',
     'kiralik ask': 'kiralik-ask',
     'kiralık aşk': 'kiralik-ask',
-    'pájaro soñador': 'erkenci-kus',
+    'erkenci kus': 'erkenci-kus',
     'erkenci kuş': 'erkenci-kus',
     'sen cal kapimi': 'sen-cal-kapimi',
     'sen çal kapımı': 'sen-cal-kapimi',
@@ -118,6 +118,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     const titulo = resultado.title || resultado.name || tituloGuess;
+    const tituloOriginal = resultado.original_title || resultado.original_name || titulo;
     const fecha  = resultado.release_date || resultado.first_air_date || '';
     const anio   = fecha ? fecha.slice(0, 4) : '';
     const overview = (resultado.overview || 'Sin sinopsis disponible.').slice(0, 160);
@@ -137,17 +138,21 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     if (esPeliculaNormal && env) {
         const generoFinal = generoTMDBaGeneroApp(resultado.genre_ids);
 
-        // Consulta extra al detalle para conseguir la duración (no viene en la búsqueda)
+        // Consulta extra al detalle para conseguir la duración y el título internacional (en inglés)
+        // Esto evita usar el título original en el idioma nativo (ej. hindi, coreano) o la traducción
+        // al español, que "poster.js"/"trailer.js" (que buscan sin idioma, por default en inglés) no encontrarían.
         let duracionTexto = '';
+        let tituloParaQuery = tituloOriginal;
         try {
-            const detalleRes = await fetch(`https://api.themoviedb.org/3/movie/${resultado.id}?api_key=${TMDB_KEY}&language=es-ES`);
+            const detalleRes = await fetch(`https://api.themoviedb.org/3/movie/${resultado.id}?api_key=${TMDB_KEY}`);
             const detalle = await detalleRes.json();
             if (detalle?.runtime) {
                 const h = Math.floor(detalle.runtime / 60);
                 const m = detalle.runtime % 60;
                 duracionTexto = h > 0 ? ` | 🕐${h}h ${m}min` : ` | 🕐${m}min`;
             }
-        } catch { /* si falla, seguimos sin duración */ }
+            if (detalle?.title) tituloParaQuery = detalle.title;
+        } catch { /* si falla, seguimos con tituloOriginal */ }
 
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
@@ -160,7 +165,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
             catalogo.push({
                 titulo,
-                tmdbQuery: `${titulo} ${anio}`,
+                tmdbQuery: `${tituloParaQuery} ${anio}`,
                 nombreKV: nombreKVsugerido,
                 genero: generoFinal,
                 info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'}${duracionTexto}`,
@@ -194,7 +199,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         generoSugerido = 'drama (o comedia/accion-serie, ajustá)';
     }
 
-    const bloque = `{ titulo:'${titulo}', tmdbQuery:'${titulo} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
+    const bloque = `{ titulo:'${titulo}', tmdbQuery:'${tituloOriginal} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
 
     return `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)`;
 }
@@ -439,12 +444,49 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
+        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Corregir película auto-agregada:*\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, genero, info, desc)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
         return new Response('OK');
     }
 
     const partes = texto.split(' ');
     const cmd    = partes[0];
+
+    if (cmd === '/corregir') {
+        // /corregir pelicula nombreKV campo valor con espacios...
+        const tipo = partes[1];
+        const nombreKV = partes[2];
+        const campo = partes[3];
+        const valor = partes.slice(4).join(' ');
+
+        if (tipo !== 'pelicula' || !nombreKV || !campo || !valor) {
+            await enviar(`Uso: /corregir pelicula nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, genero, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024`);
+            return new Response('OK');
+        }
+
+        const camposValidos = ['titulo', 'tmdbQuery', 'genero', 'info', 'desc'];
+        if (!camposValidos.includes(campo)) {
+            await enviar(`❌ Campo inválido. Usá uno de: ${camposValidos.join(', ')}`);
+            return new Response('OK');
+        }
+
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            const idx = catalogo.findIndex(p => p.nombreKV === nombreKV);
+
+            if (idx === -1) {
+                await enviar(`❌ No encontré "${nombreKV}" en el catálogo de películas.`);
+                return new Response('OK');
+            }
+
+            catalogo[idx][campo] = valor;
+            await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
+            await enviar(`✅ Corregido "${nombreKV}" → ${campo}: ${valor}`);
+        } catch (e) {
+            await enviar(`❌ Error al corregir: ${e.message}`);
+        }
+        return new Response('OK');
+    }
 
     if (cmd === '/asignar') {
         const tipo = partes[1];
