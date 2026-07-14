@@ -51,7 +51,8 @@ export async function onRequest(context) {
             body: JSON.stringify({
                 chat_id: userId,
                 text: `${caption}\n\n${fileIdOrUrl}`,
-                parse_mode: 'Markdown'
+                parse_mode: 'Markdown',
+                protect_content: true
             })
         });
     } else {
@@ -63,7 +64,8 @@ export async function onRequest(context) {
                 video: fileIdOrUrl,
                 caption,
                 parse_mode: 'Markdown',
-                supports_streaming: true
+                supports_streaming: true,
+                protect_content: true
             })
         });
     }
