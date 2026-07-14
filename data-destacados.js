@@ -4,4 +4,4 @@
 // El poster se busca solo en TMDB, no hace falta subir imágenes.
 
 const titulosTendencias = ['Inception 2010', 'The Dark Knight 2008', 'Titanic 1997', 'Avatar 2009', 'The Avengers 2012'];
-const titulosBanner     = ['medcezir 2013', 'Mad Max Fury Road 2015', 'La La Land 2016', 'Get Out 2017', 'Spider-Man No Way Home'];
+const titulosBanner     = ['Medcezir 2013 ', 'Mad Max Fury Road 2015', 'La La Land 2016', 'Get Out 2017', 'Spider-Man No Way Home'];
