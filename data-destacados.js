@@ -18,7 +18,7 @@ const titulosTendencias = [
 
 const titulosBanner = [
     { q: 'Asi 2007',        tipo: 'tv' },
-    { q: 'Mad Max Fury Road 2015',   tipo: 'movie' },
+    { q: 'Kiralik Ask 2015',   tipo: 'tv' },
     { q: 'La La Land 2016',          tipo: 'movie' },
     { q: 'Get Out 2017',             tipo: 'movie' },
     { q: 'Spider-Man No Way Home',   tipo: 'movie' }
