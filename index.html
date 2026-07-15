@@ -91,6 +91,16 @@
         /* OVERLAY DE PRIVACIDAD (oculta el reproductor al pasar a segundo plano) */
         .privacy-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:350; align-items:center; justify-content:center; color:#666; font-size:14px; text-align:center; padding:20px; box-sizing:border-box; }
         .privacy-overlay.active { display:flex; }
+
+        /* Evitar guardar/copiar imágenes (menú de mantener presionado / clic derecho) */
+        img {
+            -webkit-touch-callout: none;   /* iOS Safari: quita "Guardar imagen" al mantener presionado */
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            user-drag: none;
+            pointer-events: auto;          /* mantiene el click normal para abrir la ficha */
+        }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -1146,6 +1156,15 @@
         });
         window.addEventListener('blur', mostrarOverlayPrivacidad);
         window.addEventListener('focus', ocultarOverlayPrivacidad);
+
+        // Bloquear menú de guardar/copiar imagen (long-press Android, clic derecho PC)
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.tagName === 'IMG') e.preventDefault();
+        });
+        // Bloquear arrastrar imagen fuera de la app
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.tagName === 'IMG') e.preventDefault();
+        });
 
         function fullscreenPlayer() {
             const modal = document.getElementById('player-modal');
