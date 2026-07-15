@@ -17,10 +17,13 @@
         .active { display:block; }
         .row { display:flex; gap:10px; overflow-x:auto; padding-bottom:10px; scrollbar-width:none; }
         .row::-webkit-scrollbar { display:none; }
-        .card { min-width:140px; background:#1a1a1a; border-radius:10px; overflow:hidden; cursor:pointer; transition:0.2s; }
+        .card { min-width:140px; background:#1a1a1a; border-radius:10px; overflow:hidden; cursor:pointer; transition:0.2s; position:relative; }
         .card:active { transform:scale(0.97); }
         .card img { width:100%; height:200px; object-fit:cover; background:#222; }
         .card p { margin:5px; font-size:13px; }
+        /* Overlay invisible: intercepta el toque ANTES de que llegue al <img>, así
+           Telegram Android no detecta un elemento imagen y no ofrece "Guardar imagen" */
+        .card::after { content:''; position:absolute; top:0; left:0; width:100%; height:200px; z-index:5; }
         /* SECCIÓN GÉNERO */
         .genero-seccion { margin-bottom:25px; }
         .genero-header { display:flex; align-items:center; justify-content:space-between; padding:0 5px; margin-bottom:10px; }
@@ -36,8 +39,9 @@
         .close { position:absolute; right:10px; top:10px; cursor:pointer; font-size:20px; color:#aaa; }
         .btn { display:block; width:100%; background:#222; color:white; border:none; padding:12px; margin-top:10px; border-radius:8px; font-size:15px; font-weight:bold; cursor:pointer; }
         .vip { background:gold; color:black; }
-        .banner-slider { width:100%; margin-bottom:15px; }
+        .banner-slider { width:100%; margin-bottom:15px; position:relative; }
         .banner-slider img { width:100%; height:220px; object-fit:cover; border-radius:12px; background:#222; }
+        .banner-slider::after { content:''; position:absolute; top:0; left:0; width:100%; height:220px; z-index:5; }
         .banner-dots { display:flex; justify-content:center; gap:8px; margin-top:10px; margin-bottom:15px; }
         .dot { width:10px; height:10px; border-radius:50%; background:#666; }
         .active-dot { background:white; }
@@ -87,6 +91,7 @@
         .grid-genero { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; padding-bottom:20px; }
         .grid-genero .card { min-width:unset; width:100%; }
         .grid-genero .card img { height:220px; }
+        .grid-genero .card::after { height:220px; }
 
         /* OVERLAY DE PRIVACIDAD (oculta el reproductor al pasar a segundo plano) */
         .privacy-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:350; align-items:center; justify-content:center; color:#666; font-size:14px; text-align:center; padding:20px; box-sizing:border-box; }
@@ -120,7 +125,10 @@
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">✖</span>
             <h2 id="modal-title">Título</h2>
-            <img id="modal-img" src="" style="width:100%; border-radius:10px;">
+            <div style="position:relative;">
+                <img id="modal-img" src="" style="width:100%; border-radius:10px;">
+                <div style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
+            </div>
             <p id="modal-info"></p>
             <p id="modal-desc"></p>
             <button class="btn" id="btn-trailer" onclick="verTrailer()" style="background:#e50914;">▶️ Ver Tráiler</button>
@@ -776,7 +784,7 @@
             cargarRusas();
             cargarHistorial();
             iniciarTemporizador();
-            document.getElementById('banner-img').addEventListener('click', () => {
+            document.querySelector('.banner-slider').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
             });
         });
