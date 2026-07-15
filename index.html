@@ -623,8 +623,8 @@
         let temporizadorBanner;
 
         async function cargarBanner() {
-            for (const q of titulosBanner) {
-                const p = await obtenerPoster(q);
+            for (const item of titulosBanner) {
+                const p = await obtenerPoster(item.q, item.tipo);
                 bannerUrls.push(p || PLACEHOLDER);
             }
             const el = document.getElementById('banner-img');
@@ -734,16 +734,17 @@
         // ─── TENDENCIAS ───────────────────────────────────────────────────────────
         async function cargarTendencias() {
             const contenedor = document.getElementById('contenedor-tendencias');
-            titulosTendencias.forEach((query, i) => {
+            titulosTendencias.forEach((item, i) => {
+                const { q: query, tipo } = item;
                 const nombre = query.replace(/\d{4}/, '').trim();
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
                 tarjeta.innerHTML = `<img id="tend-img-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${nombre}</p>`;
-                tarjeta.onclick = () => abrirModal(nombre, document.getElementById(`tend-img-${i}`).src, '', '', query, 'movie');
+                tarjeta.onclick = () => abrirModal(nombre, document.getElementById(`tend-img-${i}`).src, '', '', query, tipo);
                 contenedor.appendChild(tarjeta);
             });
-            await Promise.all(titulosTendencias.map(async (query, i) => {
-                const poster = await obtenerPoster(query);
+            await Promise.all(titulosTendencias.map(async (item, i) => {
+                const poster = await obtenerPoster(item.q, item.tipo);
                 const el = document.getElementById(`tend-img-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             }));
