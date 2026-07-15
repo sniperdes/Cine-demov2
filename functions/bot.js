@@ -160,7 +160,10 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
             const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
             if (yaExiste) {
-                return `🎬 "${titulo}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`;
+                return {
+                    texto: `🎬 "${titulo}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`,
+                    nombreKV: nombreKVsugerido
+                };
             }
 
             catalogo.push({
@@ -174,7 +177,10 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
 
-            return `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Género: ${generoFinal}\n🔑 nombreKV: ${nombreKVsugerido}\n\nYa la podés asignar con:\n/asignar pelicula ${nombreKVsugerido} 1`;
+            return {
+                texto: `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Género: ${generoFinal}\n🔑 nombreKV: ${nombreKVsugerido}`,
+                nombreKV: nombreKVsugerido
+            };
         } catch (e) {
             // Si falla el guardado automático, caemos al mensaje de copiar/pegar de siempre
         }
@@ -201,7 +207,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
     const bloque = `{ titulo:'${titulo}', tmdbQuery:'${tituloOriginal} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
 
-    return `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)`;
+    return { texto: `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)` };
 }
 
 function detectarSerie(texto) {
@@ -342,10 +348,26 @@ export async function onRequest(context) {
                 const tituloGuess = extraerTituloGuess(textoOriginal);
                 const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal, env);
                 if (sugerencia) {
+                    const payload = {
+                        chat_id: ADMIN_ID,
+                        text: sugerencia.texto,
+                        parse_mode: 'Markdown'
+                    };
+                    // Si identificamos el nombreKV (película reconocida), ofrecer botón
+                    // para guardar el video automáticamente como parte 1, sin tipear el comando
+                    if (sugerencia.nombreKV) {
+                        payload.text += `\n\n¿Guardo este video como *${sugerencia.nombreKV}* parte 1?`;
+                        payload.reply_markup = {
+                            inline_keyboard: [[
+                                { text: '✅ Confirmar', callback_data: `confp:${msgId}:${sugerencia.nombreKV}:1` },
+                                { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
+                            ]]
+                        };
+                    }
                     await fetch(`${BOT_API}/sendMessage`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ chat_id: ADMIN_ID, text: sugerencia })
+                        body: JSON.stringify(payload)
                     });
                 }
             } catch (e) {
@@ -387,6 +409,33 @@ export async function onRequest(context) {
                 body: JSON.stringify({
                     chat_id: chatId, message_id: messageId,
                     text: `✅ *${nombreKV}* T${temp}E${ep} guardado!`,
+                    parse_mode: 'Markdown'
+                })
+            });
+        }
+
+        if (data.startsWith('confp:')) {
+            const [, msgId, nombreKV, parte] = data.split(':');
+            const fileId = await env.PELICULAS_KV.get(`cola:${msgId}`);
+
+            if (!fileId) {
+                await fetch(`${BOT_API}/editMessageText`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: '❌ Video ya no está en cola.' })
+                });
+                return new Response('OK');
+            }
+
+            await env.PELICULAS_KV.put(`video:${nombreKV}:${parte}`, fileId);
+            await env.PELICULAS_KV.delete(`cola:${msgId}`);
+
+            await fetch(`${BOT_API}/editMessageText`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId, message_id: messageId,
+                    text: `✅ *${nombreKV}* parte ${parte} guardado!`,
                     parse_mode: 'Markdown'
                 })
             });
