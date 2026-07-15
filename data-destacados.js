@@ -1,7 +1,25 @@
 // ─── DESTACADOS ─────────────────────────────────────────────────────────────
 // Edita estas listas para cambiar qué aparece en "Tendencias" y en el banner
-// grande de arriba. Formato: "Nombre del título Año".
-// El poster se busca solo en TMDB, no hace falta subir imágenes.
+// grande de arriba. El poster se busca solo en TMDB, no hace falta subir imágenes.
+//
+// Cada item es: { q: 'Nombre del título Año', tipo: 'movie' }  → para películas
+//            o: { q: 'Nombre del título Año', tipo: 'tv' }     → para series
+//
+// Importante: el título debe existir en TMDB con ese nombre y año exactos,
+// y el 'tipo' debe coincidir (una serie puesta como 'movie' no va a mostrar poster).
 
-const titulosTendencias = ['Inception 2010', 'The Dark Knight 2008', 'Titanic 1997', 'Avatar 2009', 'The Avengers 2012'];
-const titulosBanner     = ['Asi 2007', 'Mad Max Fury Road 2015', 'La La Land 2016', 'Get Out 2017', 'Spider-Man No Way Home'];
+const titulosTendencias = [
+    { q: 'Inception 2010',        tipo: 'movie' },
+    { q: 'The Dark Knight 2008',  tipo: 'movie' },
+    { q: 'Titanic 1997',          tipo: 'movie' },
+    { q: 'Avatar 2009',           tipo: 'movie' },
+    { q: 'The Avengers 2012',     tipo: 'movie' }
+];
+
+const titulosBanner = [
+    { q: 'Interstellar 2014',        tipo: 'movie' },
+    { q: 'Mad Max Fury Road 2015',   tipo: 'movie' },
+    { q: 'La La Land 2016',          tipo: 'movie' },
+    { q: 'Get Out 2017',             tipo: 'movie' },
+    { q: 'Spider-Man No Way Home',   tipo: 'movie' }
+];
