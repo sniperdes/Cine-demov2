@@ -39,6 +39,7 @@ const SERIES_CONOCIDAS = {
     'poyraz karayel': 'poyraz-karayel',
     'icerde': 'icerde',
     'i̇çerde': 'icerde',
+    'No te enamores': 'Una parte de mí',
 };
 
 // TMDB (misma key que usa poster.js)
