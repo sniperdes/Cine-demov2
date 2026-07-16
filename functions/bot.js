@@ -34,13 +34,13 @@ const SERIES_CONOCIDAS = {
     'çalıkuşu': 'calikusu',
     'karadayi': 'karadayi',
     'karadayı': 'karadayi',
+    'no te enamores': 'no-te-enamores',
+    'una parte de mí': 'no-te-enamores',
     'kuruluş osman': 'kurulus-osman',
     'kurulus osman': 'kurulus-osman',
     'poyraz karayel': 'poyraz-karayel',
     'icerde': 'icerde',
     'i̇çerde': 'icerde',
-    'no te enamores': 'no-te-enamores',
-    'una parte de mí': 'no-te-enamores',
 };
 
 // TMDB (misma key que usa poster.js)
@@ -52,17 +52,12 @@ function extraerTituloGuess(texto) {
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
         .replace(/\([^)]*\)/g, ' ')
-        .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ')
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
     t = t.replace(/^(ver|pelicula|película|película completa|pelicula completa)\s+/i, '');
     // Quitar códigos numéricos largos sueltos (IDs de video, no parte del título)
     t = t.replace(/\b\d{5,}\b/g, ' ').replace(/\s+/g, ' ').trim();
-    t = t.replace(/\p{Extended_Pictographic}/gu, ' ') // Emojis
-    .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')      // Símbolos decorativos
-    .replace(/\s+/g, ' ')
-    .trim();
     return t;
 }
 
@@ -625,6 +620,20 @@ export async function onRequest(context) {
         else if (tipo === 'pelicula') { const [,, n, p] = partes; key = `video:${n}:${p}`; label = `${n} parte ${p}`; }
         await env.PELICULAS_KV.delete(key);
         await enviar(`🗑️ Borrado: ${label}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/borrarraw') {
+        // Para claves con espacios que /borrar no puede reconstruir (ej: nombreKV mal cargado)
+        // Uso: /borrarraw video:Una parte de mí:1:19
+        const key = texto.slice('/borrarraw '.length).trim();
+        if (!key) {
+            await enviar('❓ Uso: /borrarraw video:NombreExacto:temp:ep');
+            return new Response('OK');
+        }
+        const existia = await env.PELICULAS_KV.get(key);
+        await env.PELICULAS_KV.delete(key);
+        await enviar(existia ? `🗑️ Borrado: \`${key}\`` : `⚠️ Esa clave no existía: \`${key}\``);
         return new Response('OK');
     }
 
