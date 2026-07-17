@@ -22,7 +22,7 @@
            { titulo:'Bajo cero',              tmdbQuery:'Bajo cero 2010',        nombreKV:'Bajo-cero', genero:'suspenso',      info:'⭐ 6.0 | 🕐1h 34min', desc:'Tres locos por el snowboard van en el telesilla de una estación de esquí ambicionando la última bajada por la ladera antes de marchar a casa. De pronto, el telesilla se detiene por completo. Ni un alma alrededor. Todo empeora cuando las luces de la estación se apagan para no encenderse de nuevo hasta el próximo fin de semana. Entonces tendrán que hacer cosas impensables para poder sobrevivir a una muerte segura por congelación. Pero además, pronto se darán cuenta de que el frío no es su peor enemigo.' },    
         
            { titulo:'shaitaan',                  tmdbQuery:'शैतान 2024',             nombreKV:'satan', genero:'suspenso', info:'⭐ 6.5| 📺2h 12min', desc:'Una historia intemporal de lucha entre el bien y el mal, con una familia que encarna las fuerzas de la rectitud y un hombre que simboliza la malevolencia.' },
-                
+           { titulo:'Chucky',                  tmdbQuery:'Introducing Chucky: The Making of Child s Play 1988',             nombreKV:'Chucky-1', genero:'suspenso', info:'⭐ 6.5| 📺2h 12min', desc:'.' },
            //documental 
            { titulo:'ABC Nunca Más',            tmdbQuery:'ABC Nunca Más ',        nombreKV:'abc-nunca-mas', genero:'documental', info:'⭐ 7.5 | ', desc:'The largest childhood tragedy in the history of Mexico, not only marked the lives of 49 families who lost their sons in the fire at the ABC child care, but that.' },
             
