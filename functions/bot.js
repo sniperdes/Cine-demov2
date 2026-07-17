@@ -60,6 +60,11 @@ function extraerTituloGuess(texto) {
     t = t.replace(/^(ver|pelicula|película|película completa|pelicula completa)\s+/i, '');
     // Quitar códigos numéricos largos sueltos (IDs de video, no parte del título)
     t = t.replace(/\b\d{5,}\b/g, ' ').replace(/\s+/g, ' ').trim();
+    t = t.replace(/\p{Extended_Pictographic}/gu, ' ') // Emojis
+    .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')      // Símbolos decorativos
+    .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ') // Calidad
+    .replace(/\s+/g, ' ')
+    .trim();
     return t;
 }
 
