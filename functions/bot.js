@@ -13,6 +13,8 @@ const SERIES_CONOCIDAS = {
     'sen çal kapımı': 'sen-cal-kapimi',
     'llamas a mi puerta': 'sen-cal-kapimi',
     'medcezir': 'medcezir',
+    'amor eterno': 'kara-sevda',
+    'Amor Eterno': 'kara-sevda',
     'kara sevda': 'kara-sevda',
     'fatmagul': 'fatmagul',
     'fatmagül': 'fatmagul',
