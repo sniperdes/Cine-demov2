@@ -54,6 +54,7 @@ function extraerTituloGuess(texto) {
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
         .replace(/\([^)]*\)/g, ' ')
+        .replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ') // 🇫🇷 🇹🇷 🇪🇸 🇦🇷
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
