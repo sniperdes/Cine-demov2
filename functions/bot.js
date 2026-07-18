@@ -57,9 +57,7 @@ function extraerTituloGuess(texto) {
     .replace(/\p{Extended_Pictographic}/gu, ' ') // Resto de emojis
     .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')
     .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ')
-    .replace(/\b\d{5,}\b/g, ' ')
-    .replace(/\s+/g, ' ')
-        .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
+    .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
     t = t.replace(/^(ver|pelicula|película|película completa|pelicula completa)\s+/i, '');
