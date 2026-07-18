@@ -13,8 +13,6 @@ const SERIES_CONOCIDAS = {
     'sen çal kapımı': 'sen-cal-kapimi',
     'llamas a mi puerta': 'sen-cal-kapimi',
     'medcezir': 'medcezir',
-    'amor eterno': 'kara-sevda',
-    'Amor Eterno': 'kara-sevda',
     'kara sevda': 'kara-sevda',
     'fatmagul': 'fatmagul',
     'fatmagül': 'fatmagul',
@@ -54,39 +52,41 @@ function extraerTituloGuess(texto) {
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
         .replace(/\([^)]*\)/g, ' ')
-        .replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ') // 🇫🇷 🇹🇷 🇪🇸 🇦🇷
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
     t = t.replace(/^(ver|pelicula|película|película completa|pelicula completa)\s+/i, '');
     // Quitar códigos numéricos largos sueltos (IDs de video, no parte del título)
     t = t.replace(/\b\d{5,}\b/g, ' ').replace(/\s+/g, ' ').trim();
-    t = t.replace(/\p{Extended_Pictographic}/gu, ' ') // Emojis
-    .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')      // Símbolos decorativos
-    .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ') // Calidad
-    .replace(/\s+/g, ' ')
-    .trim();
     return t;
 }
 
 // Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
-// Mapea los genre_ids de TMDB a los géneros válidos de tu catálogo de películas
+// Mapea los genre_ids de TMDB a los géneros válidos de tu catálogo de películas.
+// Devuelve un ARRAY: una película puede caer en más de un género (ej: terror + suspenso).
 function generoTMDBaGeneroApp(genreIds) {
     const mapa = [
+        [28, 'accion'],
+        [12, 'aventura'],
+        [16, 'animacion'],
+        [35, 'comedia-pelicula'],
+        [80, 'crimen'],
+        [99, 'documental'],
+        [18, 'drama-pelicula'],
+        [10751, 'familiar'],
+        [14, 'fantasia'],
+        [36, 'historia'],
+        [27, 'terror'],
+        [10402, 'musica'],
+        [9648, 'misterio'],
+        [10749, 'romance'],
         [878, 'ciencia-ficcion'],
         [53, 'suspenso'],
-        [9648, 'suspenso'],
-        [99, 'documental'],
-        [35, 'comedia-pelicula'],
-        [27, 'terror'],
-        [10749, 'romance'],
-        [12, 'aventura'],
-        [28, 'accion'],
+        [10752, 'belica'],
+        [37, 'western'],
     ];
-    for (const [id, genero] of mapa) {
-        if ((genreIds || []).includes(id)) return genero;
-    }
-    return 'accion'; // default si no coincide con ninguno
+    const encontrados = mapa.filter(([id]) => (genreIds || []).includes(id)).map(([, genero]) => genero);
+    return encontrados.length ? encontrados : ['accion']; // default si no coincide con ninguno
 }
 
 async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
@@ -180,7 +180,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 titulo,
                 tmdbQuery: `${tituloParaQuery} ${anio}`,
                 nombreKV: nombreKVsugerido,
-                genero: generoFinal,
+                generos: generoFinal,
                 info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'}${duracionTexto}`,
                 desc: overview,
             });
@@ -188,7 +188,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
 
             return {
-                texto: `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Género: ${generoFinal}\n🔑 nombreKV: ${nombreKVsugerido}`,
+                texto: `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Géneros: ${generoFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`,
                 nombreKV: nombreKVsugerido
             };
         } catch (e) {
@@ -503,7 +503,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Corregir película auto-agregada:*\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, genero, info, desc)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
+        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Corregir película auto-agregada:*\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
         return new Response('OK');
     }
 
@@ -518,11 +518,11 @@ export async function onRequest(context) {
         const valor = partes.slice(4).join(' ');
 
         if (tipo !== 'pelicula' || !nombreKV || !campo || !valor) {
-            await enviar(`Uso: /corregir pelicula nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, genero, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024`);
+            await enviar(`Uso: /corregir pelicula nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir pelicula shaitaan generos terror,suspenso,drama-pelicula`);
             return new Response('OK');
         }
 
-        const camposValidos = ['titulo', 'tmdbQuery', 'genero', 'info', 'desc'];
+        const camposValidos = ['titulo', 'tmdbQuery', 'generos', 'info', 'desc'];
         if (!camposValidos.includes(campo)) {
             await enviar(`❌ Campo inválido. Usá uno de: ${camposValidos.join(', ')}`);
             return new Response('OK');
@@ -538,7 +538,8 @@ export async function onRequest(context) {
                 return new Response('OK');
             }
 
-            catalogo[idx][campo] = valor;
+            // 'generos' es un array: admite varios separados por coma (ej: terror,suspenso)
+            catalogo[idx][campo] = campo === 'generos' ? valor.split(',').map(g => g.trim()) : valor;
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
             await enviar(`✅ Corregido "${nombreKV}" → ${campo}: ${valor}`);
         } catch (e) {
