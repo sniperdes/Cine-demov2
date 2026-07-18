@@ -514,7 +514,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir película auto-agregada:*\n/vercatalogo pelicula nombre\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie nombre temp ep\n/borrar pelicula nombre parte`);
+        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir película auto-agregada:*\n/listarcatalogo pelicula\n/vercatalogo pelicula nombre\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie nombre temp ep\n/borrar pelicula nombre parte`);
         return new Response('OK');
     }
 
@@ -616,6 +616,31 @@ export async function onRequest(context) {
         else if (tipo === 'pelicula') { const [,, n, p] = partes; key = `video:${n}:${p}`; label = `${n} parte ${p}`; }
         const val = await env.PELICULAS_KV.get(key);
         await enviar(val ? `✅ *${label}*\n${val}` : `❌ No encontrado: ${label}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/listarcatalogo') {
+        // /listarcatalogo pelicula → lista TODO lo que el bot agregó solo, para encontrar algo mal agregado
+        const tipo = partes[1];
+        if (tipo !== 'pelicula') {
+            await enviar('Uso: /listarcatalogo pelicula');
+            return new Response('OK');
+        }
+        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const catalogo = raw ? JSON.parse(raw) : [];
+        if (!catalogo.length) {
+            await enviar('📋 Todavía no hay películas auto-agregadas.');
+            return new Response('OK');
+        }
+        // Telegram corta mensajes muy largos, así que mandamos de a 25
+        const LOTE = 25;
+        for (let i = 0; i < catalogo.length; i += LOTE) {
+            const bloque = catalogo.slice(i, i + LOTE);
+            let resp = i === 0 ? `📋 *Auto-agregadas* (${catalogo.length} en total)\n\n` : '';
+            bloque.forEach(p => { resp += `🔑 ${p.nombreKV} → ${p.titulo}\n`; });
+            await enviar(resp);
+        }
+        await enviar('Para ver el detalle de una: /vercatalogo pelicula nombreKV');
         return new Response('OK');
     }
 
