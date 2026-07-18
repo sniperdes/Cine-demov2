@@ -514,7 +514,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Corregir película auto-agregada:*\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar:*\n/borrar serie nombre temp ep`);
+        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir película auto-agregada:*\n/vercatalogo pelicula nombre\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie nombre temp ep\n/borrar pelicula nombre parte`);
         return new Response('OK');
     }
 
@@ -616,6 +616,46 @@ export async function onRequest(context) {
         else if (tipo === 'pelicula') { const [,, n, p] = partes; key = `video:${n}:${p}`; label = `${n} parte ${p}`; }
         const val = await env.PELICULAS_KV.get(key);
         await enviar(val ? `✅ *${label}*\n${val}` : `❌ No encontrado: ${label}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/vercatalogo') {
+        // /vercatalogo pelicula nombreKV → muestra la ficha completa tal cual quedó guardada
+        const tipo = partes[1];
+        const nombreKV = partes[2];
+        if (tipo !== 'pelicula' || !nombreKV) {
+            await enviar('Uso: /vercatalogo pelicula nombreKV');
+            return new Response('OK');
+        }
+        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const catalogo = raw ? JSON.parse(raw) : [];
+        const peli = catalogo.find(p => p.nombreKV === nombreKV);
+        if (!peli) {
+            await enviar(`❌ No encontré "${nombreKV}" en el catálogo auto-agregado.\n(Si la agregaste vos a mano en data-peliculas.js, no va a aparecer acá — esto solo lista lo que agregó el bot solo.)`);
+            return new Response('OK');
+        }
+        await enviar(`📋 *${peli.titulo}*\n\n🔑 nombreKV: ${peli.nombreKV}\n🔎 tmdbQuery: ${peli.tmdbQuery}\n📁 generos: ${(peli.generos || []).join(', ')}\nℹ️ info: ${peli.info}\n📝 desc: ${peli.desc}\n\nPara borrarla: /borrarcatalogo pelicula ${peli.nombreKV}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/borrarcatalogo') {
+        // /borrarcatalogo pelicula nombreKV → saca la ficha del catálogo (no borra el video en sí)
+        const tipo = partes[1];
+        const nombreKV = partes[2];
+        if (tipo !== 'pelicula' || !nombreKV) {
+            await enviar('Uso: /borrarcatalogo pelicula nombreKV');
+            return new Response('OK');
+        }
+        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const catalogo = raw ? JSON.parse(raw) : [];
+        const idx = catalogo.findIndex(p => p.nombreKV === nombreKV);
+        if (idx === -1) {
+            await enviar(`❌ No encontré "${nombreKV}" en el catálogo auto-agregado.`);
+            return new Response('OK');
+        }
+        catalogo.splice(idx, 1);
+        await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
+        await enviar(`🗑️ Saqué "${nombreKV}" del catálogo.\n\n(El video en sí sigue guardado — si también querés borrarlo: /borrar pelicula ${nombreKV} 1)`);
         return new Response('OK');
     }
 
