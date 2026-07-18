@@ -97,6 +97,12 @@
         .privacy-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:#000; z-index:350; align-items:center; justify-content:center; color:#666; font-size:14px; text-align:center; padding:20px; box-sizing:border-box; }
         .privacy-overlay.active { display:flex; }
 
+        /* Overlay de bloqueo cuando se detecta un adblocker activo */
+        .adblock-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:500; align-items:center; justify-content:center; flex-direction:column; text-align:center; padding:30px; box-sizing:border-box; }
+        .adblock-overlay.active { display:flex; }
+        .adblock-overlay p { color:#eee; font-size:15px; line-height:1.5; margin-bottom:18px; max-width:320px; }
+        .adblock-overlay button { background:#e50914; color:#fff; border:none; padding:12px 28px; border-radius:8px; font-size:14px; cursor:pointer; }
+
         /* Evitar guardar/copiar imágenes (menú de mantener presionado / clic derecho) */
         img {
             -webkit-touch-callout: none;   /* iOS Safari: quita "Guardar imagen" al mantener presionado */
@@ -124,7 +130,8 @@
     <div id="modal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="cerrarModal()">✖</span>
-            <h2 id="modal-title">Título</h2>
+            <h2 id="modal-title" style="display:inline-block;">Título</h2>
+            <span id="btn-favorito" onclick="toggleFavoritoActual()" style="float:right; font-size:26px; cursor:pointer; user-select:none;">🤍</span>
             <div style="position:relative;">
                 <img id="modal-img" src="" style="width:100%; border-radius:10px;">
                 <div style="position:absolute; top:0; left:0; width:100%; height:100%;"></div>
@@ -165,6 +172,12 @@
 
     <!-- OVERLAY DE PRIVACIDAD -->
     <div id="privacy-overlay" class="privacy-overlay">🔒 Contenido oculto</div>
+
+    <!-- OVERLAY DE ADBLOCK -->
+    <div id="adblock-overlay" class="adblock-overlay">
+        <p>🚫 Detectamos un bloqueador de anuncios activo.<br>Desactivalo para poder ver el contenido.</p>
+        <button id="adblock-retry-btn">Reintentar</button>
+    </div>
 
     <!-- MODAL EPISODIOS -->
     <div id="ep-modal" class="ep-modal">
@@ -208,87 +221,27 @@
                 <div class="title">▶️ Continuar viendo</div>
                 <div class="row" id="contenedor-continuar"></div>
             </div>
-            <div class="title">Tendencias</div>
+            <div class="title">🔥 Tendencias</div>
             <div class="row" id="contenedor-tendencias"></div>
+
+            <div class="title">🆕 Recién agregadas</div>
+            <div class="row" id="contenedor-recientes"></div>
+
+            <div class="title">⭐ Mejor valoradas</div>
+            <div class="row" id="contenedor-top-valoradas"></div>
+
+            <div id="seccion-favoritas" style="display:none;">
+                <div class="title">❤️ Favoritas</div>
+                <div class="row" id="contenedor-favoritas"></div>
+            </div>
         </div>
     </div>
 
     <div id="peliculas" class="view">
         <div class="title">🎬 Películas</div>
-        <div id="seccion-accion" class="genero-seccion">
-            <div class="genero-header"><h3>💥 Acción</h3></div>
-            <div class="row" id="slider-accion"></div>
-        </div>
-        <div id="seccion-ciencia-ficcion" class="genero-seccion">
-            <div class="genero-header"><h3>🚀 Ciencia Ficción</h3></div>
-            <div class="row" id="slider-ciencia-ficcion"></div>
-        </div>
-        <div id="seccion-suspenso" class="genero-seccion">
-            <div class="genero-header"><h3>🕵️ Suspenso</h3></div>
-            <div class="row" id="slider-suspenso"></div>
-        </div>
-        <div id="seccion-documental" class="genero-seccion">
-            <div class="genero-header"><h3>🎥 Documental</h3></div>
-            <div class="row" id="slider-documental"></div>
-        </div>
-        <div id="seccion-comedia-pelicula" class="genero-seccion">
-            <div class="genero-header"><h3>😂 Comedia</h3></div>
-            <div class="row" id="slider-comedia-pelicula"></div>
-        </div>
-        <div id="seccion-terror" class="genero-seccion">
-            <div class="genero-header"><h3>👻 Terror</h3></div>
-            <div class="row" id="slider-terror"></div>
-        </div>
-        <div id="seccion-romance" class="genero-seccion">
-            <div class="genero-header"><h3>💕 Romance</h3></div>
-            <div class="row" id="slider-romance"></div>
-        </div>
-        <div id="seccion-aventura" class="genero-seccion">
-            <div class="genero-header"><h3>🗺️ Aventura</h3></div>
-            <div class="row" id="slider-aventura"></div>
-        </div>
+        <div id="peliculas-secciones"></div>
     </div>
-
-    <div id="accion" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">💥 Todas las de Acción</div>
-        <div class="grid-genero" id="contenedor-accion"></div>
-    </div>
-    <div id="ciencia-ficcion" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">🚀 Todas las de Ciencia Ficción</div>
-        <div class="grid-genero" id="contenedor-ciencia-ficcion"></div>
-    </div>
-    <div id="suspenso" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">🕵️ Todas las de Suspenso</div>
-        <div class="grid-genero" id="contenedor-suspenso"></div>
-    </div>
-    <div id="documental" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">🎥 Todos los Documentales</div>
-        <div class="grid-genero" id="contenedor-documental"></div>
-    </div>
-    <div id="comedia-pelicula" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">😂 Todas las de Comedia</div>
-        <div class="grid-genero" id="contenedor-comedia-pelicula"></div>
-    </div>
-    <div id="terror" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">👻 Todas las de Terror</div>
-        <div class="grid-genero" id="contenedor-terror"></div>
-    </div>
-    <div id="romance" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">💕 Todas las de Romance</div>
-        <div class="grid-genero" id="contenedor-romance"></div>
-    </div>
-    <div id="aventura" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
-        <div class="title">🗺️ Todas las de Aventura</div>
-        <div class="grid-genero" id="contenedor-aventura"></div>
-    </div>
+    <div id="peliculas-paginas"></div>
 
     <div id="series" class="view">
         <div class="title">📺 Géneros Series</div>
@@ -675,10 +628,56 @@
             }
         }
 
+        // ─── GÉNEROS DE PELÍCULAS (taxonomía TMDB) ─────────────────────────────────
+        const GENEROS_PELICULAS = [
+            { slug:'accion',          label:'Acción',           emoji:'💥' },
+            { slug:'aventura',        label:'Aventura',         emoji:'🗺️' },
+            { slug:'animacion',       label:'Animación',        emoji:'🎨' },
+            { slug:'comedia-pelicula',label:'Comedia',          emoji:'😂' },
+            { slug:'crimen',          label:'Crimen',           emoji:'🔫' },
+            { slug:'documental',      label:'Documental',       emoji:'🎥' },
+            { slug:'drama-pelicula',  label:'Drama',            emoji:'🎭' },
+            { slug:'familiar',        label:'Familiar',         emoji:'👨‍👩‍👧' },
+            { slug:'fantasia',        label:'Fantasía',         emoji:'🧙' },
+            { slug:'historia',        label:'Historia',         emoji:'📜' },
+            { slug:'terror',          label:'Terror',           emoji:'👻' },
+            { slug:'musica',          label:'Música',           emoji:'🎵' },
+            { slug:'misterio',        label:'Misterio',         emoji:'🕵️' },
+            { slug:'romance',         label:'Romance',          emoji:'💕' },
+            { slug:'ciencia-ficcion', label:'Ciencia Ficción',  emoji:'🚀' },
+            { slug:'suspenso',        label:'Suspenso',         emoji:'🔪' },
+            { slug:'belica',          label:'Bélica',           emoji:'🎖️' },
+            { slug:'western',         label:'Western',          emoji:'🤠' },
+        ];
+
+        // Crea las secciones (home) y páginas "ver todo" para cada género, una sola vez
+        function generarSeccionesGeneros() {
+            const secciones = document.getElementById('peliculas-secciones');
+            const paginas   = document.getElementById('peliculas-paginas');
+            GENEROS_PELICULAS.forEach(g => {
+                const sec = document.createElement('div');
+                sec.className = 'genero-seccion';
+                sec.id = `seccion-${g.slug}`;
+                sec.innerHTML = `<div class="genero-header"><h3>${g.emoji} ${g.label}</h3></div><div class="row" id="slider-${g.slug}"></div>`;
+                secciones.appendChild(sec);
+
+                const pagina = document.createElement('div');
+                pagina.className = 'view';
+                pagina.id = g.slug;
+                pagina.innerHTML = `
+                    <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('peliculas')">⬅ Volver</button>
+                    <div class="title">${g.emoji} Todas las de ${g.label}</div>
+                    <div class="grid-genero" id="contenedor-${g.slug}"></div>`;
+                paginas.appendChild(pagina);
+            });
+        }
+
         // ─── CATÁLOGO CON SLIDERS ────────────────────────────────────────────────
         const SLIDER_MAX = 8; // máximo en el slider
 
         async function cargarCatalogo() {
+            generarSeccionesGeneros();
+
             // Combina el catálogo fijo (data-peliculas.js) con el que el bot agrega solo
             try {
                 const res = await fetch('/catalogo?tipo=peliculas');
@@ -693,12 +692,18 @@
                 }
             } catch {}
 
-            const generos = ['accion', 'ciencia-ficcion', 'suspenso', 'documental', 'comedia-pelicula', 'terror', 'romance', 'aventura'];
+            // Compat: si alguna entrada vieja todavía tiene 'genero' (string) en vez de
+            // 'generos' (array), la adaptamos sola para no romper nada.
+            baseDeDatosPeliculas.forEach(p => {
+                if (!p.generos && p.genero) p.generos = [p.genero];
+                if (!p.generos) p.generos = [];
+            });
 
-            for (const genero of generos) {
+            for (const g of GENEROS_PELICULAS) {
+                const genero = g.slug;
                 const slider    = document.getElementById(`slider-${genero}`);
                 const contenedor = document.getElementById(`contenedor-${genero}`);
-                const pelis     = baseDeDatosPeliculas.filter(p => p.genero === genero);
+                const pelis     = baseDeDatosPeliculas.filter(p => p.generos.includes(genero));
 
                 pelis.forEach((peli, index) => {
                     const globalIdx = baseDeDatosPeliculas.indexOf(peli);
@@ -707,8 +712,8 @@
                     if (index < SLIDER_MAX && slider) {
                         const card = document.createElement('div');
                         card.className = 'card pelicula';
-                        card.innerHTML = `<img id="img-s-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
-                        card.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-s-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
+                        card.innerHTML = `<img id="img-s-${genero}-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
+                        card.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-s-${genero}-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
                         slider.appendChild(card);
                     }
 
@@ -716,12 +721,16 @@
                     if (contenedor) {
                         const card2 = document.createElement('div');
                         card2.className = 'card pelicula';
-    
-                        card2.innerHTML = `<img id="img-t-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
-                        card2.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-t-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
+
+                        card2.innerHTML = `<img id="img-t-${genero}-${globalIdx}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
+                        card2.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-t-${genero}-${globalIdx}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
                         contenedor.appendChild(card2);
                     }
                 });
+
+                // Ocultar secciones de géneros sin ninguna película todavía
+                const seccionEl = document.getElementById(`seccion-${genero}`);
+                if (seccionEl) seccionEl.style.display = pelis.length ? '' : 'none';
 
                 // Card "Ver todo" al final del slider
                 if (slider && pelis.length > SLIDER_MAX) {
@@ -735,18 +744,104 @@
                 }
             }
 
-            // Cargar posters en lotes
+            // Cargar posters en lotes (todas las cards, sea cual sea su prefijo de id)
             const LOTE = 5;
             for (let i = 0; i < baseDeDatosPeliculas.length; i += LOTE) {
-                await Promise.all(baseDeDatosPeliculas.slice(i, i + LOTE).map(async (peli, j) => {
-                    const idx    = i + j;
+                await Promise.all(baseDeDatosPeliculas.slice(i, i + LOTE).map(async (peli) => {
+                    const idx    = baseDeDatosPeliculas.indexOf(peli);
                     const poster = await obtenerPoster(peli.tmdbQuery);
-                    const s = document.getElementById(`img-s-${idx}`);
-                    const t = document.getElementById(`img-t-${idx}`);
-                    if (s) { s.src = poster || PLACEHOLDER; s.classList.remove('skeleton'); }
-                    if (t) { t.src = poster || PLACEHOLDER; t.classList.remove('skeleton'); }
+                    document.querySelectorAll(`[id^="img-s-"][id$="-${idx}"], [id^="img-t-"][id$="-${idx}"]`).forEach(el => {
+                        el.src = poster || PLACEHOLDER;
+                        el.classList.remove('skeleton');
+                    });
                 }));
             }
+
+            await Promise.all([cargarRecientes(), cargarTopValoradas()]);
+            cargarFavoritas();
+        }
+
+        // ─── FAVORITOS (se guardan en el propio celular, por dispositivo) ─────────
+        function idFavorito(p) {
+            return p.nombreKV || p.tmdbQuery; // nombreKV si existe, si no el tmdbQuery
+        }
+        function getFavoritos() {
+            try { return JSON.parse(localStorage.getItem('favoritos') || '[]'); }
+            catch { return []; }
+        }
+        function esFavorito(id) {
+            return getFavoritos().some(f => f.id === id);
+        }
+        function toggleFavoritoActual() {
+            const id = idFavorito(modalActual);
+            let favoritos = getFavoritos();
+            if (favoritos.some(f => f.id === id)) {
+                favoritos = favoritos.filter(f => f.id !== id);
+                document.getElementById('btn-favorito').innerText = '🤍';
+            } else {
+                favoritos.push({
+                    id, titulo: modalActual.titulo, img: modalActual.img,
+                    info: modalActual.info, desc: modalActual.desc,
+                    tmdbQuery: modalActual.tmdbQuery, type: modalActual.type, nombreKV: modalActual.nombreKV
+                });
+                document.getElementById('btn-favorito').innerText = '❤️';
+            }
+            localStorage.setItem('favoritos', JSON.stringify(favoritos));
+            cargarFavoritas();
+        }
+        function cargarFavoritas() {
+            const favoritos = getFavoritos();
+            const seccion = document.getElementById('seccion-favoritas');
+            const contenedor = document.getElementById('contenedor-favoritas');
+            contenedor.innerHTML = '';
+            seccion.style.display = favoritos.length ? '' : 'none';
+            favoritos.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'card pelicula';
+                card.innerHTML = `<img class="skeleton" src="${f.img || PLACEHOLDER}"><p>${f.titulo}</p>`;
+                card.onclick = () => abrirModal(f.titulo, f.img, f.info, f.desc, f.tmdbQuery, f.type, f.nombreKV || null);
+                contenedor.appendChild(card);
+            });
+        }
+
+        // ─── RECIÉN AGREGADAS (últimas del catálogo) ───────────────────────────────
+        async function cargarRecientes() {
+            const contenedor = document.getElementById('contenedor-recientes');
+            const recientes = baseDeDatosPeliculas.slice(-12).reverse();
+            recientes.forEach((peli, i) => {
+                const card = document.createElement('div');
+                card.className = 'card pelicula';
+                card.innerHTML = `<img id="img-rec-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${peli.titulo}</p>`;
+                card.onclick = () => abrirModal(peli.titulo, document.getElementById(`img-rec-${i}`).src, peli.info, peli.desc, peli.tmdbQuery, 'movie', peli.nombreKV || null);
+                contenedor.appendChild(card);
+            });
+            await Promise.all(recientes.map(async (peli, i) => {
+                const poster = await obtenerPoster(peli.tmdbQuery);
+                const el = document.getElementById(`img-rec-${i}`);
+                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+            }));
+        }
+
+        // ─── MEJOR VALORADAS (parseando el ⭐ del campo info) ──────────────────────
+        async function cargarTopValoradas() {
+            const contenedor = document.getElementById('contenedor-top-valoradas');
+            const conRating = baseDeDatosPeliculas
+                .map(p => ({ p, rating: parseFloat((p.info || '').match(/⭐\s*([\d.]+)/)?.[1] || 0) }))
+                .filter(x => x.rating > 0)
+                .sort((a, b) => b.rating - a.rating)
+                .slice(0, 12);
+            conRating.forEach(({ p }, i) => {
+                const card = document.createElement('div');
+                card.className = 'card pelicula';
+                card.innerHTML = `<img id="img-top-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${p.titulo}</p>`;
+                card.onclick = () => abrirModal(p.titulo, document.getElementById(`img-top-${i}`).src, p.info, p.desc, p.tmdbQuery, 'movie', p.nombreKV || null);
+                contenedor.appendChild(card);
+            });
+            await Promise.all(conRating.map(async ({ p }, i) => {
+                const poster = await obtenerPoster(p.tmdbQuery);
+                const el = document.getElementById(`img-top-${i}`);
+                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+            }));
         }
 
         // ─── TENDENCIAS ───────────────────────────────────────────────────────────
@@ -805,7 +900,8 @@
             document.getElementById('modal-info').innerText = info;
             document.getElementById('modal-desc').innerText = desc;
             document.getElementById('modal').style.display = 'flex';
-            modalActual = { tmdbQuery, type, nombreKV };
+            modalActual = { titulo, img, info, desc, tmdbQuery, type, nombreKV };
+            document.getElementById('btn-favorito').innerText = esFavorito(idFavorito(modalActual)) ? '❤️' : '🤍';
             document.getElementById('btn-trailer').style.display = 'block';
             // Mostrar botones según tipo
             if (type === 'tv') {
@@ -986,12 +1082,26 @@
                 }
             };
 
-            // Mostrar anuncio primero
-            if (typeof show_11208906 === 'function') {
-                show_11208906().then(ejecutar).catch(ejecutar);
-            } else {
-                await ejecutar();
+            // Mostrar anuncio primero (con detección de adblocker)
+            await mostrarAnuncioYContinuar(ejecutar);
+        }
+
+        // ─── ADBLOCK: espera breve por si el script viene lento, y si no aparece, bloquea ──
+        async function mostrarAnuncioYContinuar(ejecutar) {
+            const intentos = 10; // 10 x 200ms = 2 segundos de margen
+            for (let i = 0; i < intentos; i++) {
+                if (typeof show_11208906 === 'function') {
+                    show_11208906().then(ejecutar).catch(ejecutar);
+                    return;
+                }
+                await new Promise(r => setTimeout(r, 200));
             }
+            // Después del margen, si el SDK sigue sin existir: bloqueador activo
+            document.getElementById('adblock-overlay').classList.add('active');
+            document.getElementById('adblock-retry-btn').onclick = () => {
+                document.getElementById('adblock-overlay').classList.remove('active');
+                mostrarAnuncioYContinuar(ejecutar);
+            };
         }
 
         // Reproductor interno para embeds (Archive.org, etc)
