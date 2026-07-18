@@ -14,6 +14,7 @@ const SERIES_CONOCIDAS = {
     'llamas a mi puerta': 'sen-cal-kapimi',
     'medcezir': 'medcezir',
     'kara sevda': 'kara-sevda',
+    'amor eterno': 'kara-sevda',
     'fatmagul': 'fatmagul',
     'fatmagül': 'fatmagul',
     'asi': 'asi',
