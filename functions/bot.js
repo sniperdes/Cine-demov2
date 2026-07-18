@@ -53,6 +53,12 @@ function extraerTituloGuess(texto) {
         .replace(/\.(mp4|mkv|avi)$/i, '')
         .replace(/\[[^\]]*\]/g, ' ')
         .replace(/\([^)]*\)/g, ' ')
+       .replace(/[\u{1F1E6}-\u{1F1FF}]{2}/gu, ' ') // 🇫🇷 🇹🇷 🇪🇸 🇦🇷
+    .replace(/\p{Extended_Pictographic}/gu, ' ') // Resto de emojis
+    .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')
+    .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ')
+    .replace(/\b\d{5,}\b/g, ' ')
+    .replace(/\s+/g, ' ')
         .split(/cap[ií]tulo|capitulo|episodio|\bep\.?\s*\d|temporada|season/i)[0];
     t = t.replace(/[|_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
     // Quitar prefijos comunes tipo "Ver", "Pelicula", "Película completa"
