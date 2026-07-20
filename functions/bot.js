@@ -46,7 +46,7 @@ const SERIES_CONOCIDAS = {
     'i̇çerde': 'icerde',
 
     // ── Series (van a data-series.js) ──────────────────────────────
-    // 'Rancho Dutton': 'rancho-dutton',
+      'Rancho Dutton': 'rancho-dutton',
     // 'stranger things': 'stranger-things',
 
     // ── Doramas (van a data-doramas.js) ─────────────────────────────
