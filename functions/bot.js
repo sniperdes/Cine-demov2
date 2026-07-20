@@ -21,7 +21,7 @@ const SERIES_CONOCIDAS = {
     'aşı': 'asi',
     'elif': 'elif',
     'contra el destino': 'contra-el-destino',
-    'Kadere Karşı': 'contra-el-destino',
+    'kadere karşı': 'contra-el-destino',
     'dirilis ertugrul': 'dirilis-ertugrul',
     'diriliş ertuğrul': 'dirilis-ertugrul',
     'resurrection ertugrul': 'dirilis-ertugrul',
@@ -44,6 +44,19 @@ const SERIES_CONOCIDAS = {
     'poyraz karayel': 'poyraz-karayel',
     'icerde': 'icerde',
     'i̇çerde': 'icerde',
+
+    // ── Series (van a data-series.js) ──────────────────────────────
+    // 'breaking bad': 'breaking-bad',
+    // 'stranger things': 'stranger-things',
+
+    // ── Doramas (van a data-doramas.js) ─────────────────────────────
+    // 'goblin': 'goblin',
+
+    // ── Anime (van a data-anime.js) ─────────────────────────────────
+    // 'naruto': 'naruto',
+
+    // ── Rusas (van a data-rusas.js) ──────────────────────────────────
+    // 'brigada': 'brigada',
 };
 
 // TMDB (misma key que usa poster.js)
