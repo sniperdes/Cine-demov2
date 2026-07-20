@@ -244,8 +244,8 @@
     <div id="peliculas-paginas"></div>
 
     <div id="series" class="view">
-        <div class="title">📺 Géneros Series</div>
-        <div class="row" id="series-menu"></div>
+        <div class="title">📺 Series</div>
+        <div id="series-secciones"></div>
     </div>
     <div id="series-paginas"></div>
     <div id="anime" class="view">
@@ -398,29 +398,31 @@
             { slug:'western-serie',                   label:'Western',                  emoji:'🤠', muestra:'Yellowstone 2018' },
         ];
 
-        // Crea el menú de géneros (home) y las páginas "ver todo", una sola vez
+        // Crea las secciones (home, apiladas) y páginas "ver todo" para cada género
         function generarSeccionesSeries() {
-            const menu = document.getElementById('series-menu');
-            const paginas = document.getElementById('series-paginas');
+            const secciones = document.getElementById('series-secciones');
+            const paginas   = document.getElementById('series-paginas');
             GENEROS_SERIES.forEach(g => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => show(g.slug);
-                card.innerHTML = `<img id="img-genero-${g.slug}" class="skeleton" src="${PLACEHOLDER}"><p>${g.emoji} ${g.label}</p>`;
-                menu.appendChild(card);
+                const sec = document.createElement('div');
+                sec.className = 'genero-seccion';
+                sec.id = `seccion-${g.slug}`;
+                sec.innerHTML = `<div class="genero-header"><h3>${g.emoji} ${g.label}</h3></div><div class="row" id="slider-${g.slug}"></div>`;
+                secciones.appendChild(sec);
 
                 const pagina = document.createElement('div');
                 pagina.className = 'view';
                 pagina.id = g.slug;
                 pagina.innerHTML = `
                     <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
-                    <div class="title">${g.emoji} ${g.label}</div>
-                    <div class="row" id="contenedor-${g.slug}"></div>`;
+                    <div class="title">${g.emoji} Todas las de ${g.label}</div>
+                    <div class="grid-genero" id="contenedor-${g.slug}"></div>`;
                 paginas.appendChild(pagina);
             });
         }
 
         // ─── CARGAR SERIES ────────────────────────────────────────────────────────
+        const SLIDER_MAX_SERIES = 8;
+
         async function cargarSeries() {
             generarSeccionesSeries();
 
@@ -442,26 +444,45 @@
                 if (!s.generos) s.generos = [];
             });
 
-            // Portadas de los íconos del menú de géneros
-            await Promise.all(GENEROS_SERIES.map(async g => {
-                const poster = await obtenerPoster(g.muestra, 'tv');
-                const el = document.getElementById(`img-genero-${g.slug}`);
-                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
-            }));
-
-            // Tarjetas por género (una serie puede aparecer en varias páginas)
             for (const g of GENEROS_SERIES) {
+                const slider     = document.getElementById(`slider-${g.slug}`);
                 const contenedor = document.getElementById(`contenedor-${g.slug}`);
-                if (!contenedor) continue;
-                const series = baseDeDatosSeries.filter(s => s.generos.includes(g.slug));
-                series.forEach(serie => {
+                const series     = baseDeDatosSeries.filter(s => s.generos.includes(g.slug));
+
+                series.forEach((serie, index) => {
                     const idx = baseDeDatosSeries.indexOf(serie);
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'card pelicula';
-                    tarjeta.innerHTML = `<img id="serie-img-${g.slug}-${idx}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
-                    tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${g.slug}-${idx}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv', serie.nombreKV || null);
-                    contenedor.appendChild(tarjeta);
+
+                    if (index < SLIDER_MAX_SERIES && slider) {
+                        const tarjeta = document.createElement('div');
+                        tarjeta.className = 'card pelicula';
+                        tarjeta.innerHTML = `<img id="serie-img-s-${g.slug}-${idx}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
+                        tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-s-${g.slug}-${idx}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv', serie.nombreKV || null);
+                        slider.appendChild(tarjeta);
+                    }
+
+                    if (contenedor) {
+                        const tarjeta2 = document.createElement('div');
+                        tarjeta2.className = 'card pelicula';
+                        tarjeta2.innerHTML = `<img id="serie-img-t-${g.slug}-${idx}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
+                        tarjeta2.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-t-${g.slug}-${idx}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv', serie.nombreKV || null);
+                        contenedor.appendChild(tarjeta2);
+                    }
                 });
+
+                // Ocultar géneros sin ninguna serie todavía
+                const seccionEl = document.getElementById(`seccion-${g.slug}`);
+                if (seccionEl) seccionEl.style.display = series.length ? '' : 'none';
+
+                // Card "Ver todo" al final del slider
+                if (slider && series.length > SLIDER_MAX_SERIES) {
+                    const verTodo = document.createElement('div');
+                    verTodo.className = 'card-ver-todo';
+                    verTodo.style.minWidth = '100px';
+                    verTodo.style.height = '200px';
+                    verTodo.innerHTML = `<div class="ver-todo-icon">▶️</div><p>Ver todo</p>`;
+                    verTodo.onclick = () => show(g.slug);
+                    slider.appendChild(verTodo);
+                }
             }
 
             // Posters, apuntando directo a los IDs de ESTA serie (nunca por selector global)
@@ -471,8 +492,10 @@
                     const idx    = baseDeDatosSeries.indexOf(serie);
                     const poster = await obtenerPoster(serie.tmdbQuery, 'tv');
                     (serie.generos || []).forEach(genero => {
-                        const el = document.getElementById(`serie-img-${genero}-${idx}`);
-                        if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+                        const s = document.getElementById(`serie-img-s-${genero}-${idx}`);
+                        const t = document.getElementById(`serie-img-t-${genero}-${idx}`);
+                        if (s) { s.src = poster || PLACEHOLDER; s.classList.remove('skeleton'); }
+                        if (t) { t.src = poster || PLACEHOLDER; t.classList.remove('skeleton'); }
                     });
                 }));
             }
