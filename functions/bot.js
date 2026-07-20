@@ -46,7 +46,7 @@ const SERIES_CONOCIDAS = {
     'i̇çerde': 'icerde',
 
     // ── Series (van a data-series.js) ──────────────────────────────
-      'rancho dutton': 'rancho-dutton',
+    // 'breaking bad': 'breaking-bad',
     // 'stranger things': 'stranger-things',
 
     // ── Doramas (van a data-doramas.js) ─────────────────────────────
@@ -83,7 +83,24 @@ function extraerTituloGuess(texto) {
     return t;
 }
 
-// Busca el título en TMDB (primero como serie, después como película) y arma un bloque sugerido
+// Mapea los genre_ids de series de TV (TMDB) a los géneros válidos de data-series.js
+function generoTMDBaGeneroSerie(genreIds) {
+    const mapa = [
+        [10759, 'accion-serie'],
+        [16, 'animacion-serie'],
+        [35, 'comedia'],
+        [80, 'crimen-serie'],
+        [99, 'documental-serie'],
+        [18, 'drama'],
+        [10751, 'familiar-serie'],
+        [9648, 'misterio-serie'],
+        [10765, 'cienciaficcion-fantasia-serie'],
+        [10768, 'belica-serie'],
+        [37, 'western-serie'],
+    ];
+    const encontrados = mapa.filter(([id]) => (genreIds || []).includes(id)).map(([, genero]) => genero);
+    return encontrados.length ? encontrados : ['drama'];
+}
 // Mapea los genre_ids de TMDB a los géneros válidos de tu catálogo de películas.
 // Devuelve un ARRAY: una película puede caer en más de un género (ej: terror + suspenso).
 function generoTMDBaGeneroApp(genreIds) {
@@ -165,6 +182,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const esAnime = idioma === 'ja' && esAnimacion;
     const esDorama = idioma === 'ko' || (idioma === 'ja' && tipo === 'tv');
     const esPeliculaNormal = tipo === 'movie' && !esTurca && !esRusa && !esAnime && !esDorama;
+    const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama;
 
     // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
     if (esPeliculaNormal && env) {
@@ -218,7 +236,51 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         }
     }
 
-    // Para el resto (series, turcas, rusas, anime, doramas) seguimos con el bloque para copiar/pegar
+    // Caso especial: serie "normal" (occidental) -> se agrega SOLA al catálogo
+    if (esSerieNormal && env) {
+        const generosFinal = generoTMDBaGeneroSerie(resultado.genre_ids);
+        // Reusamos detectarSerie solo para sacar temporada/episodio del nombre del archivo
+        // (ya sabemos que nombreKV dio null acá, porque si no, no estaríamos en esta rama)
+        const { episodio, temporada } = detectarSerie(textoOriginal);
+
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:series');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+
+            if (!yaExiste) {
+                catalogo.push({
+                    titulo,
+                    tmdbQuery: `${tituloOriginal} ${anio}`,
+                    nombreKV: nombreKVsugerido,
+                    generos: generosFinal,
+                    info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
+                    desc: overview,
+                });
+                await env.PELICULAS_KV.put('catalogo:series', JSON.stringify(catalogo));
+            }
+
+            const textoBase = yaExiste
+                ? `📺 "${titulo}" (${anio}) ya estaba en el catálogo de series (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de series.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
+
+            if (episodio) {
+                return {
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    nombreKV: nombreKVsugerido,
+                    temporada,
+                    episodio
+                };
+            }
+            // No se pudo sacar el episodio del nombre del archivo: guarda la ficha
+            // igual, pero sin botón (asigná el video a mano con /asignar serie)
+            return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
+        } catch (e) {
+            // Si falla el guardado automático, caemos al mensaje de copiar/pegar de siempre
+        }
+    }
+
+    // Para el resto (series no reconocidas por lo anterior, turcas, rusas, anime, doramas) seguimos con el bloque para copiar/pegar
     let archivoSugerido, generoSugerido;
     if (esTurca) {
         archivoSugerido = 'data-turcas.js';
@@ -389,9 +451,17 @@ export async function onRequest(context) {
                         text: sugerencia.texto,
                         parse_mode: 'Markdown'
                     };
-                    // Si identificamos el nombreKV (película reconocida), ofrecer botón
-                    // para guardar el video automáticamente como parte 1, sin tipear el comando
-                    if (sugerencia.nombreKV) {
+                    // Si identificamos el nombreKV, ofrecer botón para guardar el video
+                    // automáticamente, sin tipear el comando. Distinguimos película (parte 1)
+                    // de serie (temporada/episodio, si se pudo leer del nombre del archivo).
+                    if (sugerencia.nombreKV && sugerencia.episodio) {
+                        payload.reply_markup = {
+                            inline_keyboard: [[
+                                { text: '✅ Confirmar', callback_data: `confs:${msgId}:${sugerencia.nombreKV}:${sugerencia.temporada}:${sugerencia.episodio}` },
+                                { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
+                            ]]
+                        };
+                    } else if (sugerencia.nombreKV) {
                         payload.text += `\n\n¿Guardo este video como *${sugerencia.nombreKV}* parte 1?`;
                         payload.reply_markup = {
                             inline_keyboard: [[
@@ -477,6 +547,33 @@ export async function onRequest(context) {
             });
         }
 
+        if (data.startsWith('confs:')) {
+            const [, msgId, nombreKV, temporada, episodio] = data.split(':');
+            const fileId = await env.PELICULAS_KV.get(`cola:${msgId}`);
+
+            if (!fileId) {
+                await fetch(`${BOT_API}/editMessageText`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: '❌ Video ya no está en cola.' })
+                });
+                return new Response('OK');
+            }
+
+            await env.PELICULAS_KV.put(`video:${nombreKV}:${temporada}:${episodio}`, fileId);
+            await env.PELICULAS_KV.delete(`cola:${msgId}`);
+
+            await fetch(`${BOT_API}/editMessageText`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: chatId, message_id: messageId,
+                    text: `✅ *${nombreKV}* T${temporada}E${episodio} guardado!`,
+                    parse_mode: 'Markdown'
+                })
+            });
+        }
+
         if (data.startsWith('corr:')) {
             const [, msgId] = data.split(':');
             await fetch(`${BOT_API}/editMessageText`, {
@@ -529,7 +626,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir película auto-agregada:*\n/listarcatalogo pelicula\n/vercatalogo pelicula nombre\n/corregir pelicula nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie nombre temp ep\n/borrar pelicula nombre parte`);
+        await enviar(`👋 *Bot Admin Cine Demo*\n\n*Automático:*\nSubí el video al canal. Si reconozco la serie te muestro botones para confirmar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada (película o serie):*\n/listarcatalogo pelicula|serie\n/vercatalogo pelicula|serie nombre\n/corregir pelicula|serie nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie nombre temp ep\n/borrar pelicula nombre parte`);
         return new Response('OK');
     }
 
@@ -537,14 +634,15 @@ export async function onRequest(context) {
     const cmd    = partes[0];
 
     if (cmd === '/corregir') {
-        // /corregir pelicula nombreKV campo valor con espacios...
+        // /corregir pelicula|serie nombreKV campo valor con espacios...
         const tipo = partes[1];
         const nombreKV = partes[2];
         const campo = partes[3];
         const valor = partes.slice(4).join(' ');
+        const kvKey = tipo === 'serie' ? 'catalogo:series' : 'catalogo:peliculas';
 
-        if (tipo !== 'pelicula' || !nombreKV || !campo || !valor) {
-            await enviar(`Uso: /corregir pelicula nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir pelicula shaitaan generos terror,suspenso,drama-pelicula`);
+        if (!['pelicula', 'serie'].includes(tipo) || !nombreKV || !campo || !valor) {
+            await enviar(`Uso: /corregir pelicula|serie nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie`);
             return new Response('OK');
         }
 
@@ -555,18 +653,18 @@ export async function onRequest(context) {
         }
 
         try {
-            const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+            const raw = await env.PELICULAS_KV.get(kvKey);
             const catalogo = raw ? JSON.parse(raw) : [];
             const idx = catalogo.findIndex(p => p.nombreKV === nombreKV);
 
             if (idx === -1) {
-                await enviar(`❌ No encontré "${nombreKV}" en el catálogo de películas.`);
+                await enviar(`❌ No encontré "${nombreKV}" en el catálogo de ${tipo === 'serie' ? 'series' : 'películas'}.`);
                 return new Response('OK');
             }
 
             // 'generos' es un array: admite varios separados por coma (ej: terror,suspenso)
             catalogo[idx][campo] = campo === 'generos' ? valor.split(',').map(g => g.trim()) : valor;
-            await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
+            await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
             await enviar(`✅ Corregido "${nombreKV}" → ${campo}: ${valor}`);
         } catch (e) {
             await enviar(`❌ Error al corregir: ${e.message}`);
@@ -635,16 +733,17 @@ export async function onRequest(context) {
     }
 
     if (cmd === '/listarcatalogo') {
-        // /listarcatalogo pelicula → lista TODO lo que el bot agregó solo, para encontrar algo mal agregado
+        // /listarcatalogo pelicula|serie → lista TODO lo que el bot agregó solo
         const tipo = partes[1];
-        if (tipo !== 'pelicula') {
-            await enviar('Uso: /listarcatalogo pelicula');
+        if (!['pelicula', 'serie'].includes(tipo)) {
+            await enviar('Uso: /listarcatalogo pelicula|serie');
             return new Response('OK');
         }
-        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const kvKey = tipo === 'serie' ? 'catalogo:series' : 'catalogo:peliculas';
+        const raw = await env.PELICULAS_KV.get(kvKey);
         const catalogo = raw ? JSON.parse(raw) : [];
         if (!catalogo.length) {
-            await enviar('📋 Todavía no hay películas auto-agregadas.');
+            await enviar(`📋 Todavía no hay ${tipo === 'serie' ? 'series' : 'películas'} auto-agregadas.`);
             return new Response('OK');
         }
         // Telegram corta mensajes muy largos, así que mandamos de a 25
@@ -655,38 +754,40 @@ export async function onRequest(context) {
             bloque.forEach(p => { resp += `🔑 ${p.nombreKV} → ${p.titulo}\n`; });
             await enviar(resp);
         }
-        await enviar('Para ver el detalle de una: /vercatalogo pelicula nombreKV');
+        await enviar(`Para ver el detalle de una: /vercatalogo ${tipo} nombreKV`);
         return new Response('OK');
     }
 
     if (cmd === '/vercatalogo') {
-        // /vercatalogo pelicula nombreKV → muestra la ficha completa tal cual quedó guardada
+        // /vercatalogo pelicula|serie nombreKV → muestra la ficha completa tal cual quedó guardada
         const tipo = partes[1];
         const nombreKV = partes[2];
-        if (tipo !== 'pelicula' || !nombreKV) {
-            await enviar('Uso: /vercatalogo pelicula nombreKV');
+        if (!['pelicula', 'serie'].includes(tipo) || !nombreKV) {
+            await enviar('Uso: /vercatalogo pelicula|serie nombreKV');
             return new Response('OK');
         }
-        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const kvKey = tipo === 'serie' ? 'catalogo:series' : 'catalogo:peliculas';
+        const raw = await env.PELICULAS_KV.get(kvKey);
         const catalogo = raw ? JSON.parse(raw) : [];
         const peli = catalogo.find(p => p.nombreKV === nombreKV);
         if (!peli) {
-            await enviar(`❌ No encontré "${nombreKV}" en el catálogo auto-agregado.\n(Si la agregaste vos a mano en data-peliculas.js, no va a aparecer acá — esto solo lista lo que agregó el bot solo.)`);
+            await enviar(`❌ No encontré "${nombreKV}" en el catálogo auto-agregado.\n(Si la agregaste vos a mano en data-${tipo === 'serie' ? 'series' : 'peliculas'}.js, no va a aparecer acá — esto solo lista lo que agregó el bot solo.)`);
             return new Response('OK');
         }
-        await enviar(`📋 *${peli.titulo}*\n\n🔑 nombreKV: ${peli.nombreKV}\n🔎 tmdbQuery: ${peli.tmdbQuery}\n📁 generos: ${(peli.generos || []).join(', ')}\nℹ️ info: ${peli.info}\n📝 desc: ${peli.desc}\n\nPara borrarla: /borrarcatalogo pelicula ${peli.nombreKV}`);
+        await enviar(`📋 *${peli.titulo}*\n\n🔑 nombreKV: ${peli.nombreKV}\n🔎 tmdbQuery: ${peli.tmdbQuery}\n📁 generos: ${(peli.generos || []).join(', ')}\nℹ️ info: ${peli.info}\n📝 desc: ${peli.desc}\n\nPara borrarla: /borrarcatalogo ${tipo} ${peli.nombreKV}`);
         return new Response('OK');
     }
 
     if (cmd === '/borrarcatalogo') {
-        // /borrarcatalogo pelicula nombreKV → saca la ficha del catálogo (no borra el video en sí)
+        // /borrarcatalogo pelicula|serie nombreKV → saca la ficha del catálogo (no borra el video en sí)
         const tipo = partes[1];
         const nombreKV = partes[2];
-        if (tipo !== 'pelicula' || !nombreKV) {
-            await enviar('Uso: /borrarcatalogo pelicula nombreKV');
+        if (!['pelicula', 'serie'].includes(tipo) || !nombreKV) {
+            await enviar('Uso: /borrarcatalogo pelicula|serie nombreKV');
             return new Response('OK');
         }
-        const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
+        const kvKey = tipo === 'serie' ? 'catalogo:series' : 'catalogo:peliculas';
+        const raw = await env.PELICULAS_KV.get(kvKey);
         const catalogo = raw ? JSON.parse(raw) : [];
         const idx = catalogo.findIndex(p => p.nombreKV === nombreKV);
         if (idx === -1) {
@@ -694,8 +795,8 @@ export async function onRequest(context) {
             return new Response('OK');
         }
         catalogo.splice(idx, 1);
-        await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
-        await enviar(`🗑️ Saqué "${nombreKV}" del catálogo.\n\n(El video en sí sigue guardado — si también querés borrarlo: /borrar pelicula ${nombreKV} 1)`);
+        await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
+        await enviar(`🗑️ Saqué "${nombreKV}" del catálogo.\n\n(El video en sí sigue guardado — si también querés borrarlo con /borrar)`);
         return new Response('OK');
     }
 
