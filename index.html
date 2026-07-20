@@ -245,24 +245,9 @@
 
     <div id="series" class="view">
         <div class="title">📺 Géneros Series</div>
-        <div class="row">
-            <div class="card" onclick="show('drama')"><img id="img-genero-drama" class="skeleton" src=""><p>Drama</p></div>
-            <div class="card" onclick="show('comedia')"><img id="img-genero-comedia" class="skeleton" src=""><p>Comedia</p></div>
-            <div class="card" onclick="show('accion-serie')"><img id="img-genero-accion-serie" class="skeleton" src=""><p>Acción</p></div>
-        </div>
+        <div class="row" id="series-menu"></div>
     </div>
-    <div id="drama" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
-        <div class="row" id="contenedor-drama"></div>
-    </div>
-    <div id="comedia" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
-        <div class="row" id="contenedor-comedia"></div>
-    </div>
-    <div id="accion-serie" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
-        <div class="row" id="contenedor-accion-serie"></div>
-    </div>
+    <div id="series-paginas"></div>
     <div id="anime" class="view">
         <div class="title">🎌 Anime</div>
         <div class="row" id="contenedor-anime"></div>
@@ -398,40 +383,97 @@
         // ─── BASE DE DATOS ANIME ──────────────────────────────────────────────────
 // baseDeDatosAnime se carga desde data-*.js
 
-        // ─── IMÁGENES PORTADA GÉNEROS SERIES ─────────────────────────────────────
-        const titularesGeneroSeries = {
-            drama: 'Breaking Bad 2008',
-            comedia: 'Squid Game 2021',
-            'accion-serie': 'The Walking Dead 2010'
-        };
+        // ─── GÉNEROS DE SERIES (taxonomía TMDB TV) ─────────────────────────────────
+        const GENEROS_SERIES = [
+            { slug:'accion-serie',                   label:'Acción y Aventura',        emoji:'💥', muestra:'The Walking Dead 2010' },
+            { slug:'animacion-serie',                label:'Animación',                emoji:'🎨', muestra:'Arcane 2021' },
+            { slug:'comedia',                        label:'Comedia',                  emoji:'😂', muestra:'Squid Game 2021' },
+            { slug:'crimen-serie',                    label:'Crimen',                   emoji:'🔫', muestra:'Breaking Bad 2008' },
+            { slug:'documental-serie',                label:'Documental',              emoji:'🎥', muestra:'Chef\'s Table 2015' },
+            { slug:'drama',                           label:'Drama',                    emoji:'🎭', muestra:'Breaking Bad 2008' },
+            { slug:'familiar-serie',                  label:'Familiar',                 emoji:'👨‍👩‍👧', muestra:'Stranger Things 2016' },
+            { slug:'misterio-serie',                  label:'Misterio',                 emoji:'🕵️', muestra:'True Detective 2014' },
+            { slug:'cienciaficcion-fantasia-serie',   label:'Ciencia Ficción y Fantasía', emoji:'🚀', muestra:'Stranger Things 2016' },
+            { slug:'belica-serie',                    label:'Bélica y Política',        emoji:'🎖️', muestra:'Band of Brothers 2001' },
+            { slug:'western-serie',                   label:'Western',                  emoji:'🤠', muestra:'Yellowstone 2018' },
+        ];
+
+        // Crea el menú de géneros (home) y las páginas "ver todo", una sola vez
+        function generarSeccionesSeries() {
+            const menu = document.getElementById('series-menu');
+            const paginas = document.getElementById('series-paginas');
+            GENEROS_SERIES.forEach(g => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => show(g.slug);
+                card.innerHTML = `<img id="img-genero-${g.slug}" class="skeleton" src="${PLACEHOLDER}"><p>${g.emoji} ${g.label}</p>`;
+                menu.appendChild(card);
+
+                const pagina = document.createElement('div');
+                pagina.className = 'view';
+                pagina.id = g.slug;
+                pagina.innerHTML = `
+                    <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('series')">⬅ Volver</button>
+                    <div class="title">${g.emoji} ${g.label}</div>
+                    <div class="row" id="contenedor-${g.slug}"></div>`;
+                paginas.appendChild(pagina);
+            });
+        }
 
         // ─── CARGAR SERIES ────────────────────────────────────────────────────────
         async function cargarSeries() {
-            // Portadas géneros
-            for (const [genero, query] of Object.entries(titularesGeneroSeries)) {
-                const poster = await obtenerPoster(query, 'tv');
-                const el = document.getElementById(`img-genero-${genero}`);
-                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
-            }
+            generarSeccionesSeries();
 
-            // Tarjetas
-            baseDeDatosSeries.forEach((serie, index) => {
-                const contenedor = document.getElementById(`contenedor-${serie.genero}`);
-                if (!contenedor) return;
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'card pelicula';
-                tarjeta.innerHTML = `<img id="serie-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
-                tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${index}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv');
-                contenedor.appendChild(tarjeta);
+            // Combina el catálogo fijo (data-series.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=series');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosSeries.map(s => s.nombreKV));
+                    for (const serie of dinamico) {
+                        if (!nombresExistentes.has(serie.nombreKV)) baseDeDatosSeries.push(serie);
+                    }
+                }
+            } catch {}
+
+            // Compat con entradas viejas que todavía tengan 'genero' (string)
+            baseDeDatosSeries.forEach(s => {
+                if (!s.generos && s.genero) s.generos = [s.genero];
+                if (!s.generos) s.generos = [];
             });
 
+            // Portadas de los íconos del menú de géneros
+            await Promise.all(GENEROS_SERIES.map(async g => {
+                const poster = await obtenerPoster(g.muestra, 'tv');
+                const el = document.getElementById(`img-genero-${g.slug}`);
+                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+            }));
+
+            // Tarjetas por género (una serie puede aparecer en varias páginas)
+            for (const g of GENEROS_SERIES) {
+                const contenedor = document.getElementById(`contenedor-${g.slug}`);
+                if (!contenedor) continue;
+                const series = baseDeDatosSeries.filter(s => s.generos.includes(g.slug));
+                series.forEach(serie => {
+                    const idx = baseDeDatosSeries.indexOf(serie);
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'card pelicula';
+                    tarjeta.innerHTML = `<img id="serie-img-${g.slug}-${idx}" class="skeleton" src="${PLACEHOLDER}"><p>${serie.titulo}</p>`;
+                    tarjeta.onclick = () => abrirModal(serie.titulo, document.getElementById(`serie-img-${g.slug}-${idx}`).src, serie.info, serie.desc, serie.tmdbQuery, 'tv', serie.nombreKV || null);
+                    contenedor.appendChild(tarjeta);
+                });
+            }
+
+            // Posters, apuntando directo a los IDs de ESTA serie (nunca por selector global)
             const LOTE = 5;
             for (let i = 0; i < baseDeDatosSeries.length; i += LOTE) {
-                await Promise.all(baseDeDatosSeries.slice(i, i + LOTE).map(async (serie, j) => {
-                    const idx    = i + j;
+                await Promise.all(baseDeDatosSeries.slice(i, i + LOTE).map(async (serie) => {
+                    const idx    = baseDeDatosSeries.indexOf(serie);
                     const poster = await obtenerPoster(serie.tmdbQuery, 'tv');
-                    const imgEl  = document.getElementById(`serie-img-${idx}`);
-                    if (imgEl) { imgEl.src = poster || PLACEHOLDER; imgEl.classList.remove('skeleton'); }
+                    (serie.generos || []).forEach(genero => {
+                        const el = document.getElementById(`serie-img-${genero}-${idx}`);
+                        if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
+                    });
                 }));
             }
         }
