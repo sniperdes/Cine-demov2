@@ -53,8 +53,8 @@ const SERIES_CONOCIDAS = {
     // 'goblin': 'goblin',
 
     // ── Anime (van a data-anime.js) ─────────────────────────────────
-    // 'naruto': 'naruto',
-
+       'solo leveling': 'solo-leveling',
+       'Solo Leveling': 'solo-leveling',
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
 };
