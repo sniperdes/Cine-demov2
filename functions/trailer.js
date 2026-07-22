@@ -69,19 +69,14 @@ export async function onRequest(context) {
     let youtubeKey = null;
 
     try {
-        const res  = await fetch(`${TMDB_BASE}/${videoEndpoint}?api_key=${TMDB_KEY}&language=es-ES`);
+        // include_video_language trae en UNA sola consulta los videos en varios
+        // idiomas (antes solo se probaba español y después inglés, nunca turco,
+        // por eso muchas series turcas no encontraban tráiler aunque sí lo tuvieran)
+        const res  = await fetch(`${TMDB_BASE}/${videoEndpoint}?api_key=${TMDB_KEY}&language=es-ES&include_video_language=es,en,tr`);
         const data = await res.json();
 
-        // Buscar trailer oficial en español primero
-        let trailer = data.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
-
-        // Si no hay en español, buscar en inglés
-        if (!trailer) {
-            const res2  = await fetch(`${TMDB_BASE}/${videoEndpoint}?api_key=${TMDB_KEY}`);
-            const data2 = await res2.json();
-            trailer = data2.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube')
-                   || data2.results?.find(v => v.site === 'YouTube');
-        }
+        let trailer = data.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube')
+                   || data.results?.find(v => v.site === 'YouTube');
 
         youtubeKey = trailer?.key || null;
     } catch (err) {
