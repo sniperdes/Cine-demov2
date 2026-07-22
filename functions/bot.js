@@ -20,6 +20,7 @@ const SERIES_CONOCIDAS = {
     'asi': 'asi',
     'aşı': 'asi',
     'elif': 'elif',
+    'Kahraman Babam': 'mi-padre-heroe',
     'contra el destino': 'contra-el-destino',
     'kadere karşı': 'contra-el-destino',
     'dirilis ertugrul': 'dirilis-ertugrul',
