@@ -53,8 +53,8 @@ const SERIES_CONOCIDAS = {
     // 'goblin': 'goblin',
 
     // ── Anime (van a data-anime.js) ─────────────────────────────────
-       'solo leveling': 'solo-leveling',
-       'Solo Leveling': 'solo-leveling',
+    // 'naruto': 'naruto',
+
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
 };
@@ -816,9 +816,30 @@ export async function onRequest(context) {
 
     if (cmd === '/borrar') {
         const tipo = partes[1];
+        const categoriasEpisodio = ['serie', 'anime', 'dorama', 'turca', 'rusa'];
         let key, label;
-        if (tipo === 'serie') { const [,, n, t, e] = partes; key = `video:${n}:${t}:${e}`; label = `${n} T${t}E${e}`; }
-        else if (tipo === 'pelicula') { const [,, n, p] = partes; key = `video:${n}:${p}`; label = `${n} parte ${p}`; }
+
+        if (categoriasEpisodio.includes(tipo)) {
+            const [,, n, t, e] = partes;
+            if (!n || !t || !e) {
+                await enviar(`Uso: /borrar ${tipo} nombreKV temporada episodio\nEj: /borrar anime solo-leveling 1 10\n(temporada y episodio van como número solo, sin la T ni la E)`);
+                return new Response('OK');
+            }
+            key = `video:${n}:${t}:${e}`;
+            label = `${n} T${t}E${e}`;
+        } else if (tipo === 'pelicula') {
+            const [,, n, p] = partes;
+            if (!n || !p) {
+                await enviar('Uso: /borrar pelicula nombreKV parte\nEj: /borrar pelicula john-wick 1');
+                return new Response('OK');
+            }
+            key = `video:${n}:${p}`;
+            label = `${n} parte ${p}`;
+        } else {
+            await enviar('Uso: /borrar serie|pelicula|anime|dorama|turca|rusa nombreKV temp ep (o parte si es película)');
+            return new Response('OK');
+        }
+
         await env.PELICULAS_KV.delete(key);
         await enviar(`🗑️ Borrado: ${label}`);
         return new Response('OK');
