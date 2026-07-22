@@ -21,7 +21,7 @@ const SERIES_CONOCIDAS = {
     'aşı': 'asi',
     'elif': 'elif',
     'Kahraman Babam': 'mi-padre-heroe',
-    'El Doctor Del Pueblo': 'el-doctor-del-pueblo'
+    'El Doctor Del Pueblo': 'el-doctor-del-pueblo',
     'contra el destino': 'contra-el-destino',
     'kadere karşı': 'contra-el-destino',
     'dirilis ertugrul': 'dirilis-ertugrul',
