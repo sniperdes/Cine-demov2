@@ -11,7 +11,6 @@
             { titulo:'contra el Destino',        tmdbQuery:'Kadere Karşı 2022',          nombreKV:'contra-el-destino', genero:'turca-romance', info:'⭐ 7.8 | 🌙 Turca | 📺 1000+ ep', desc:'Una familia .' },
             { titulo:'Mi padre heroe',           tmdbQuery:'Kahraman Babam 2021',        nombreKV:'mi-padre-heroe', genero:'turca-romance', info:'⭐ 5.8 | 🌙 Turca | 📺 + ep', desc:'Vidas peligrosas de los bomberos que se enfrentan a situaciones difíciles.' },
             { titulo:'El doctor del pueblo',     tmdbQuery:'Kasaba Doktoru 2022',        nombreKV:'el-doctor-del-pueblo', genero:'turca-romance', info:'⭐ 7.6 | 🌙 Turca | 📺 + ep', desc:'El talentoso y prometedor Ömer, que decidió convertirse en médico tras perder a su padre, y el legendario cirujano Hakan, que se dedica a salvar vidas, se cruzan en un hospital de pueblo alejado de la ciudad.' },
-         
             // DRAMA
             { titulo:'Dirilis Ertugrul',         tmdbQuery:'Dirilis Ertugrul 2014',      nombreKV:'dirilis-ertugrul', genero:'turca-drama', info:'⭐ 8.1 | 🌙 Turca | 📺 150 ep', desc:'Las aventuras del padre del fundador del Imperio Otomano.' },
             { titulo:'Fatih Harbiye',            tmdbQuery:'Fatih Harbiye 2013',         nombreKV:'fatih-harbiye', genero:'turca-drama', info:'⭐ 7.9 | 🌙 Turca | 📺 60 ep', desc:'Una chica entre dos mundos y dos amores.' },
