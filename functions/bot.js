@@ -52,7 +52,7 @@ const SERIES_CONOCIDAS = {
     // 'stranger things': 'stranger-things',
 
     // ── Doramas (van a data-doramas.js) ─────────────────────────────
-    // 'goblin': 'goblin',
+    // 'goblin': 'así-aprenderás',
 
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
