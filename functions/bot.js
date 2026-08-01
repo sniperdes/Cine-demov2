@@ -54,6 +54,7 @@ const SERIES_CONOCIDAS = {
     // ── Doramas (van a data-doramas.js) ─────────────────────────────
     'Así aprenderás': 'así-aprenderás',
     'Pro bono': 'pro-bono',
+    'Un sueño contigo': 'pro-bono',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
 
