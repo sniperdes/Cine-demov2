@@ -55,7 +55,7 @@ const SERIES_CONOCIDAS = {
     'Así aprenderás': 'así-aprenderás',
     'Pro bono': 'pro-bono',
     'Un sueño contigo': 'un-sueño-contigo',
-    'Nos venos en la oficina': 'nos-vemos-en-la-oficina',
+    'Nos vemos en la oficina': 'nos-vemos-en-la-oficina',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
 
