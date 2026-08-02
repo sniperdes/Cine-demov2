@@ -1,6 +1,7 @@
 // ─── BASE DE DATOS DORAMAS ───────────────────────────────────────────────
         const baseDeDatosDoramas = [
             // ROMANCE
+            { titulo:'¡Nos vemos en la oficina!', tmdbQuery:'내일도 출근! 2026', nombreKV:'nos-vemos-en-la-oficina', genero:'dorama-romance', info:'⭐ 9.0 | 📺', desc:'Cha Ji-yoon lleva 7 años trabajando en el mundo corporativo y está cansada del trabajo y de las citas. Kang Si-woo, un cínico jefe con mala reputación, se cruza.' },
             { titulo:'Un sueño contigo', tmdbQuery:'그대에게 드림 2026', nombreKV:'un-sueño-contigo', genero:'dorama-romance', info:'⭐ 7.9 | 📺', desc:'Sin sinopsis disponible.' },
             // DRAMA
             { titulo:'Así aprenderás', tmdbQuery:'참교육 2026', nombreKV:'así-aprenderás',  genero:'dorama-drama', info:'⭐ 9.4 | 📺', desc:'Unos inspectores insólitos entran en escena en los colegios, con lecciones duras de las que no aparecen en los libros de texto, para acabar con las reiteradas  faltas de respeto.' },
