@@ -60,7 +60,7 @@ const SERIES_CONOCIDAS = {
     'Hacemos lo que podemos': 'hacemos-lo-que-podemos',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
-    'Solo Leveling ': 'solo-leveling',
+    'Solo Leveling': 'solo-leveling',
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
 };
