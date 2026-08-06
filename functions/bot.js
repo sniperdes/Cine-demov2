@@ -61,6 +61,7 @@ const SERIES_CONOCIDAS = {
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
     'Solo Leveling': 'solo-leveling',
+    'jujutsu kaisen 0':'jujutsu-kaisen-0',
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
 };
