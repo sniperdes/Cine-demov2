@@ -58,7 +58,7 @@ const SERIES_CONOCIDAS = {
     'Nos vemos en la oficina': 'nos-vemos-en-la-oficina',
     'Un novio por suscripción': 'un-novio-por-suscripción',
     'Hacemos lo que podemos': 'hacemos-lo-que-podemos',
-    'En tu mejor momento':'en-tu-mejor-momento',
+    'En tu mejor momento': 'en-tu-mejor-momento',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
     'Solo Leveling': 'solo-leveling',
