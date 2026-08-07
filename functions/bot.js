@@ -61,6 +61,7 @@ const SERIES_CONOCIDAS = {
     'En tu mejor momento': 'en-tu-mejor-momento',
     'El genio y los deseos': 'el-genio-y-los-deseos',
     'Un chico ejemplar': 'un-chico-ejemplar',
+    'Perros de caza': 'perros-de-caza',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
     'Solo Leveling': 'solo-leveling',
