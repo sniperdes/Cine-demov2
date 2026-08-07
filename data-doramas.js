@@ -12,5 +12,5 @@
             { titulo:'En tu mejor momento', tmdbQuery:'In Your Radiant Season 2026', nombreKV:'en-tu-mejor-momento', genero:'dorama-drama', info:'⭐ 8.1 | 📺', desc:'Song Ha Ran es la diseñadora jefe de Nana Atelier, la principal casa de moda de alta gama de Corea A diferencia de su imagen impecable y aparentemente perfecta.' },
             { titulo:'El genio y los deseos', tmdbQuery:'다 이루어질지니 2025', nombreKV:'el-genio-y-los-deseos', genero:'dorama-drama', info:'⭐ 7.9 | 📺', desc:'Un excéntrico genio reaparece después de mil años para cumplir los deseos de una mujer impasible Logrará colmarla de amor e ilusión con su magia.' },
             // ACCIÓN
-            { titulo:'Vagabond',                tmdbQuery:'Vagabond 2019',              genero:'dorama-accion', info:'⭐ 8.1 | 🌸 Dorama | 📺 16 ep', desc:'Un hombre investiga un accidente de avión que mató a su sobrino.' },
+            { titulo:'Un chico ejemplar', tmdbQuery:'Un chico ejemplar 2025', nombreKV:'un-chico-ejemplar', genero:'dorama-accion', info:'⭐ 8.7 | 📺', desc:'Tras 11 años, la Policía de Insung acoge a antiguos deportistas de la selección nacional Estos medallistas que fueron héroes se enfrentan hoy a una cruda realidad.' },
             ];
