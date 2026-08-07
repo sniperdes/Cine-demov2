@@ -13,4 +13,6 @@
             { titulo:'El genio y los deseos', tmdbQuery:'다 이루어질지니 2025', nombreKV:'el-genio-y-los-deseos', genero:'dorama-drama', info:'⭐ 7.9 | 📺', desc:'Un excéntrico genio reaparece después de mil años para cumplir los deseos de una mujer impasible Logrará colmarla de amor e ilusión con su magia.' },
             // ACCIÓN
             { titulo:'Un chico ejemplar', tmdbQuery:'Un chico ejemplar 2025', nombreKV:'un-chico-ejemplar', genero:'dorama-accion', info:'⭐ 8.7 | 📺', desc:'Tras 11 años, la Policía de Insung acoge a antiguos deportistas de la selección nacional Estos medallistas que fueron héroes se enfrentan hoy a una cruda realidad.' },
+            { titulo:'Perros de caza', tmdbQuery:'사냥개들 2023', nombreKV:'perros-de-caza', genero:'dorama-accion', info:'⭐ 8.5 | 📺', desc:'Dos jóvenes boxeadores se alían con un prestamista benévolo para acabar con un despiadado usurero que se aprovecha de los más endeudados y desesperados.' },
+
             ];
