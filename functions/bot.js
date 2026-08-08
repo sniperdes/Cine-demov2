@@ -63,6 +63,7 @@ const SERIES_CONOCIDAS = {
     'Un chico ejemplar': 'un-chico-ejemplar',
     'Perros de caza': 'perros-de-caza',
     'GOBLIN El solitario ser inmortal': 'goblin-el-solitario-ser-inmortal',
+    'El capo del bloque': 'el-capo-del-bloque',
     // ── Anime (van a data-anime.js) ─────────────────────────────────
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
     'Solo Leveling': 'solo-leveling',
