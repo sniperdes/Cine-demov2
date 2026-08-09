@@ -17,6 +17,4 @@
             { titulo:'Un chico ejemplar', tmdbQuery:'Un chico ejemplar 2025', nombreKV:'un-chico-ejemplar', genero:'dorama-accion', info:'⭐ 8.7 | 📺', desc:'Tras 11 años, la Policía de Insung acoge a antiguos deportistas de la selección nacional Estos medallistas que fueron héroes se enfrentan hoy a una cruda realidad.' },
             { titulo:'Perros de caza', tmdbQuery:'사냥개들 2023', nombreKV:'perros-de-caza', genero:'dorama-accion', info:'⭐ 8.5 | 📺', desc:'Dos jóvenes boxeadores se alían con un prestamista benévolo para acabar con un despiadado usurero que se aprovecha de los más endeudados y desesperados.' },
             { titulo:'El capo del bloque', tmdbQuery:'El capo del bloque 2026', nombreKV:'el-capo-del-bloque', genero:'dorama-accion', info:'⭐ 8.7 | 📺', desc:'Un capo se alía con una abogada en ciernes para robar el fondo de reserva de un complejo de apartamentos y acaban destapando una red de corrupción.' },
-            //COMEDIA
-            { titulo:'Un comeback salvaje', tmdbQuery:'와일드 씽 2026', nombreKV:'un-comeback-salvaje', genero:'dorama-drama', info:'⭐ 5.9 | 📺', desc:'Triangle es un grupo de baile mixto de tres miembros que dominó las listas de éxitos a principios de los años 2000, antes de que un escándalo nocturno pusiera.' },
             ];
