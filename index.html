@@ -193,7 +193,14 @@
     <div class="header"><div class="logo">NovaPlay</div></div>
 
     <div class="search-box">
-        <input type="text" id="buscar" placeholder="🔍 Buscar película..." onkeyup="buscarPelicula()">
+        <input type="text" id="buscar" placeholder="🔍 Buscar en todo el catálogo..." onkeyup="buscarPelicula()">
+    </div>
+
+    <div id="resultados-busqueda" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="document.getElementById('buscar').value=''; buscarPelicula();">⬅ Volver</button>
+        <div class="title">🔍 Resultados</div>
+        <div class="grid-genero" id="resultados-busqueda-grid"></div>
+        <p id="resultados-busqueda-vacio" style="display:none; opacity:0.6; text-align:center; margin-top:30px;">No se encontraron resultados.</p>
     </div>
 
     <div class="menu">
@@ -283,9 +290,7 @@
         <div class="title">💥 Doramas Acción</div>
         <div class="grid-genero" id="contenedor-dorama-accion"></div>
     </div>
-    
-    </div>
-    
+
     <!-- TURCAS -->
     <div id="turcas" class="view">
         <div class="title">🌙 Series Turcas</div>
@@ -1188,11 +1193,60 @@
             document.getElementById('ep-modal').classList.remove('active');
         }
 
+        // ─── BÚSQUEDA GLOBAL (todas las categorías, ignora acentos/mayúsculas) ────
+        let vistaAntesDeBuscar = null;
+
+        function normalizarTexto(txt) {
+            return (txt || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+        }
+
         function buscarPelicula() {
-            const input = document.getElementById('buscar').value.toLowerCase();
-            document.querySelectorAll('.card.pelicula').forEach(card => {
-                const nombre = card.querySelector('p').innerText.toLowerCase();
-                card.style.display = nombre.includes(input) ? 'block' : 'none';
+            const input = normalizarTexto(document.getElementById('buscar').value);
+            const vistaResultados = document.getElementById('resultados-busqueda');
+
+            if (!input) {
+                // Campo vacío: volver a la pantalla en la que estaba antes de buscar
+                if (vistaResultados.classList.contains('active') && vistaAntesDeBuscar) {
+                    show(vistaAntesDeBuscar);
+                }
+                return;
+            }
+
+            // Al empezar a escribir, recordamos en qué pantalla estaba el usuario
+            if (!vistaResultados.classList.contains('active')) {
+                const actual = document.querySelector('.view.active');
+                vistaAntesDeBuscar = actual ? actual.id : 'home';
+                show('resultados-busqueda');
+            }
+
+            const todo = [
+                ...baseDeDatosPeliculas.map(x => ({ ...x, _type: 'movie' })),
+                ...baseDeDatosSeries.map(x => ({ ...x, _type: 'tv' })),
+                ...baseDeDatosAnime.map(x => ({ ...x, _type: 'tv' })),
+                ...baseDeDatosDoramas.map(x => ({ ...x, _type: 'tv' })),
+                ...baseDeDatosTurcas.map(x => ({ ...x, _type: 'tv' })),
+                ...baseDeDatosRusas.map(x => ({ ...x, _type: 'tv' })),
+            ];
+
+            const resultados = todo.filter(item => normalizarTexto(item.titulo).includes(input));
+
+            const contenedor = document.getElementById('resultados-busqueda-grid');
+            const vacio = document.getElementById('resultados-busqueda-vacio');
+            contenedor.innerHTML = '';
+            vacio.style.display = resultados.length ? 'none' : 'block';
+
+            resultados.forEach((item, i) => {
+                const card = document.createElement('div');
+                card.className = 'card pelicula';
+                card.innerHTML = `<img id="buscar-img-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
+                card.onclick = () => abrirModal(item.titulo, document.getElementById(`buscar-img-${i}`).src, item.info, item.desc, item.tmdbQuery, item._type, item.nombreKV || null);
+                contenedor.appendChild(card);
+            });
+
+            resultados.forEach(async (item, i) => {
+                const poster = await obtenerPoster(item.tmdbQuery, item._type);
+                const el = document.getElementById(`buscar-img-${i}`);
+                if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             });
         }
 
