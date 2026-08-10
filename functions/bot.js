@@ -22,6 +22,7 @@ const SERIES_CONOCIDAS = {
     'elif': 'elif',
     'Kahraman Babam': 'mi-padre-heroe',
     'El Doctor Del Pueblo': 'el-doctor-del-pueblo',
+    'kasaba doktoru': 'el-doctor-del-pueblo',
     'contra el destino': 'contra-el-destino',
     'kadere karşı': 'contra-el-destino',
     'dirilis ertugrul': 'dirilis-ertugrul',
@@ -628,7 +629,23 @@ export async function onRequest(context) {
     };
 
     if (userId !== ADMIN_ID) {
-        await enviar('⛔ No autorizado.');
+        // Usuario común (no el admin): cualquier cosa que escriba, le mostramos
+        // el botón grande y visible para abrir la Mini App, en vez de depender
+        // de que note el botón chiquito de abajo o que sepa escribir /start.
+        await fetch(`${BOT_API}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: chatId,
+                text: '🎬 *¡Bienvenido a NovaPlay!*\n\nTocá el botón de abajo para ver el catálogo completo de películas, series, anime y más 👇',
+                parse_mode: 'Markdown',
+                reply_markup: {
+                    inline_keyboard: [[
+                        { text: '🍿 Ver Cartelera', web_app: { url: 'https://cine-demov2.pages.dev/' } }
+                    ]]
+                }
+            })
+        });
         return new Response('OK');
     }
 
