@@ -160,6 +160,7 @@
         <div class="player-header">
             <span id="player-title">Cargando...</span>
             <div style="display:flex;gap:15px;align-items:center;">
+                <span style="color:white;font-size:20px;cursor:pointer;" onclick="abrirEnNavegador()" title="Abrir en el navegador">🌐</span>
                 <span style="color:white;font-size:22px;cursor:pointer;" onclick="fullscreenPlayer()">⛶</span>
                 <span class="player-close" onclick="cerrarPlayer()">✖</span>
             </div>
@@ -968,6 +969,7 @@
         }
 
         let modalActual = { tmdbQuery: null, type: 'movie', nombreKV: null };
+        let urlReproductorActual = null; // para el botón "Abrir en navegador"
 
         function abrirModal(titulo, img, info, desc, tmdbQuery = null, type = 'movie', nombreKV = null) {
             document.getElementById('modal-title').innerText = titulo;
@@ -1186,6 +1188,7 @@
                 : nombre;
             document.getElementById('player-episodios').style.display = 'none';
             document.getElementById('player-frame').src = url;
+            urlReproductorActual = url;
             document.getElementById('player-modal').classList.add('active');
         }
 
@@ -1347,6 +1350,7 @@
                 src = `https://vidsrc.to/embed/tv/${tmdbId}/${temporada}/${episodio}`;
             }
             document.getElementById('player-frame').src = src;
+            urlReproductorActual = src;
         }
 
         function mostrarEpisodios(totalTemporadas) {
@@ -1407,6 +1411,14 @@
         document.addEventListener('dragstart', (e) => {
             if (e.target.tagName === 'IMG') e.preventDefault();
         });
+
+        function abrirEnNavegador() {
+            if (!urlReproductorActual) return;
+            // window.open funciona bien dentro del WebView de Telegram en la mayoría
+            // de los casos y abre el navegador del sistema (Chrome/Safari), que sí
+            // tiene fullscreen y compartir pantalla sin las limitaciones del WebView
+            window.open(urlReproductorActual, '_blank');
+        }
 
         async function fullscreenPlayer() {
             const modal = document.getElementById('player-modal');
