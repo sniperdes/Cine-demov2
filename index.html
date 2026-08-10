@@ -1408,14 +1408,22 @@
             if (e.target.tagName === 'IMG') e.preventDefault();
         });
 
-        function fullscreenPlayer() {
+        async function fullscreenPlayer() {
             const modal = document.getElementById('player-modal');
             const btn   = document.getElementById('exit-fs-btn');
             modal.classList.add('fullscreen-mode');
             btn.style.display = 'flex';
-            // Forzar orientación horizontal si es posible
+
+            // El bloqueo de orientación necesita fullscreen REAL del navegador
+            // primero (no alcanza con el truco de CSS). Si el WebView de Telegram
+            // no lo soporta, seguimos igual con el modo CSS a pantalla completa.
+            try {
+                if (modal.requestFullscreen) await modal.requestFullscreen();
+                else if (modal.webkitRequestFullscreen) await modal.webkitRequestFullscreen();
+            } catch (e) { /* fullscreen real no soportado acá, seguimos con CSS */ }
+
             if (screen.orientation && screen.orientation.lock) {
-                screen.orientation.lock('landscape').catch(() => {});
+                try { await screen.orientation.lock('landscape'); } catch (e) { /* no soportado */ }
             }
         }
 
@@ -1424,10 +1432,24 @@
             const btn   = document.getElementById('exit-fs-btn');
             modal.classList.remove('fullscreen-mode');
             btn.style.display = 'none';
-            if (screen.orientation && screen.orientation.unlock) {
-                screen.orientation.unlock();
-            }
+            if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+            if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
         }
+
+        // Si el usuario gira el celular manualmente mientras el player está
+        // abierto, entramos/salimos de pantalla completa solos (sin que tenga
+        // que tocar el botón ⛶)
+        window.addEventListener('orientationchange', () => {
+            const modal = document.getElementById('player-modal');
+            if (!modal.classList.contains('active')) return; // el player no está abierto
+
+            const esHorizontal = Math.abs(window.orientation) === 90;
+            if (esHorizontal && !modal.classList.contains('fullscreen-mode')) {
+                fullscreenPlayer();
+            } else if (!esHorizontal && modal.classList.contains('fullscreen-mode')) {
+                salirFullscreen();
+            }
+        });
     </script>
 </body>
 </html>
