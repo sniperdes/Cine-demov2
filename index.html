@@ -160,7 +160,6 @@
         <div class="player-header">
             <span id="player-title">Cargando...</span>
             <div style="display:flex;gap:15px;align-items:center;">
-                <span style="color:white;font-size:20px;cursor:pointer;" onclick="abrirEnNavegador()" title="Abrir en el navegador">🌐</span>
                 <span style="color:white;font-size:22px;cursor:pointer;" onclick="fullscreenPlayer()">⛶</span>
                 <span class="player-close" onclick="cerrarPlayer()">✖</span>
             </div>
@@ -969,7 +968,6 @@
         }
 
         let modalActual = { tmdbQuery: null, type: 'movie', nombreKV: null };
-        let urlReproductorActual = null; // para el botón "Abrir en navegador"
 
         function abrirModal(titulo, img, info, desc, tmdbQuery = null, type = 'movie', nombreKV = null) {
             document.getElementById('modal-title').innerText = titulo;
@@ -1188,7 +1186,6 @@
                 : nombre;
             document.getElementById('player-episodios').style.display = 'none';
             document.getElementById('player-frame').src = url;
-            urlReproductorActual = url;
             document.getElementById('player-modal').classList.add('active');
         }
 
@@ -1253,7 +1250,7 @@
             });
         }
 
-        function verAnuncio() {
+        async function verAnuncio() {
             const tg     = window.Telegram?.WebApp;
             const nombre = modalActual.nombreKV;
             const type   = modalActual.type;
@@ -1266,11 +1263,55 @@
 
             cerrarModal();
 
-            // Para películas usamos parte 1
             if (type === 'movie') {
-                reproducirEpisodio(nombre, null, '1');
+                await verPartesPelicula();
             } else {
                 verEpisodios();
+            }
+        }
+
+        // ─── SELECTOR DE PARTES (películas en más de un video) ─────────────────────
+        async function verPartesPelicula() {
+            const tg     = window.Telegram?.WebApp;
+            const nombre = modalActual.nombreKV;
+            const titulo = document.getElementById('modal-title').innerText;
+
+            try {
+                const res  = await fetch(`/video?nombre=${encodeURIComponent(nombre)}&tipo=pelicula`);
+                const data = await res.json();
+
+                if (!data.total) {
+                    if (tg) tg.showAlert('⚠️ Esta película no tiene contenido disponible aún.');
+                    else alert('Sin contenido disponible aún.');
+                    return;
+                }
+
+                // Si hay una sola parte, reproducir directo (igual que antes)
+                if (data.total === 1) {
+                    reproducirEpisodio(nombre, null, data.partes[0].parte);
+                    return;
+                }
+
+                // Más de una parte: mostrar selector
+                const partesOrdenadas = data.partes
+                    .map(p => p.parte)
+                    .sort((a, b) => parseInt(a) - parseInt(b));
+
+                document.getElementById('ep-modal-titulo').innerText = titulo;
+                let html = '<div class="ep-lista">';
+                for (const p of partesOrdenadas) {
+                    html += `<div class="ep-item" onclick="reproducirEpisodio('${nombre}',null,'${p}')">
+                        <span>Parte ${p}</span>
+                        <span class="ep-play">▶</span>
+                    </div>`;
+                }
+                html += '</div>';
+                document.getElementById('ep-modal-body').innerHTML = html;
+                document.getElementById('ep-modal').classList.add('active');
+
+            } catch {
+                if (tg) tg.showAlert('❌ Error al cargar las partes.');
+                else alert('Error al cargar.');
             }
         }
 
@@ -1350,7 +1391,6 @@
                 src = `https://vidsrc.to/embed/tv/${tmdbId}/${temporada}/${episodio}`;
             }
             document.getElementById('player-frame').src = src;
-            urlReproductorActual = src;
         }
 
         function mostrarEpisodios(totalTemporadas) {
@@ -1411,14 +1451,6 @@
         document.addEventListener('dragstart', (e) => {
             if (e.target.tagName === 'IMG') e.preventDefault();
         });
-
-        function abrirEnNavegador() {
-            if (!urlReproductorActual) return;
-            // window.open funciona bien dentro del WebView de Telegram en la mayoría
-            // de los casos y abre el navegador del sistema (Chrome/Safari), que sí
-            // tiene fullscreen y compartir pantalla sin las limitaciones del WebView
-            window.open(urlReproductorActual, '_blank');
-        }
 
         async function fullscreenPlayer() {
             const modal = document.getElementById('player-modal');
