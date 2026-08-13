@@ -257,39 +257,15 @@
     <div id="series-paginas"></div>
     <div id="anime" class="view">
         <div class="title">🎌 Anime</div>
-        <div class="row" id="contenedor-anime"></div>
+        <div id="anime-secciones"></div>
     </div>
+    <div id="anime-paginas"></div>
     <!-- DORAMAS -->
     <div id="doramas" class="view">
         <div class="title">🌸 Doramas</div>
-        <div id="seccion-dorama-romance" class="genero-seccion">
-            <div class="genero-header"><h3>💕 Romance</h3></div>
-            <div class="row" id="slider-dorama-romance"></div>
-        </div>
-        <div id="seccion-dorama-drama" class="genero-seccion">
-            <div class="genero-header"><h3>🎭 Drama</h3></div>
-            <div class="row" id="slider-dorama-drama"></div>
-        </div>
-        <div id="seccion-dorama-accion" class="genero-seccion">
-            <div class="genero-header"><h3>💥 Acción</h3></div>
-            <div class="row" id="slider-dorama-accion"></div>
-        </div>
+        <div id="doramas-secciones"></div>
     </div>
-    <div id="dorama-romance" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
-        <div class="title">💕 Doramas Romance</div>
-        <div class="grid-genero" id="contenedor-dorama-romance"></div>
-    </div>
-    <div id="dorama-drama" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
-        <div class="title">🎭 Doramas Drama</div>
-        <div class="grid-genero" id="contenedor-dorama-drama"></div>
-    </div>
-    <div id="dorama-accion" class="view">
-        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('doramas')">⬅ Volver</button>
-        <div class="title">💥 Doramas Acción</div>
-        <div class="grid-genero" id="contenedor-dorama-accion"></div>
-    </div>
+    <div id="doramas-paginas"></div>
 
     <!-- TURCAS -->
     <div id="turcas" class="view">
@@ -509,29 +485,58 @@
         }
 
         // ─── CARGAR ANIME ─────────────────────────────────────────────────────────
-        async function cargarAnime() {
-            const contenedor = document.getElementById('contenedor-anime');
-            if (!contenedor) return;
+        // ─── GÉNEROS DE ANIME (taxonomía TMDB TV + Romance propio) ─────────────────
+        const GENEROS_ANIME = [
+            { slug:'accion-anime',                   label:'Acción y Aventura',        emoji:'💥' },
+            { slug:'romance-anime',                  label:'Romance',                  emoji:'💕' },
+            { slug:'comedia-anime',                  label:'Comedia',                  emoji:'😂' },
+            { slug:'drama-anime',                    label:'Drama',                    emoji:'🎭' },
+            { slug:'ciencia-ficcion-fantasia-anime',  label:'Ciencia Ficción y Fantasía', emoji:'🚀' },
+            { slug:'misterio-anime',                 label:'Misterio',                 emoji:'🕵️' },
+            { slug:'crimen-anime',                    label:'Crimen',                   emoji:'🔫' },
+            { slug:'familiar-anime',                  label:'Familiar',                 emoji:'👨‍👩‍👧' },
+            { slug:'belica-anime',                    label:'Bélica y Política',        emoji:'🎖️' },
+            { slug:'documental-anime',                label:'Documental',              emoji:'🎥' },
+        ];
 
-            baseDeDatosAnime.forEach((anime, index) => {
-                const tarjeta = document.createElement('div');
-                tarjeta.className = 'card pelicula';
-                tarjeta.innerHTML = `<img id="anime-img-${index}" class="skeleton" src="${PLACEHOLDER}"><p>${anime.titulo}</p>`;
-                tarjeta.onclick = () => abrirModal(anime.titulo, document.getElementById(`anime-img-${index}`).src, anime.info, anime.desc, anime.tmdbQuery, 'tv', anime.nombreKV || null);
-                contenedor.appendChild(tarjeta);
+        function generarSeccionesDinamicas(generosConfig, idSecciones, idPaginas, viewVolverA) {
+            const secciones = document.getElementById(idSecciones);
+            const paginas   = document.getElementById(idPaginas);
+            generosConfig.forEach(g => {
+                const sec = document.createElement('div');
+                sec.className = 'genero-seccion';
+                sec.id = `seccion-${g.slug}`;
+                sec.innerHTML = `<div class="genero-header"><h3>${g.emoji} ${g.label}</h3></div><div class="row" id="slider-${g.slug}"></div>`;
+                secciones.appendChild(sec);
+
+                const pagina = document.createElement('div');
+                pagina.className = 'view';
+                pagina.id = g.slug;
+                pagina.innerHTML = `
+                    <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('${viewVolverA}')">⬅ Volver</button>
+                    <div class="title">${g.emoji} Todas las de ${g.label}</div>
+                    <div class="grid-genero" id="contenedor-${g.slug}"></div>`;
+                paginas.appendChild(pagina);
             });
-
-            const LOTE = 5;
-            for (let i = 0; i < baseDeDatosAnime.length; i += LOTE) {
-                await Promise.all(baseDeDatosAnime.slice(i, i + LOTE).map(async (anime, j) => {
-                    const idx    = i + j;
-                    const poster = await obtenerPoster(anime.tmdbQuery, 'tv');
-                    const imgEl  = document.getElementById(`anime-img-${idx}`);
-                    if (imgEl) { imgEl.src = poster || PLACEHOLDER; imgEl.classList.remove('skeleton'); }
-                }));
-            }
         }
 
+        async function cargarAnime() {
+            generarSeccionesDinamicas(GENEROS_ANIME, 'anime-secciones', 'anime-paginas', 'anime');
+
+            // Combina el catálogo fijo (data-anime.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=animes');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosAnime.map(a => a.nombreKV));
+                    for (const anime of dinamico) {
+                        if (!nombresExistentes.has(anime.nombreKV)) baseDeDatosAnime.push(anime);
+                    }
+                }
+            } catch {}
+
+            await cargarCategoria(baseDeDatosAnime, GENEROS_ANIME.map(g => g.slug), 'tv');
+        }
 
         // ─── BASE DE DATOS DORAMAS ───────────────────────────────────────────────
 // baseDeDatosDoramas se carga desde data-*.js
@@ -542,9 +547,37 @@
         // ─── BASE DE DATOS RUSAS ─────────────────────────────────────────────────
 // baseDeDatosRusas se carga desde data-*.js
 
+        // ─── GÉNEROS DE DORAMAS (taxonomía TMDB TV + Romance propio) ───────────────
+        const GENEROS_DORAMAS = [
+            { slug:'romance-dorama',                 label:'Romance',                  emoji:'💕' },
+            { slug:'drama-dorama',                    label:'Drama',                    emoji:'🎭' },
+            { slug:'accion-dorama',                   label:'Acción y Aventura',        emoji:'💥' },
+            { slug:'comedia-dorama',                  label:'Comedia',                  emoji:'😂' },
+            { slug:'ciencia-ficcion-fantasia-dorama', label:'Ciencia Ficción y Fantasía', emoji:'🚀' },
+            { slug:'misterio-dorama',                 label:'Misterio',                 emoji:'🕵️' },
+            { slug:'crimen-dorama',                    label:'Crimen',                   emoji:'🔫' },
+            { slug:'familiar-dorama',                  label:'Familiar',                 emoji:'👨‍👩‍👧' },
+            { slug:'belica-dorama',                    label:'Bélica y Política',        emoji:'🎖️' },
+            { slug:'documental-dorama',                label:'Documental',              emoji:'🎥' },
+        ];
+
         // ─── CARGAR DORAMAS ───────────────────────────────────────────────────────
         async function cargarDoramas() {
-            await cargarCategoria(baseDeDatosDoramas, ['dorama-romance','dorama-drama','dorama-accion'], 'tv');
+            generarSeccionesDinamicas(GENEROS_DORAMAS, 'doramas-secciones', 'doramas-paginas', 'doramas');
+
+            // Combina el catálogo fijo (data-doramas.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=doramas');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosDoramas.map(d => d.nombreKV));
+                    for (const dorama of dinamico) {
+                        if (!nombresExistentes.has(dorama.nombreKV)) baseDeDatosDoramas.push(dorama);
+                    }
+                }
+            } catch {}
+
+            await cargarCategoria(baseDeDatosDoramas, GENEROS_DORAMAS.map(g => g.slug), 'tv');
         }
 
         // ─── CARGAR TURCAS ────────────────────────────────────────────────────────
@@ -559,10 +592,17 @@
 
         // ─── FUNCIÓN GENÉRICA PARA CARGAR CUALQUIER CATEGORÍA CON SLIDERS ────────
         async function cargarCategoria(base, generos, type) {
+            // Compat: si algún item todavía tiene 'genero' (string) en vez de
+            // 'generos' (array), lo adaptamos solo, sin romper nada
+            base.forEach(item => {
+                if (!item.generos && item.genero) item.generos = [item.genero];
+                if (!item.generos) item.generos = [];
+            });
+
             for (const genero of generos) {
                 const slider     = document.getElementById(`slider-${genero}`);
                 const contenedor = document.getElementById(`contenedor-${genero}`);
-                const items      = base.filter(p => p.genero === genero);
+                const items      = base.filter(p => p.generos.includes(genero));
 
                 items.forEach((item, index) => {
                     const uid = `${genero}-${index}`;
@@ -593,20 +633,26 @@
                     verTodo.onclick = () => show(genero);
                     slider.appendChild(verTodo);
                 }
+
+                // Ocultar secciones de género sin ningún ítem todavía
+                const seccionEl = document.getElementById(`seccion-${genero}`);
+                if (seccionEl) seccionEl.style.display = items.length ? '' : 'none';
             }
 
-            // Cargar posters en lotes
+            // Cargar posters en lotes (actualiza TODAS las secciones a las que
+            // pertenece el ítem, ninguna asume un solo género)
             const LOTE = 5;
             for (let i = 0; i < base.length; i += LOTE) {
-                await Promise.all(base.slice(i, i + LOTE).map(async (item, j) => {
-                    const genero = item.genero;
-                    const index  = base.filter(p => p.genero === genero).indexOf(item);
-                    const uid    = `${genero}-${index}`;
+                await Promise.all(base.slice(i, i + LOTE).map(async (item) => {
                     const poster = await obtenerPoster(item.tmdbQuery, type);
-                    const s = document.getElementById(`img-s-${uid}`);
-                    const t = document.getElementById(`img-t-${uid}`);
-                    if (s) { s.src = poster || PLACEHOLDER; s.classList.remove('skeleton'); }
-                    if (t) { t.src = poster || PLACEHOLDER; t.classList.remove('skeleton'); }
+                    item.generos.forEach(genero => {
+                        const index = base.filter(p => p.generos.includes(genero)).indexOf(item);
+                        const uid   = `${genero}-${index}`;
+                        const s = document.getElementById(`img-s-${uid}`);
+                        const t = document.getElementById(`img-t-${uid}`);
+                        if (s) { s.src = poster || PLACEHOLDER; s.classList.remove('skeleton'); }
+                        if (t) { t.src = poster || PLACEHOLDER; t.classList.remove('skeleton'); }
+                    });
                 }));
             }
         }
