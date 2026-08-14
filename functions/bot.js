@@ -80,6 +80,8 @@ const SERIES_CONOCIDAS = {
     'Ore dake Level Up na Ken Solo Leveling ': 'solo-leveling',
     'Solo Leveling': 'solo-leveling',
     'Jujutsu Kaisen 0': 'jujutsu-kaisen-0',
+    'de campesino cuarenton a espadachin legendario': 'de-campesino-a-espadachin',
+    'katainaka no ossan': 'de-campesino-a-espadachin',
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
 };
@@ -217,7 +219,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const esTurca = idioma === 'tr';
     const esRusa  = idioma === 'ru';
     const esAnime = idioma === 'ja' && esAnimacion;
-    const esDorama = idioma === 'ko' || (idioma === 'ja' && tipo === 'tv');
+    const esDorama = idioma === 'ko';
     const esPeliculaNormal = tipo === 'movie' && !esTurca && !esRusa && !esAnime && !esDorama;
     const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama;
 
