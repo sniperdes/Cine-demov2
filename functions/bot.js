@@ -190,10 +190,22 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     // Buscamos en los dos tipos a la vez, sin asumir de antemano si es serie o película
     const [resultadoTv, resultadoMovie] = await Promise.all([buscar('tv'), buscar('movie')]);
 
-    // Nos quedamos con el más relevante según la popularidad que da TMDB
+    // Nos quedamos con el más relevante: primero priorizamos coincidencia EXACTA
+    // de título (evita casos como "Lucky" vs "Lucky Strike", donde la película
+    // tenía más popularidad pero el título correcto era el de la serie), y solo
+    // si hay empate o ninguno coincide exacto, usamos la popularidad de TMDB
+    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
     let resultado, tipo;
     if (resultadoTv && resultadoMovie) {
-        if ((resultadoMovie.popularity || 0) >= (resultadoTv.popularity || 0)) {
+        const queryNorm    = normalizar(tituloGuess);
+        const tvExacto      = normalizar(resultadoTv.name) === queryNorm;
+        const movieExacto   = normalizar(resultadoMovie.title) === queryNorm;
+
+        if (tvExacto && !movieExacto) {
+            resultado = resultadoTv; tipo = 'tv';
+        } else if (movieExacto && !tvExacto) {
+            resultado = resultadoMovie; tipo = 'movie';
+        } else if ((resultadoMovie.popularity || 0) >= (resultadoTv.popularity || 0)) {
             resultado = resultadoMovie; tipo = 'movie';
         } else {
             resultado = resultadoTv; tipo = 'tv';
