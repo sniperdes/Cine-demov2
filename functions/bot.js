@@ -326,7 +326,6 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     // Caso especial: anime -> se agrega SOLO al catálogo
     if (esAnime && env) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-anime');
-        const { episodio, temporada } = detectarSerie(textoOriginal);
 
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:animes');
@@ -339,6 +338,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     tmdbQuery: `${tituloOriginal} ${anio}`,
                     nombreKV: nombreKVsugerido,
                     generos: generosFinal,
+                    tipoContenido: tipo,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                 });
@@ -349,6 +349,13 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 ? `🎌 "${titulo}" (${anio}) ya estaba en el catálogo de anime (${nombreKVsugerido}). No se duplicó.`
                 : `✅ "${titulo}" (${anio}) se agregó solo al catálogo de anime.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
+            // Una película de anime no tiene episodios: se guarda como "parte 1",
+            // igual que cualquier película (mismo camino que confp: ya usa)
+            if (tipo === 'movie') {
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'anime' };
+            }
+
+            const { episodio, temporada } = detectarSerie(textoOriginal);
             if (episodio) {
                 return {
                     texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
@@ -367,7 +374,6 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     // Caso especial: dorama -> se agrega SOLO al catálogo
     if (esDorama && env) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-dorama');
-        const { episodio, temporada } = detectarSerie(textoOriginal);
 
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:doramas');
@@ -380,6 +386,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     tmdbQuery: `${tituloOriginal} ${anio}`,
                     nombreKV: nombreKVsugerido,
                     generos: generosFinal,
+                    tipoContenido: tipo,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                 });
@@ -390,6 +397,13 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 ? `🎎 "${titulo}" (${anio}) ya estaba en el catálogo de doramas (${nombreKVsugerido}). No se duplicó.`
                 : `✅ "${titulo}" (${anio}) se agregó solo al catálogo de doramas.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
+            // Una película de dorama (poco común, pero pasa) tampoco tiene
+            // episodios: se guarda como "parte 1"
+            if (tipo === 'movie') {
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'dorama' };
+            }
+
+            const { episodio, temporada } = detectarSerie(textoOriginal);
             if (episodio) {
                 return {
                     texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
