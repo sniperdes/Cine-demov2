@@ -611,7 +611,7 @@
                         const card = document.createElement('div');
                         card.className = 'card pelicula';
                         card.innerHTML = `<img id="img-s-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
-                        card.onclick = () => abrirModal(item.titulo, document.getElementById(`img-s-${uid}`).src, item.info, item.desc, item.tmdbQuery, type, item.nombreKV || null);
+                        card.onclick = () => abrirModal(item.titulo, document.getElementById(`img-s-${uid}`).src, item.info, item.desc, item.tmdbQuery, item.tipoContenido || type, item.nombreKV || null);
                         slider.appendChild(card);
                     }
 
@@ -619,7 +619,7 @@
                         const card2 = document.createElement('div');
                         card2.className = 'card pelicula';
                         card2.innerHTML = `<img id="img-t-${uid}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
-                        card2.onclick = () => abrirModal(item.titulo, document.getElementById(`img-t-${uid}`).src, item.info, item.desc, item.tmdbQuery, type, item.nombreKV || null);
+                        card2.onclick = () => abrirModal(item.titulo, document.getElementById(`img-t-${uid}`).src, item.info, item.desc, item.tmdbQuery, item.tipoContenido || type, item.nombreKV || null);
                         contenedor.appendChild(card2);
                     }
                 });
@@ -1268,8 +1268,8 @@
             const todo = [
                 ...baseDeDatosPeliculas.map(x => ({ ...x, _type: 'movie' })),
                 ...baseDeDatosSeries.map(x => ({ ...x, _type: 'tv' })),
-                ...baseDeDatosAnime.map(x => ({ ...x, _type: 'tv' })),
-                ...baseDeDatosDoramas.map(x => ({ ...x, _type: 'tv' })),
+                ...baseDeDatosAnime.map(x => ({ ...x, _type: x.tipoContenido || 'tv' })),
+                ...baseDeDatosDoramas.map(x => ({ ...x, _type: x.tipoContenido || 'tv' })),
                 ...baseDeDatosTurcas.map(x => ({ ...x, _type: 'tv' })),
                 ...baseDeDatosRusas.map(x => ({ ...x, _type: 'tv' })),
             ];
