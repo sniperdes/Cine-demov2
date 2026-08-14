@@ -81,6 +81,7 @@ const SERIES_CONOCIDAS = {
     'Solo Leveling': 'solo-leveling',
     'Jujutsu Kaisen 0': 'jujutsu-kaisen-0',
     'de campesino cuarenton a espadachin legendario': 'de-campesino-a-espadachin',
+    'de campesino cuarenton a espadachin legendario': 'de-campesino-a-espadachin',
     'katainaka no ossan': 'de-campesino-a-espadachin',
     // ── Rusas (van a data-rusas.js) ──────────────────────────────────
     // 'brigada': 'brigada',
