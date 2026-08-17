@@ -644,7 +644,7 @@
             const LOTE = 5;
             for (let i = 0; i < base.length; i += LOTE) {
                 await Promise.all(base.slice(i, i + LOTE).map(async (item) => {
-                    const poster = await obtenerPoster(item.tmdbQuery, type);
+                    const poster = await obtenerPoster(item.tmdbQuery, item.tipoContenido || type);
                     item.generos.forEach(genero => {
                         const index = base.filter(p => p.generos.includes(genero)).indexOf(item);
                         const uid   = `${genero}-${index}`;
