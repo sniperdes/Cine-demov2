@@ -106,6 +106,7 @@ function extraerTituloGuess(texto) {
     t = t.replace(/\p{Extended_Pictographic}/gu, ' ') // Emojis
     .replace(/[★☆✦✪✨❖◆◇•►【】《》]/g, ' ')      // Símbolos decorativos
     .replace(/(?:ᴴᴰ|HD|FHD|UHD|4K|1080p|720p|480p)/gi, ' ') // Calidad
+    .replace(/\bT\d{1,2}\b/gi, ' ') // Temporada corta (T2, T02) que ensucia la búsqueda en TMDB
     .replace(/\s+/g, ' ')
     .trim();
     return t;
