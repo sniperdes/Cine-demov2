@@ -486,9 +486,9 @@ function detectarSerie(texto) {
         };
 
         let temporada = '1';
-        const matchTemp = limpio.match(/temporada\s*(\d+)|season\s*(\d+)/i);
+        const matchTemp = limpio.match(/temporada\s*(\d+)|season\s*(\d+)|\bt\s*(\d{1,2})\b/i);
         if (matchTemp) {
-            temporada = matchTemp[1] || matchTemp[2];
+            temporada = matchTemp[1] || matchTemp[2] || matchTemp[3];
         } else {
             const matchOrdinal = limpio.match(/(primera|segunda|tercera|cuarta|quinta|sexta|séptima|septima|octava|novena|décima|decima)\s*temporada/i);
             const matchCardinal = limpio.match(/temporada\s*(uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\b/i);
