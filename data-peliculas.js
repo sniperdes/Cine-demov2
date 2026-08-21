@@ -8,7 +8,7 @@
 // romance, ciencia-ficcion, suspenso, belica, western
         const baseDeDatosPeliculas = [
             { titulo:'John Wick',               tmdbQuery:'John Wick 2014',            nombreKV:'john-wick', generos:['accion','suspenso','crimen'], info:'⭐ 8.5 | 🎭 Acción | 🕒 101 min', desc:'Un asesino legendario vuelve del retiro para buscar venganza.' },
-
+{ titulo:'TEST OK.ru', tmdbQuery:'La teoria del todo 2014', nombreKV:'test-okru', generos:['drama-pelicula'], info:'prueba', desc:'prueba embed ok.ru' },
             { titulo:'Equipaje De Mano',         tmdbQuery:'Carry-On 2024',             nombreKV:'equipaje-de-mano', generos:['accion','suspenso','crimen'], info:'⭐ 6.9 |  🎭 acción | 🕒 120 min', desc:'El día de Nochebuena, un viajero misterioso chantajea a un agente de seguridad del aeropuerto para que le deje subir un objeto peligroso al avión.' },
             { titulo:'Catastrofe helada',        tmdbQuery:'Catastrofe helada 2014',    nombreKV:'catastrofe-helada', generos:['accion','ciencia-ficcion'], info:'⭐ 5.4 | 🕐1h 26min', desc:'Es Navidad y todo está tranquilo en un apacible pueblo mientras la nieve cubre cada rincón. Sin embargo, la tragedia empieza cuando un terrorífico meteorito se. ' },
             { titulo:'hawai en llamas',          tmdbQuery:'hawai en llamas',           nombreKV:'hawai-en-llamas', generos:['accion','ciencia-ficcion'], info:'⭐ 5.6| 📺1h 26min', desc:'Cuando un supervolcán amenaza la isla de Hawái, un equipo de expertos debe correr contrarreloj para salvar a quienes se encuentran en el camino de la lava fundida y detenerla para siempre.' },
