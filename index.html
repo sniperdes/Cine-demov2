@@ -431,16 +431,22 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 10;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
             contadorToques++;
+            console.log(`[anuncio-toques] ${contadorToques}/${TOQUES_POR_ANUNCIO}`);
             if (contadorToques < TOQUES_POR_ANUNCIO) return;
             contadorToques = 0;
-            if (typeof show_11208906 === 'function') {
-                show_11208906().catch(() => {}); // si falla (adblock, etc.) no rompe nada
+            if (typeof show_11208906 !== 'function') {
+                console.warn('[anuncio-toques] show_11208906 no está definida — ¿SDK de Monetag bloqueado o no cargó?');
+                return;
             }
+            console.log('[anuncio-toques] pidiendo el interstitial a Monetag...');
+            show_11208906()
+                .then(() => console.log('[anuncio-toques] Monetag SÍ mostró el anuncio'))
+                .catch((e) => console.warn('[anuncio-toques] Monetag NO lo mostró:', e));
         });
 
         // ─── FUNCIÓN CENTRAL: usa el Worker /poster con caché en KV ─────────────
