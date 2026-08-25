@@ -112,6 +112,35 @@
             user-drag: none;
             pointer-events: auto;          /* mantiene el click normal para abrir la ficha */
         }
+
+        /* NAVEGACIÓN INFERIOR (Inicio / Perfil / Premium) */
+        body { padding-bottom: 62px; } /* deja espacio para que el nav no tape contenido */
+        .bottom-nav { position:fixed; bottom:0; left:0; width:100%; display:flex; background:#111; border-top:1px solid #222; z-index:400; padding-bottom:env(safe-area-inset-bottom); }
+        .bottom-nav button { flex:1; background:none; border:none; color:#888; padding:10px 0 8px; display:flex; flex-direction:column; align-items:center; gap:2px; font-size:11px; cursor:pointer; }
+        .bottom-nav button .nav-icon { font-size:20px; }
+        .bottom-nav button.nav-active { color:#3B82F6; }
+
+        /* PERFIL */
+        .perfil-header { display:flex; align-items:center; gap:14px; padding:20px 15px; }
+        .perfil-avatar { width:64px; height:64px; border-radius:50%; background:#1f1f1f; object-fit:cover; }
+        .perfil-nombre { font-size:18px; font-weight:bold; color:#eee; }
+        .perfil-sub-estado { font-size:13px; margin-top:3px; }
+        .perfil-sub-estado.activo { color:#3ddc84; }
+        .perfil-sub-estado.inactivo { color:#888; }
+        .perfil-card { background:#1a1a1a; border-radius:10px; padding:15px; margin:0 15px 15px; }
+        .perfil-card h4 { margin:0 0 10px; font-size:14px; color:#aaa; }
+
+        /* PREMIUM */
+        .premium-hero { text-align:center; padding:30px 20px 10px; }
+        .premium-hero .premium-icono { font-size:44px; }
+        .premium-hero h2 { color:gold; margin:10px 0 5px; }
+        .premium-hero p { color:#aaa; font-size:14px; margin:0; }
+        .premium-plan { background:#1a1a1a; border:2px solid gold; border-radius:14px; margin:20px 15px; padding:20px; text-align:center; }
+        .premium-plan .precio { font-size:28px; font-weight:800; color:gold; }
+        .premium-plan .precio span { font-size:14px; color:#aaa; font-weight:normal; }
+        .premium-beneficios { list-style:none; padding:0; margin:15px 0; text-align:left; }
+        .premium-beneficios li { padding:6px 0; color:#ddd; font-size:14px; }
+        .premium-estado-actual { text-align:center; padding:15px; color:#3ddc84; font-size:14px; display:none; }
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -332,6 +361,53 @@
     </div>
 
     <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
+
+    <!-- PERFIL -->
+    <div id="perfil" class="view">
+        <div class="perfil-header">
+            <img id="perfil-avatar" class="perfil-avatar" src="">
+            <div>
+                <div class="perfil-nombre" id="perfil-nombre">Usuario</div>
+                <div class="perfil-sub-estado inactivo" id="perfil-sub-estado">Sin plan Premium</div>
+            </div>
+        </div>
+        <div class="perfil-card">
+            <h4>💎 Suscripción</h4>
+            <p id="perfil-sub-detalle" style="margin:0; color:#ccc; font-size:14px;">Cargando...</p>
+            <button class="btn vip" style="margin-top:12px;" onclick="show('premium')">Ver planes Premium</button>
+        </div>
+        <div class="perfil-card">
+            <h4>▶️ Historial de reproducción</h4>
+            <div class="row" id="perfil-historial"></div>
+            <p id="perfil-historial-vacio" style="display:none; color:#666; font-size:13px; margin:0;">Todavía no viste nada.</p>
+        </div>
+    </div>
+
+    <!-- PREMIUM -->
+    <div id="premium" class="view">
+        <div class="premium-hero">
+            <div class="premium-icono">💎</div>
+            <h2>NovaPlay Premium</h2>
+            <p>Mirá todo el catálogo sin anuncios</p>
+        </div>
+        <div id="premium-estado-actual" class="premium-estado-actual"></div>
+        <div class="premium-plan" id="premium-plan-card">
+            <div class="precio">⭐ <span id="premium-precio">150</span> <span>Stars / 30 días</span></div>
+            <ul class="premium-beneficios">
+                <li>🚫 Sin anuncios antes de reproducir</li>
+                <li>♾️ Acceso a todo el catálogo</li>
+                <li>⭐ Pago simple con Telegram Stars</li>
+            </ul>
+            <button class="btn vip" onclick="comprarPremium()">💎 Suscribirme</button>
+        </div>
+    </div>
+
+    <!-- NAV INFERIOR -->
+    <div class="bottom-nav">
+        <button data-nav="home" class="nav-active" onclick="show('home')"><span class="nav-icon">🏠</span>Inicio</button>
+        <button data-nav="perfil" onclick="show('perfil')"><span class="nav-icon">👤</span>Perfil</button>
+        <button data-nav="premium" onclick="show('premium')"><span class="nav-icon">💎</span>Premium</button>
+    </div>
 
     <script>
         // ─── BASE DE DATOS ────────────────────────────────────────────────────────
@@ -1011,6 +1087,97 @@
             const t = document.getElementById(id);
             if (t) t.classList.add('active');
             if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+            // Resalta el ítem correspondiente del nav inferior (home cubre todas
+            // las categorías de catálogo, no solo la vista "home" en sí)
+            const navId = ['perfil', 'premium'].includes(id) ? id : 'home';
+            document.querySelectorAll('.bottom-nav button').forEach(b => {
+                b.classList.toggle('nav-active', b.dataset.nav === navId);
+            });
+
+            if (id === 'perfil') cargarPerfil();
+            if (id === 'premium') cargarPremium();
+        }
+
+        // ─── PERFIL ───────────────────────────────────────────────────────────────
+        async function cargarPerfil() {
+            const tg = window.Telegram?.WebApp;
+            const user = tg?.initDataUnsafe?.user;
+
+            document.getElementById('perfil-nombre').innerText = user
+                ? [user.first_name, user.last_name].filter(Boolean).join(' ')
+                : 'Usuario';
+            document.getElementById('perfil-avatar').src = user?.photo_url || PLACEHOLDER;
+
+            const estadoEl   = document.getElementById('perfil-sub-estado');
+            const detalleEl  = document.getElementById('perfil-sub-detalle');
+            const sub = await consultarSuscripcion();
+
+            if (sub?.activo) {
+                estadoEl.textContent = 'Premium activo';
+                estadoEl.className = 'perfil-sub-estado activo';
+                const fecha = new Date(sub.expiraEn).toLocaleDateString('es-AR');
+                detalleEl.textContent = `Tu plan vence el ${fecha}.`;
+            } else {
+                estadoEl.textContent = 'Sin plan Premium';
+                estadoEl.className = 'perfil-sub-estado inactivo';
+                detalleEl.textContent = 'Todavía no tenés un plan activo — sacate uno y mirá sin anuncios.';
+            }
+
+            // TODO: cuando exista el endpoint de historial, reemplazar por datos reales
+            document.getElementById('perfil-historial-vacio').style.display = 'block';
+        }
+
+        // Consulta si el usuario tiene una suscripción activa (valida su
+        // identidad server-side con el initData de Telegram).
+        async function consultarSuscripcion() {
+            const tg = window.Telegram?.WebApp;
+            const initData = tg?.initData || '';
+            try {
+                const res = await fetch('/mi-suscripcion', {
+                    headers: { 'X-Telegram-Init-Data': initData }
+                });
+                if (!res.ok) return { activo: false };
+                return await res.json();
+            } catch {
+                return { activo: false };
+            }
+        }
+
+        // ─── PREMIUM ──────────────────────────────────────────────────────────────
+        async function cargarPremium() {
+            const sub = await consultarSuscripcion();
+            const estadoEl = document.getElementById('premium-estado-actual');
+            const cardEl   = document.getElementById('premium-plan-card');
+
+            if (sub?.activo) {
+                const fecha = new Date(sub.expiraEn).toLocaleDateString('es-AR');
+                estadoEl.textContent = `✅ Ya tenés Premium activo hasta el ${fecha}`;
+                estadoEl.style.display = 'block';
+                cardEl.style.display = 'none';
+            } else {
+                estadoEl.style.display = 'none';
+                cardEl.style.display = 'block';
+            }
+        }
+
+        // Dispara la compra vía Telegram Stars.
+        async function comprarPremium() {
+            const tg = window.Telegram?.WebApp;
+            try {
+                const res = await fetch('/crear-factura', {
+                    method: 'POST',
+                    headers: { 'X-Telegram-Init-Data': tg?.initData || '' }
+                });
+                if (!res.ok) throw new Error('endpoint no disponible');
+                const { link } = await res.json();
+                if (tg) tg.openInvoice(link, (status) => {
+                    if (status === 'paid') cargarPremium();
+                });
+            } catch {
+                if (tg) tg.showAlert('💎 La compra de Premium está por activarse — probá de nuevo pronto.');
+                else alert('Premium: próximamente.');
+            }
         }
 
         let modalActual = { tmdbQuery: null, type: 'movie', nombreKV: null };
