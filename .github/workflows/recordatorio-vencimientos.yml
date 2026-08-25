@@ -1,1 +1,15 @@
+name: Recordatorio de vencimientos Premium
 
+on:
+  schedule:
+    # 12:00 UTC = 9:00 en Argentina (UTC-3). Ajustá la hora a tu gusto.
+    - cron: '0 12 * * *'
+  workflow_dispatch: # te deja dispararlo a mano desde la pestaña Actions, para probar
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pegarle al endpoint de recordatorios
+        run: |
+          curl -sf "https://cine-demov2.pages.dev/recordatorio-vencimientos?secret=${{ secrets.CRON_SECRET }}"
