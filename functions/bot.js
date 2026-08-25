@@ -1,6 +1,11 @@
 // /functions/bot.js
 const ADMIN_ID = 1590059037;
 
+// ─── Suscripción Premium (Telegram Stars) ────────────────────────────────────
+const STARS_PRICE = 150; // ⚠️ ajustar precio en Stars
+const PLAN_DIAS = 30;
+const PREMIUM_PAYLOAD = 'novaplay_premium_30d';
+
 // Mapa compartido: tipo de catálogo -> clave de KV. Usado por /listarcatalogo,
 // /vercatalogo, /borrarcatalogo, /corregir y el handler cancel:
 const KV_KEY_POR_TIPO = {
@@ -643,6 +648,24 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
+    // ─── PRE-CHECKOUT (Telegram Stars) ───────────────────────────────────────────
+    // Telegram exige responder en <10s antes de completar el cobro
+    if (update?.pre_checkout_query) {
+        const query = update.pre_checkout_query;
+        const ok = query.invoice_payload === PREMIUM_PAYLOAD;
+
+        await fetch(`${BOT_API}/answerPreCheckoutQuery`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                pre_checkout_query_id: query.id,
+                ok,
+                ...(ok ? {} : { error_message: 'Plan no reconocido, intentá de nuevo.' })
+            })
+        });
+        return new Response('OK');
+    }
+
     // ─── BOTONES (callback_query) ───────────────────────────────────────────────
     const callback = update?.callback_query;
     if (callback) {
@@ -798,6 +821,37 @@ export async function onRequest(context) {
             body: JSON.stringify({ chat_id: chatId, text: txt, parse_mode: 'Markdown' })
         });
     };
+
+    if (msg.successful_payment) {
+        const payment = msg.successful_payment;
+        const now = Date.now();
+
+        let expiraEn = now;
+        try {
+            const existenteRaw = await env.PELICULAS_KV.get(`sub:${userId}`);
+            const existente = existenteRaw ? JSON.parse(existenteRaw) : null;
+            // Si ya tenía plan activo, extiende desde el vencimiento; si no, desde ahora
+            const base = existente && existente.expiraEn > now ? existente.expiraEn : now;
+            expiraEn = base + PLAN_DIAS * 24 * 60 * 60 * 1000;
+
+            await env.PELICULAS_KV.put(`sub:${userId}`, JSON.stringify({
+                activo: true,
+                expiraEn,
+                ultimoPago: {
+                    chargeId: payment.telegram_payment_charge_id,
+                    stars: payment.total_amount,
+                    fecha: now,
+                },
+            }));
+        } catch (e) {
+            await avisarAdmin(`⚠️ Pago recibido de ${userId} pero falló el guardado en KV:\n${e?.message || e}`);
+        }
+
+        const fechaTexto = new Date(expiraEn).toLocaleDateString('es-AR');
+        await enviar(`✅ ¡Listo! Tu Premium está activo hasta *${fechaTexto}*. Ya no vas a ver anuncios.`);
+        await avisarAdmin(`⭐ Nuevo pago: usuario ${userId}, ${payment.total_amount} Stars, vence ${fechaTexto}`);
+        return new Response('OK');
+    }
 
     if (userId !== ADMIN_ID) {
         // Usuario común (no el admin): cualquier cosa que escriba, le mostramos
