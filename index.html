@@ -424,6 +424,25 @@
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         let usuarioEsPremium = false;
 
+        // ─── ANUNCIO POR TOQUES (reutiliza la MISMA zona 11208906, no crea una nueva) ──
+        // Cada N toques en cualquier parte de la app (menos Premium), dispara el
+        // interstitial. Al reusar la misma zona que ya usás antes de reproducir,
+        // no corre el riesgo de "doble zona" que Monetag puede leer como manipulación
+        // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
+        // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
+        // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
+        const TOQUES_POR_ANUNCIO = 10;
+        let contadorToques = 0;
+        document.addEventListener('click', () => {
+            if (usuarioEsPremium) return;
+            contadorToques++;
+            if (contadorToques < TOQUES_POR_ANUNCIO) return;
+            contadorToques = 0;
+            if (typeof show_11208906 === 'function') {
+                show_11208906().catch(() => {}); // si falla (adblock, etc.) no rompe nada
+            }
+        });
+
         // ─── FUNCIÓN CENTRAL: usa el Worker /poster con caché en KV ─────────────
         const posterCache = {};
 
