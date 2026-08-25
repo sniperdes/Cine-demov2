@@ -837,6 +837,7 @@ export async function onRequest(context) {
             await env.PELICULAS_KV.put(`sub:${userId}`, JSON.stringify({
                 activo: true,
                 expiraEn,
+                avisoEnviado: false, // se resetea al renovar, para que vuelva a avisar antes del próximo vencimiento
                 ultimoPago: {
                     chargeId: payment.telegram_payment_charge_id,
                     stars: payment.total_amount,
@@ -882,7 +883,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId`);
         return new Response('OK');
     }
 
@@ -1123,6 +1124,7 @@ export async function onRequest(context) {
         await env.PELICULAS_KV.put(`sub:${destinoId}`, JSON.stringify({
             activo: true,
             expiraEn,
+            avisoEnviado: false,
             ultimoPago: { chargeId: 'manual-admin', stars: 0, fecha: now },
         }));
 
@@ -1140,6 +1142,44 @@ export async function onRequest(context) {
         }
         await env.PELICULAS_KV.delete(`sub:${destinoId}`);
         await enviar(`🗑️ Premium quitado a \`${destinoId}\`.`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/reembolsar') {
+        // Uso: /reembolsar userId — devuelve los Stars del último pago real de ese
+        // usuario (no funciona sobre Premium otorgado a mano con /darpremium,
+        // porque ahí no hay chargeId real de Telegram)
+        const destinoId = partes[1] ? Number(partes[1]) : null;
+        if (!destinoId) {
+            await enviar('❓ Uso: /reembolsar userId');
+            return new Response('OK');
+        }
+
+        const raw = await env.PELICULAS_KV.get(`sub:${destinoId}`);
+        const sub = raw ? JSON.parse(raw) : null;
+        const chargeId = sub?.ultimoPago?.chargeId;
+
+        if (!chargeId || chargeId === 'manual-admin') {
+            await enviar(`❌ No hay un pago real de Stars para reembolsar a \`${destinoId}\` (Premium otorgado a mano, o sin pagos registrados).`);
+            return new Response('OK');
+        }
+
+        try {
+            const res = await fetch(`${BOT_API}/refundStarPayment`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: destinoId, telegram_payment_charge_id: chargeId })
+            });
+            const data = await res.json();
+            if (!data.ok) {
+                await enviar(`❌ Telegram rechazó el reembolso: ${data.description || 'error desconocido'}`);
+                return new Response('OK');
+            }
+            await env.PELICULAS_KV.delete(`sub:${destinoId}`);
+            await enviar(`✅ Reembolsado y Premium retirado a \`${destinoId}\`.`);
+        } catch (e) {
+            await enviar(`❌ Error al reembolsar: ${e?.message || e}`);
+        }
         return new Response('OK');
     }
 
