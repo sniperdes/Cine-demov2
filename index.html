@@ -418,6 +418,10 @@
 
         const PLACEHOLDER = 'https://via.placeholder.com/140x200/1a1a1a/666?text=Sin+imagen';
 
+        // Estado de la suscripción Premium del usuario actual — se carga una vez
+        // al abrir la app y se usa para saltear el anuncio antes de reproducir.
+        let usuarioEsPremium = false;
+
         // ─── FUNCIÓN CENTRAL: usa el Worker /poster con caché en KV ─────────────
         const posterCache = {};
 
@@ -1079,6 +1083,10 @@
             document.querySelector('.banner-slider').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
             });
+
+            // Estado Premium: se consulta una sola vez al abrir la app
+            const sub = await consultarSuscripcion();
+            usuarioEsPremium = !!sub?.activo;
         });
 
         // ─── NAV & MODAL ──────────────────────────────────────────────────────────
@@ -1192,14 +1200,16 @@
             document.getElementById('btn-favorito').innerText = esFavorito(idFavorito(modalActual)) ? '❤️' : '🤍';
             document.getElementById('btn-trailer').style.display = 'block';
             // Mostrar botones según tipo
+            const btnAnuncio = document.getElementById('btn-ver-anuncio');
+            btnAnuncio.innerText = usuarioEsPremium ? '▶️ Ver' : '📺 Ver con anuncios';
             if (type === 'tv') {
                 // Series/Anime siempre muestran Ver Episodios
                 document.getElementById('btn-episodios').style.display = 'block';
-                document.getElementById('btn-ver-anuncio').style.display = 'none';
+                btnAnuncio.style.display = 'none';
             } else {
-                // Películas siempre muestran Ver con anuncios
+                // Películas siempre muestran Ver (con o sin anuncios según el plan)
                 document.getElementById('btn-episodios').style.display = 'none';
-                document.getElementById('btn-ver-anuncio').style.display = 'block';
+                btnAnuncio.style.display = 'block';
             }
         }
 
@@ -1370,8 +1380,12 @@
                 }
             };
 
-            // Mostrar anuncio primero (con detección de adblocker)
-            await mostrarAnuncioYContinuar(ejecutar);
+            // Mostrar anuncio primero (con detección de adblocker) — salvo que sea Premium
+            if (usuarioEsPremium) {
+                await ejecutar();
+            } else {
+                await mostrarAnuncioYContinuar(ejecutar);
+            }
         }
 
         // ─── ADBLOCK: espera breve por si el script viene lento, y si no aparece, bloquea ──
