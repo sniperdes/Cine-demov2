@@ -882,7 +882,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]`);
         return new Response('OK');
     }
 
@@ -1099,6 +1099,47 @@ export async function onRequest(context) {
 
         await env.PELICULAS_KV.delete(key);
         await enviar(`🗑️ Borrado: ${label}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/darpremium') {
+        // Uso: /darpremium [userId] [dias]
+        // Sin userId: te lo activás a vos mismo (útil para testear).
+        // Sin dias: usa PLAN_DIAS (el mismo plazo del plan pago).
+        const destinoId = partes[1] ? Number(partes[1]) : ADMIN_ID;
+        const dias = partes[2] ? Number(partes[2]) : PLAN_DIAS;
+
+        if (!destinoId || isNaN(dias) || dias <= 0) {
+            await enviar('❓ Uso: /darpremium [userId] [dias]\nEj: /darpremium (a vos mismo, 30 días)\nEj: /darpremium 123456789 7 (a otro usuario, 7 días)');
+            return new Response('OK');
+        }
+
+        const now = Date.now();
+        const existenteRaw = await env.PELICULAS_KV.get(`sub:${destinoId}`);
+        const existente = existenteRaw ? JSON.parse(existenteRaw) : null;
+        const base = existente && existente.expiraEn > now ? existente.expiraEn : now;
+        const expiraEn = base + dias * 24 * 60 * 60 * 1000;
+
+        await env.PELICULAS_KV.put(`sub:${destinoId}`, JSON.stringify({
+            activo: true,
+            expiraEn,
+            ultimoPago: { chargeId: 'manual-admin', stars: 0, fecha: now },
+        }));
+
+        const fechaTexto = new Date(expiraEn).toLocaleDateString('es-AR');
+        await enviar(`✅ Premium activado para \`${destinoId}\` hasta *${fechaTexto}* (sin cobro, otorgado a mano).`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/quitarpremium') {
+        // Uso: /quitarpremium [userId] — sin userId, te lo saca a vos mismo
+        const destinoId = partes[1] ? Number(partes[1]) : ADMIN_ID;
+        if (!destinoId) {
+            await enviar('❓ Uso: /quitarpremium [userId]');
+            return new Response('OK');
+        }
+        await env.PELICULAS_KV.delete(`sub:${destinoId}`);
+        await enviar(`🗑️ Premium quitado a \`${destinoId}\`.`);
         return new Response('OK');
     }
 
