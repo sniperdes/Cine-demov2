@@ -124,6 +124,7 @@
         .perfil-header { display:flex; align-items:center; gap:14px; padding:20px 15px; }
         .perfil-avatar { width:64px; height:64px; border-radius:50%; background:#1f1f1f; object-fit:cover; }
         .perfil-nombre { font-size:18px; font-weight:bold; color:#eee; }
+        .perfil-id { font-size:12px; color:#666; margin-top:2px; user-select:all; } /* user-select:all = un solo toque selecciona todo el ID para copiar */
         .perfil-sub-estado { font-size:13px; margin-top:3px; }
         .perfil-sub-estado.activo { color:#3ddc84; }
         .perfil-sub-estado.inactivo { color:#888; }
@@ -368,6 +369,7 @@
             <img id="perfil-avatar" class="perfil-avatar" src="">
             <div>
                 <div class="perfil-nombre" id="perfil-nombre">Usuario</div>
+                <div class="perfil-id" id="perfil-id"></div>
                 <div class="perfil-sub-estado inactivo" id="perfil-sub-estado">Sin plan Premium</div>
             </div>
         </div>
@@ -1121,6 +1123,7 @@
             document.getElementById('perfil-nombre').innerText = user
                 ? [user.first_name, user.last_name].filter(Boolean).join(' ')
                 : 'Usuario';
+            document.getElementById('perfil-id').innerText = user?.id ? `ID: ${user.id}` : '';
             document.getElementById('perfil-avatar').src = user?.photo_url || PLACEHOLDER;
 
             const estadoEl   = document.getElementById('perfil-sub-estado');
