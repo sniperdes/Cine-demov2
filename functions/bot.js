@@ -243,7 +243,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama;
 
     // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
-    if (esPeliculaNormal && env) {
+    if (esPeliculaNormal && env && nombreKVsugerido) {
         const generoFinal = generoTMDBaGeneroApp(resultado.genre_ids);
 
         // Consulta extra al detalle para conseguir la duración y el título internacional (en inglés)
@@ -298,7 +298,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: serie "normal" (occidental) -> se agrega SOLA al catálogo
-    if (esSerieNormal && env) {
+    if (esSerieNormal && env && nombreKVsugerido) {
         const generosFinal = generoTMDBaGeneroSerie(resultado.genre_ids);
         // Reusamos detectarSerie solo para sacar temporada/episodio del nombre del archivo
         // (ya sabemos que nombreKV dio null acá, porque si no, no estaríamos en esta rama)
@@ -344,7 +344,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: anime -> se agrega SOLO al catálogo
-    if (esAnime && env) {
+    if (esAnime && env && nombreKVsugerido) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-anime');
 
         try {
@@ -393,7 +393,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: dorama -> se agrega SOLO al catálogo
-    if (esDorama && env) {
+    if (esDorama && env && nombreKVsugerido) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-dorama');
 
         try {
