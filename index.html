@@ -537,7 +537,9 @@
             for (const g of GENEROS_SERIES) {
                 const slider     = document.getElementById(`slider-${g.slug}`);
                 const contenedor = document.getElementById(`contenedor-${g.slug}`);
-                const series     = baseDeDatosSeries.filter(s => s.generos.includes(g.slug));
+                const series     = baseDeDatosSeries
+                    .filter(s => s.generos.includes(g.slug))
+                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
 
                 series.forEach((serie, index) => {
                     const idx = baseDeDatosSeries.indexOf(serie);
@@ -709,7 +711,9 @@
             for (const genero of generos) {
                 const slider     = document.getElementById(`slider-${genero}`);
                 const contenedor = document.getElementById(`contenedor-${genero}`);
-                const items      = base.filter(p => p.generos.includes(genero));
+                const items      = base
+                    .filter(p => p.generos.includes(genero))
+                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
 
                 items.forEach((item, index) => {
                     const uid = `${genero}-${index}`;
@@ -934,7 +938,9 @@
                 const genero = g.slug;
                 const slider    = document.getElementById(`slider-${genero}`);
                 const contenedor = document.getElementById(`contenedor-${genero}`);
-                const pelis     = baseDeDatosPeliculas.filter(p => p.generos.includes(genero));
+                const pelis     = baseDeDatosPeliculas
+                    .filter(p => p.generos.includes(genero))
+                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
 
                 pelis.forEach((peli, index) => {
                     const globalIdx = baseDeDatosPeliculas.indexOf(peli);
