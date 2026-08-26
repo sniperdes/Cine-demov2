@@ -282,6 +282,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 generos: generoFinal,
                 info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'}${duracionTexto}`,
                 desc: overview,
+                fechaAgregado: Date.now(),
             });
 
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
@@ -316,6 +317,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     generos: generosFinal,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
+                    fechaAgregado: Date.now(),
                 });
                 await env.PELICULAS_KV.put('catalogo:series', JSON.stringify(catalogo));
             }
@@ -359,6 +361,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     tipoContenido: tipo,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
+                    fechaAgregado: Date.now(),
                 });
                 await env.PELICULAS_KV.put('catalogo:animes', JSON.stringify(catalogo));
             }
@@ -407,6 +410,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     tipoContenido: tipo,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
+                    fechaAgregado: Date.now(),
                 });
                 await env.PELICULAS_KV.put('catalogo:doramas', JSON.stringify(catalogo));
             }
