@@ -887,7 +887,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId`);
         return new Response('OK');
     }
 
@@ -1013,10 +1013,13 @@ export async function onRequest(context) {
         for (let i = 0; i < catalogo.length; i += LOTE) {
             const bloque = catalogo.slice(i, i + LOTE);
             let resp = i === 0 ? `📋 *Auto-agregadas* (${catalogo.length} en total)\n\n` : '';
-            bloque.forEach(p => { resp += `🔑 ${p.nombreKV} → ${p.titulo}\n`; });
+            bloque.forEach((p, j) => {
+                const num = i + j + 1;
+                resp += `${num}. 🔑 ${p.nombreKV || '(sin clave)'} → ${p.titulo}\n`;
+            });
             await enviar(resp);
         }
-        await enviar(`Para ver el detalle de una: /vercatalogo ${tipo} nombreKV`);
+        await enviar(`Para ver el detalle de una: /vercatalogo ${tipo} nombreKV\nPara borrar por número (útil si tiene la clave vacía o duplicada): /borrarcatalogoidx ${tipo} numero`);
         return new Response('OK');
     }
 
@@ -1059,6 +1062,31 @@ export async function onRequest(context) {
         catalogo.splice(idx, 1);
         await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
         await enviar(`🗑️ Saqué "${nombreKV}" del catálogo.\n\n(El video en sí sigue guardado — si también querés borrarlo con /borrar)`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/borrarcatalogoidx') {
+        // /borrarcatalogoidx pelicula|serie|anime|dorama numero — borra por POSICIÓN
+        // (la que muestra /listarcatalogo), no por nombreKV. Sirve para fichas con
+        // la clave vacía o duplicada, que /borrarcatalogo no puede targetear por nombre.
+        const tipo = partes[1];
+        const numero = Number(partes[2]);
+        if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !numero || numero < 1) {
+            await enviar(`Uso: /borrarcatalogoidx ${TIPOS_CATALOGO_VALIDOS.join('|')} numero\n(el número es el que te muestra /listarcatalogo ${tipo || 'tipo'})`);
+            return new Response('OK');
+        }
+        const kvKey = KV_KEY_POR_TIPO[tipo];
+        const raw = await env.PELICULAS_KV.get(kvKey);
+        const catalogo = raw ? JSON.parse(raw) : [];
+        const idx = numero - 1;
+        if (idx < 0 || idx >= catalogo.length) {
+            await enviar(`❌ No hay una entrada #${numero} (el catálogo de ${tipo} tiene ${catalogo.length}).`);
+            return new Response('OK');
+        }
+        const eliminada = catalogo[idx];
+        catalogo.splice(idx, 1);
+        await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
+        await enviar(`🗑️ Saqué del catálogo: "${eliminada.titulo}" (era #${numero}, clave: ${eliminada.nombreKV || '(sin clave)'})\n\n(El video en sí sigue guardado — si también querés borrarlo con /borrar)`);
         return new Response('OK');
     }
 
