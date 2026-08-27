@@ -431,7 +431,7 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 5;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
@@ -757,7 +757,10 @@
                 await Promise.all(base.slice(i, i + LOTE).map(async (item) => {
                     const poster = await obtenerPoster(item.tmdbQuery, item.tipoContenido || type);
                     item.generos.forEach(genero => {
-                        const index = base.filter(p => p.generos.includes(genero)).indexOf(item);
+                        const index = base
+                            .filter(p => p.generos.includes(genero))
+                            .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0))
+                            .indexOf(item);
                         const uid   = `${genero}-${index}`;
                         const s = document.getElementById(`img-s-${uid}`);
                         const t = document.getElementById(`img-t-${uid}`);
