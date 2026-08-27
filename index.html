@@ -443,7 +443,7 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 5;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
@@ -1456,7 +1456,18 @@
             const intentos = 10; // 10 x 200ms = 2 segundos de margen
             for (let i = 0; i < intentos; i++) {
                 if (typeof show_11208906 === 'function') {
-                    show_11208906().then(ejecutar).catch(ejecutar);
+                    show_11208906()
+                        .then((resultado) => {
+                            // Monetag devuelve reward_event_type: 'valued' solo si el
+                            // usuario vio el anuncio completo. Si lo cerró antes de
+                            // tiempo ('not_valued'), no lo dejamos pasar directo.
+                            if (resultado?.reward_event_type === 'not_valued') {
+                                anuncioIncompleto(ejecutar);
+                            } else {
+                                ejecutar();
+                            }
+                        })
+                        .catch(() => anuncioIncompleto(ejecutar));
                     return;
                 }
                 await new Promise(r => setTimeout(r, 200));
@@ -1467,6 +1478,16 @@
                 document.getElementById('adblock-overlay').classList.remove('active');
                 mostrarAnuncioYContinuar(ejecutar);
             };
+        }
+
+        // Se llama cuando el usuario cerró/saltó el anuncio antes de completarlo.
+        // Le avisamos y lo dejamos reintentar tocando de nuevo (no reintenta solo,
+        // para no encadenar anuncios sin que el usuario lo pida).
+        function anuncioIncompleto(ejecutar) {
+            const tg = window.Telegram?.WebApp;
+            const mensaje = '📺 Tenés que ver el anuncio completo para reproducir. Volvé a tocar "Ver" para intentar de nuevo.';
+            if (tg?.showAlert) tg.showAlert(mensaje);
+            else alert(mensaje);
         }
 
         // Reproductor interno para embeds (Archive.org, etc)
