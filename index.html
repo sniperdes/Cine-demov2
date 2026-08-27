@@ -13,7 +13,7 @@
         .logo {color: #3B82F6;font-size: 26px;font-weight: 800;letter-spacing: 1.5px;text-shadow: 0 0 8px rgba(96,165,250,.35);}
         .menu { display:flex; gap:10px; overflow-x:auto; padding:10px; background:#0b0b0b; scrollbar-width:none; }
         .menu::-webkit-scrollbar { display:none; }
-        .menu button { background:#1f1f1f; border:none; color:white; padding:10px 14px; border-radius:20px; white-space:nowrap; font-weight:bold; cursor:pointer; }
+        .menu button { background:#1f1f1f; border:none; color:white; padding:10px 14px; border-radius:20px; white-space:nowrap; font-weight:bold; font-size:15px; cursor:pointer; }
         .section { padding:15px; }
         .title { font-size:18px; margin:10px 0; color:#e5e5e5; }
         .view { display:none; padding:15px; }
@@ -443,7 +443,7 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 5;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
