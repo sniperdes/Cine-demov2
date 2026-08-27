@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NovaPlay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
         body { margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:white; -webkit-user-select:none; user-select:none; }
         .header { display:flex; align-items:center; justify-content:space-between; padding:15px; background:#111; position:sticky; top:0; z-index:10; }
@@ -27,7 +30,16 @@
         /* SECCIÓN GÉNERO */
         .genero-seccion { margin-bottom:25px; }
         .genero-header { display:flex; align-items:center; justify-content:space-between; padding:0 5px; margin-bottom:10px; }
-        .genero-header h3 { margin:0; font-size:17px; color:#e5e5e5; }
+        .genero-header h3 {
+            margin:0;
+            font-size:22px;
+            font-family:'Bangers', cursive;
+            font-weight:normal; /* Bangers ya es "bold" por diseño */
+            letter-spacing:1.5px;
+            color:#FFD84D;
+            -webkit-text-stroke:1px #3a2a00;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+        }
         .card-ver-todo { min-width:100px; background:#1a1a1a; border-radius:10px; overflow:hidden; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; border:2px solid #333; transition:0.2s; }
         .card-ver-todo:active { transform:scale(0.97); }
         .card-ver-todo .ver-todo-icon { font-size:30px; margin-bottom:8px; }
@@ -431,7 +443,7 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 5;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
