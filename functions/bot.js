@@ -231,9 +231,17 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const overview = (resultado.overview || 'Sin sinopsis disponible.').slice(0, 160);
     const idioma = resultado.original_language || '';
     const esAnimacion = (resultado.genre_ids || []).includes(16);
-    const nombreKVsugerido = tituloGuess.toLowerCase()
+    let nombreKVsugerido = tituloGuess.toLowerCase()
         .replace(/[^a-z0-9áéíóúñü ]/gi, '')
         .replace(/\s+/g, '-');
+    if (!nombreKVsugerido) {
+        // El nombre del archivo/caption no tenía texto en alfabeto latino (común
+        // en anime con captions en japonés) — usamos de respaldo el título que
+        // ya nos devolvió TMDB en español, que sí viene en latino.
+        nombreKVsugerido = titulo.toLowerCase()
+            .replace(/[^a-z0-9áéíóúñü ]/gi, '')
+            .replace(/\s+/g, '-');
+    }
 
     const esTurca = idioma === 'tr';
     const esRusa  = idioma === 'ru';
