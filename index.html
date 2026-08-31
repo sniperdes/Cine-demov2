@@ -443,7 +443,7 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
-        const TOQUES_POR_ANUNCIO = 7;
+        const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
             if (usuarioEsPremium) return;
@@ -1141,6 +1141,12 @@
             // Estado Premium: se consulta una sola vez al abrir la app
             const sub = await consultarSuscripcion();
             usuarioEsPremium = !!sub?.activo;
+
+            // Registro de visita (para poder ver cuántos usuarios entraron desde el bot)
+            fetch('/registrar-visita', {
+                method: 'POST',
+                headers: { 'X-Telegram-Init-Data': tg?.initData || '' }
+            }).catch(() => {}); // no bloquea nada si falla
         });
 
         // ─── NAV & MODAL ──────────────────────────────────────────────────────────
