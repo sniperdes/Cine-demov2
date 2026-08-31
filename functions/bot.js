@@ -200,7 +200,12 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     // de título (evita casos como "Lucky" vs "Lucky Strike", donde la película
     // tenía más popularidad pero el título correcto era el de la serie), y solo
     // si hay empate o ninguno coincide exacto, usamos la popularidad de TMDB
-    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+        // Ignora prefijos de estudio/plataforma tipo "Marvel's", "Netflix", "HBO",
+        // que suelen estar en el título oficial de TMDB pero no en el nombre del
+        // archivo (ej: "Marvel - The Punisher" vs "Marvel's The Punisher")
+        .replace(/^(marvel'?s?|netflix|disney\+?|hbo\smax|hbo|amazon(\sprime)?|dc)[\s-]+/i, '')
+        .trim();
     let resultado, tipo;
     if (resultadoTv && resultadoMovie) {
         const queryNorm    = normalizar(tituloGuess);
@@ -895,7 +900,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)`);
         return new Response('OK');
     }
 
@@ -1219,6 +1224,66 @@ export async function onRequest(context) {
             await enviar(`✅ Reembolsado y Premium retirado a \`${destinoId}\`.`);
         } catch (e) {
             await enviar(`❌ Error al reembolsar: ${e?.message || e}`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/estadisticas') {
+        const ahora = Date.now();
+        const DIA = 24 * 60 * 60 * 1000;
+        let total = 0, activosHoy = 0, activos7d = 0, activos30d = 0;
+        let premiumActivos = 0, premiumPagos = 0, premiumManuales = 0;
+        let cursor;
+
+        try {
+            // Visitas (usuarios únicos que abrieron la app)
+            do {
+                const lista = await env.PELICULAS_KV.list({ prefix: 'visita:', cursor });
+                cursor = lista.cursor;
+                for (const key of lista.keys) {
+                    const raw = await env.PELICULAS_KV.get(key.name);
+                    if (!raw) continue;
+                    const v = JSON.parse(raw);
+                    total++;
+                    const desde = ahora - v.ultimaVisita;
+                    if (desde <= DIA) activosHoy++;
+                    if (desde <= 7 * DIA) activos7d++;
+                    if (desde <= 30 * DIA) activos30d++;
+                }
+            } while (cursor);
+
+            // Suscripciones Premium activas
+            cursor = undefined;
+            do {
+                const lista = await env.PELICULAS_KV.list({ prefix: 'sub:', cursor });
+                cursor = lista.cursor;
+                for (const key of lista.keys) {
+                    const raw = await env.PELICULAS_KV.get(key.name);
+                    if (!raw) continue;
+                    const s = JSON.parse(raw);
+                    if (s.activo && s.expiraEn > ahora) {
+                        premiumActivos++;
+                        if (s.ultimoPago?.chargeId === 'manual-admin') premiumManuales++;
+                        else premiumPagos++;
+                    }
+                }
+            } while (cursor);
+
+            const gratis = Math.max(total - premiumActivos, 0);
+
+            await enviar(
+                `📊 *Estadísticas de la Mini App*\n\n` +
+                `👥 Usuarios únicos (histórico): ${total}\n` +
+                `🟢 Activos hoy: ${activosHoy}\n` +
+                `📅 Activos últimos 7 días: ${activos7d}\n` +
+                `📆 Activos últimos 30 días: ${activos30d}\n\n` +
+                `💎 Premium activos: ${premiumActivos}\n` +
+                `⭐ — pagados con Stars: ${premiumPagos}\n` +
+                `🎁 — otorgados a mano: ${premiumManuales}\n` +
+                `🆓 Sin Premium: ${gratis}`
+            );
+        } catch (e) {
+            await enviar(`❌ Error al calcular estadísticas: ${e?.message || e}`);
         }
         return new Response('OK');
     }
