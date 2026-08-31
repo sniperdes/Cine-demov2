@@ -436,6 +436,17 @@
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         let usuarioEsPremium = false;
 
+        // Devuelve el año de un ítem del catálogo para poder ordenar por estreno.
+        // El contenido agregado por el bot ya trae un campo "anio" explícito, pero
+        // el catálogo fijo/manual (data-*.js) no siempre lo tiene — como respaldo,
+        // buscamos un año de 4 dígitos dentro de tmdbQuery o el título (ej: "John
+        // Wick 2013" → 2013).
+        function obtenerAnio(item) {
+            if (item.anio) return item.anio;
+            const match = (item.tmdbQuery || item.titulo || '').match(/(19|20)\d{2}/);
+            return match ? Number(match[0]) : 0;
+        }
+
         // ─── ANUNCIO POR TOQUES (reutiliza la MISMA zona 11208906, no crea una nueva) ──
         // Cada N toques en cualquier parte de la app (menos Premium), dispara el
         // interstitial. Al reusar la misma zona que ya usás antes de reproducir,
@@ -551,7 +562,7 @@
                 const contenedor = document.getElementById(`contenedor-${g.slug}`);
                 const series     = baseDeDatosSeries
                     .filter(s => s.generos.includes(g.slug))
-                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
+                    .sort((a, b) => obtenerAnio(b) - obtenerAnio(a));
 
                 series.forEach((serie, index) => {
                     const idx = baseDeDatosSeries.indexOf(serie);
@@ -725,7 +736,7 @@
                 const contenedor = document.getElementById(`contenedor-${genero}`);
                 const items      = base
                     .filter(p => p.generos.includes(genero))
-                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
+                    .sort((a, b) => obtenerAnio(b) - obtenerAnio(a));
 
                 items.forEach((item, index) => {
                     const uid = `${genero}-${index}`;
@@ -771,7 +782,7 @@
                     item.generos.forEach(genero => {
                         const index = base
                             .filter(p => p.generos.includes(genero))
-                            .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0))
+                            .sort((a, b) => obtenerAnio(b) - obtenerAnio(a))
                             .indexOf(item);
                         const uid   = `${genero}-${index}`;
                         const s = document.getElementById(`img-s-${uid}`);
@@ -955,7 +966,7 @@
                 const contenedor = document.getElementById(`contenedor-${genero}`);
                 const pelis     = baseDeDatosPeliculas
                     .filter(p => p.generos.includes(genero))
-                    .sort((a, b) => (b.fechaAgregado || 0) - (a.fechaAgregado || 0));
+                    .sort((a, b) => obtenerAnio(b) - obtenerAnio(a));
 
                 pelis.forEach((peli, index) => {
                     const globalIdx = baseDeDatosPeliculas.indexOf(peli);
