@@ -184,7 +184,11 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const buscar = async (tipo) => {
         const endpoint = tipo === 'tv' ? 'search/tv' : 'search/movie';
         const yearParam = anioParam
-            ? (tipo === 'tv' ? `&first_air_date_year=${anioParam}` : `&year=${anioParam}`)
+            // "year" en TMDB es un filtro flojo (mira CUALQUIER fecha de estreno,
+            // reediciones incluidas) y puede devolver una película distinta con
+            // el mismo título. "primary_release_year" filtra por el estreno
+            // oficial real, mucho más preciso.
+            ? (tipo === 'tv' ? `&first_air_date_year=${anioParam}` : `&primary_release_year=${anioParam}`)
             : '';
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
@@ -296,6 +300,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'}${duracionTexto}`,
                 desc: overview,
                 fechaAgregado: Date.now(),
+                anio: Number(anio) || 0,
             });
 
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
@@ -331,6 +336,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                     fechaAgregado: Date.now(),
+                anio: Number(anio) || 0,
                 });
                 await env.PELICULAS_KV.put('catalogo:series', JSON.stringify(catalogo));
             }
@@ -375,6 +381,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                     fechaAgregado: Date.now(),
+                anio: Number(anio) || 0,
                 });
                 await env.PELICULAS_KV.put('catalogo:animes', JSON.stringify(catalogo));
             }
@@ -424,6 +431,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                     fechaAgregado: Date.now(),
+                anio: Number(anio) || 0,
                 });
                 await env.PELICULAS_KV.put('catalogo:doramas', JSON.stringify(catalogo));
             }
