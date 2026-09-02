@@ -880,6 +880,21 @@ export async function onRequest(context) {
     }
 
     if (userId !== ADMIN_ID) {
+        // Si vino de un link de invitación (t.me/Cine_demobot?start=ref_123456789),
+        // registramos quién lo invitó — una sola vez, y nunca a sí mismo. El premio
+        // real se otorga después, cuando ESTE usuario reproduzca algo por primera
+        // vez (ver /functions/marcar-reproduccion.js), no por solo entrar.
+        const matchRef = texto.match(/^\/start ref_(\d+)/);
+        if (matchRef) {
+            const referidorId = Number(matchRef[1]);
+            if (referidorId && referidorId !== userId) {
+                const yaExiste = await env.PELICULAS_KV.get(`referido_por:${userId}`);
+                if (!yaExiste) {
+                    await env.PELICULAS_KV.put(`referido_por:${userId}`, String(referidorId));
+                }
+            }
+        }
+
         // Usuario común (no el admin): cualquier cosa que escriba, le mostramos
         // el botón grande y visible para abrir la Mini App, en vez de depender
         // de que note el botón chiquito de abajo o que sepa escribir /start.
