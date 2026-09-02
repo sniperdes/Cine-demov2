@@ -142,6 +142,8 @@
         .perfil-sub-estado.inactivo { color:#888; }
         .perfil-card { background:#1a1a1a; border-radius:10px; padding:15px; margin:0 15px 15px; }
         .perfil-card h4 { margin:0 0 10px; font-size:14px; color:#aaa; }
+        .referidos-barra { background:#000; border-radius:6px; height:10px; overflow:hidden; }
+        .referidos-barra-fill { background:linear-gradient(90deg, gold, #ffb700); height:100%; border-radius:6px; transition:width .3s; }
 
         /* PREMIUM */
         .premium-hero { text-align:center; padding:30px 20px 10px; }
@@ -395,6 +397,17 @@
             <div class="row" id="perfil-historial"></div>
             <p id="perfil-historial-vacio" style="display:none; color:#666; font-size:13px; margin:0;">Todavía no viste nada.</p>
         </div>
+        <div class="perfil-card">
+            <h4>🎁 Invitá amigos, ganá Premium gratis</h4>
+            <p style="margin:0 0 10px; color:#ccc; font-size:14px;">
+                Cuando 10 amigos entren con tu link y vean algo, te regalamos 30 días de Premium.
+            </p>
+            <div class="referidos-barra">
+                <div class="referidos-barra-fill" id="referidos-barra-fill" style="width:0%;"></div>
+            </div>
+            <p style="margin:6px 0 12px; color:#aaa; font-size:13px;" id="referidos-texto">0/10 amigos</p>
+            <button class="btn vip" onclick="compartirInvitacion()">📤 Compartir mi link</button>
+        </div>
     </div>
 
     <!-- PREMIUM -->
@@ -435,6 +448,7 @@
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         let usuarioEsPremium = false;
+        const DIAS_PREMIO_REFERIDOS = 30; // debe coincidir con DIAS_PREMIO en marcar-reproduccion.js
 
         // Devuelve el año de un ítem del catálogo para poder ordenar por estreno.
         // El contenido agregado por el bot ya trae un campo "anio" explícito, pero
@@ -1214,6 +1228,13 @@
             } else {
                 vacioHist.style.display = 'block';
             }
+
+            const referidos = await consultarReferidos();
+            const pct = Math.min(100, Math.round((referidos.progreso / referidos.meta) * 100));
+            document.getElementById('referidos-barra-fill').style.width = `${pct}%`;
+            document.getElementById('referidos-texto').textContent = referidos.otorgado
+                ? `✅ ¡Ya ganaste tus ${DIAS_PREMIO_REFERIDOS} días de Premium por invitar!`
+                : `${referidos.progreso}/${referidos.meta} amigos`;
         }
 
         // Consulta si el usuario tiene una suscripción activa (valida su
@@ -1230,6 +1251,41 @@
             } catch {
                 return { activo: false };
             }
+        }
+
+        // Avisa al backend que este usuario reprodujo algo (solo cuenta la primera
+        // vez — el backend se encarga de eso). Usado para el sistema de referidos:
+        // "entrar" no cuenta, tiene que ver contenido de verdad.
+        function marcarReproduccion() {
+            const tg = window.Telegram?.WebApp;
+            fetch('/marcar-reproduccion', {
+                method: 'POST',
+                headers: { 'X-Telegram-Init-Data': tg?.initData || '' }
+            }).catch(() => {});
+        }
+
+        async function consultarReferidos() {
+            const tg = window.Telegram?.WebApp;
+            try {
+                const res = await fetch('/mi-referidos', {
+                    headers: { 'X-Telegram-Init-Data': tg?.initData || '' }
+                });
+                if (!res.ok) return { progreso: 0, meta: 10, otorgado: false };
+                return await res.json();
+            } catch {
+                return { progreso: 0, meta: 10, otorgado: false };
+            }
+        }
+
+        function compartirInvitacion() {
+            const tg     = window.Telegram?.WebApp;
+            const userId = tg?.initDataUnsafe?.user?.id;
+            if (!userId) return;
+            const link  = `https://t.me/Cine_demobot?start=ref_${userId}`;
+            const texto = '🎬 Estoy usando NovaPlay para ver películas, series y anime gratis. ¡Entrá con mi link!';
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(texto)}`;
+            if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
+            else window.open(shareUrl, '_blank');
         }
 
         // ─── PREMIUM ──────────────────────────────────────────────────────────────
@@ -1421,6 +1477,7 @@
                     // Si es URL de embed → abrir reproductor interno
                     if (url.startsWith('http')) {
                         abrirReproductorEmbed(url, nombre, temporada, episodio);
+                        marcarReproduccion();
                     } else {
                         // Si es file_id de Telegram → mandar por bot
                         if (!userId) {
@@ -1438,6 +1495,7 @@
                         });
                         const data2 = await res2.json();
                         if (data2.ok) {
+                            marcarReproduccion();
                             if (tg) {
                                 tg.showPopup({
                                     title: '✅ ¡Video listo!',
