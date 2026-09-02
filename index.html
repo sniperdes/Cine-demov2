@@ -406,7 +406,10 @@
                 <div class="referidos-barra-fill" id="referidos-barra-fill" style="width:0%;"></div>
             </div>
             <p style="margin:6px 0 12px; color:#aaa; font-size:13px;" id="referidos-texto">0/10 amigos</p>
-            <button class="btn vip" onclick="compartirInvitacion()">📤 Compartir mi link</button>
+            <div style="display:flex; gap:8px;">
+                <button class="btn vip" style="flex:1;" onclick="compartirInvitacion()">📤 Telegram</button>
+                <button class="btn vip" style="flex:1; background:#25D366; border-color:#25D366; color:#000;" onclick="compartirInvitacionWhatsapp()">💬 WhatsApp</button>
+            </div>
         </div>
     </div>
 
@@ -1277,15 +1280,34 @@
             }
         }
 
-        function compartirInvitacion() {
+        function datosInvitacion() {
             const tg     = window.Telegram?.WebApp;
             const userId = tg?.initDataUnsafe?.user?.id;
-            if (!userId) return;
-            const link  = `https://t.me/Cine_demobot?start=ref_${userId}`;
-            const texto = '🎬 Estoy usando NovaPlay para ver películas, series y anime gratis. ¡Entrá con mi link!';
-            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(texto)}`;
+            if (!userId) return null;
+            return {
+                link: `https://t.me/Cine_demobot?start=ref_${userId}`,
+                texto: '🎬 Estoy usando NovaPlay para ver películas, series y anime gratis. ¡Entrá con mi link!',
+            };
+        }
+
+        function compartirInvitacion() {
+            const datos = datosInvitacion();
+            if (!datos) return;
+            const tg = window.Telegram?.WebApp;
+            const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(datos.link)}&text=${encodeURIComponent(datos.texto)}`;
             if (tg?.openTelegramLink) tg.openTelegramLink(shareUrl);
             else window.open(shareUrl, '_blank');
+        }
+
+        function compartirInvitacionWhatsapp() {
+            const datos = datosInvitacion();
+            if (!datos) return;
+            const tg = window.Telegram?.WebApp;
+            const mensaje = `${datos.texto} ${datos.link}`;
+            const waUrl = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+            // openLink (no openTelegramLink) porque wa.me es un link externo, no de Telegram
+            if (tg?.openLink) tg.openLink(waUrl);
+            else window.open(waUrl, '_blank');
         }
 
         // ─── PREMIUM ──────────────────────────────────────────────────────────────
