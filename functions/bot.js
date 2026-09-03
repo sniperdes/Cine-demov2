@@ -13,6 +13,7 @@ const KV_KEY_POR_TIPO = {
     serie: 'catalogo:series',
     anime: 'catalogo:animes',
     dorama: 'catalogo:doramas',
+    turca: 'catalogo:turcas',
 };
 const TIPOS_CATALOGO_VALIDOS = Object.keys(KV_KEY_POR_TIPO);
 
@@ -160,6 +161,16 @@ function generoTMDBaGeneroApp(genreIds) {
     ];
     const encontrados = mapa.filter(([id]) => (genreIds || []).includes(id)).map(([, genero]) => genero);
     return encontrados.length ? encontrados : ['accion']; // default si no coincide con ninguno
+}
+
+// Turcas usa 3 categorías fijas (no la taxonomía completa de TMDB) — elegimos
+// UNA sola por prioridad: si tiene género Acción, va ahí; si no pero tiene
+// Romance, va a romance; si no, cae en drama por defecto.
+function elegirGeneroTurca(genreIds) {
+    const ids = genreIds || [];
+    if (ids.includes(28) || ids.includes(10759)) return 'turca-accion'; // 28=Acción(película) / 10759=Acción y Aventura(serie)
+    if (ids.includes(10749)) return 'turca-romance';
+    return 'turca-drama';
 }
 
 // Igual que generoTMDBaGeneroSerie pero genérico con sufijo, para no chocar
@@ -356,6 +367,54 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             }
             // No se pudo sacar el episodio del nombre del archivo: guarda la ficha
             // igual, pero sin botón (asigná el video a mano con /asignar serie)
+            return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
+        } catch (e) {
+            // Si falla, caemos al bloque de copiar/pegar de siempre
+        }
+    }
+
+    // Caso especial: turca -> se agrega SOLA al catálogo, con UNO de los 3
+    // subgéneros fijos elegido automáticamente (acción > romance > drama)
+    if (esTurca && env && nombreKVsugerido) {
+        const generoElegido = elegirGeneroTurca(resultado.genre_ids);
+
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:turcas');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+
+            if (!yaExiste) {
+                catalogo.push({
+                    titulo,
+                    tmdbQuery: `${tituloOriginal} ${anio}`,
+                    nombreKV: nombreKVsugerido,
+                    generos: [generoElegido],
+                    info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
+                    desc: overview,
+                    fechaAgregado: Date.now(),
+                    anio: Number(anio) || 0,
+                });
+                await env.PELICULAS_KV.put('catalogo:turcas', JSON.stringify(catalogo));
+            }
+
+            const textoBase = yaExiste
+                ? `🌙 "${titulo}" (${anio}) ya estaba en el catálogo de turcas (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de turcas.\n📁 Género elegido automáticamente: ${generoElegido}\n🔑 nombreKV: ${nombreKVsugerido}`;
+
+            if (tipo === 'movie') {
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'turca' };
+            }
+
+            const { episodio, temporada } = detectarSerie(textoOriginal);
+            if (episodio) {
+                return {
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    nombreKV: nombreKVsugerido,
+                    temporada,
+                    episodio,
+                    catalogoTipo: 'turca'
+                };
+            }
             return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
         } catch (e) {
             // Si falla, caemos al bloque de copiar/pegar de siempre
