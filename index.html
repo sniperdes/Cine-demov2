@@ -267,6 +267,7 @@
             <div class="banner-dots">
                 <span class="dot active-dot"></span><span class="dot"></span>
                 <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
             </div>
             <div id="seccion-continuar" style="display:none;">
                 <div class="title">▶️ Continuar viendo</div>
@@ -462,6 +463,30 @@
             if (item.anio) return item.anio;
             const match = (item.tmdbQuery || item.titulo || '').match(/(19|20)\d{2}/);
             return match ? Number(match[0]) : 0;
+        }
+
+        // Junta TODO el catálogo (películas, series, anime, doramas, turcas, rusas)
+        // en un solo pool, marcando el tipo real de cada uno (para pedir el poster
+        // y abrir el modal correcto). Se usa para Destacadas y Tendencias.
+        function poolCatalogoCompleto() {
+            return [
+                ...baseDeDatosPeliculas.map(p => ({ ...p, _tipo: 'movie' })),
+                ...baseDeDatosSeries.map(s => ({ ...s, _tipo: 'tv' })),
+                ...baseDeDatosAnime.map(a => ({ ...a, _tipo: 'tv' })),
+                ...baseDeDatosDoramas.map(d => ({ ...d, _tipo: 'tv' })),
+                ...baseDeDatosTurcas.map(t => ({ ...t, _tipo: 'tv' })),
+                ...baseDeDatosRusas.map(r => ({ ...r, _tipo: 'tv' })),
+            ];
+        }
+
+        // Elige N ítems al azar de un array, sin repetir (Fisher-Yates)
+        function elegirAlAzar(pool, cantidad) {
+            const copia = [...pool];
+            for (let i = copia.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [copia[i], copia[j]] = [copia[j], copia[i]];
+            }
+            return copia.slice(0, cantidad);
         }
 
         // ─── ANUNCIO POR TOQUES (reutiliza la MISMA zona 11208906, no crea una nueva) ──
@@ -731,6 +756,18 @@
 
         // ─── CARGAR TURCAS ────────────────────────────────────────────────────────
         async function cargarTurcas() {
+            // Combina el catálogo fijo (data-turcas.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=turcas');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosTurcas.map(t => t.nombreKV));
+                    for (const item of dinamico) {
+                        if (!nombresExistentes.has(item.nombreKV)) baseDeDatosTurcas.push(item);
+                    }
+                }
+            } catch {}
+
             await cargarCategoria(baseDeDatosTurcas, ['turca-romance','turca-drama','turca-accion'], 'tv');
         }
 
@@ -872,8 +909,9 @@
         let temporizadorBanner;
 
         async function cargarBanner() {
-            for (const item of titulosBanner) {
-                const p = await obtenerPoster(item.q, item.tipo);
+            const elegidos = elegirAlAzar(poolCatalogoCompleto(), 8);
+            for (const item of elegidos) {
+                const p = await obtenerPoster(item.tmdbQuery, item._tipo);
                 bannerUrls.push(p || PLACEHOLDER);
             }
             const el = document.getElementById('banner-img');
@@ -1130,17 +1168,16 @@
         // ─── TENDENCIAS ───────────────────────────────────────────────────────────
         async function cargarTendencias() {
             const contenedor = document.getElementById('contenedor-tendencias');
-            titulosTendencias.forEach((item, i) => {
-                const { q: query, tipo } = item;
-                const nombre = query.replace(/\d{4}/, '').trim();
+            const elegidos = elegirAlAzar(poolCatalogoCompleto(), 8);
+            elegidos.forEach((item, i) => {
                 const tarjeta = document.createElement('div');
                 tarjeta.className = 'card pelicula';
-                tarjeta.innerHTML = `<img id="tend-img-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${nombre}</p>`;
-                tarjeta.onclick = () => abrirModal(nombre, document.getElementById(`tend-img-${i}`).src, '', '', query, tipo);
+                tarjeta.innerHTML = `<img id="tend-img-${i}" class="skeleton" src="${PLACEHOLDER}"><p>${item.titulo}</p>`;
+                tarjeta.onclick = () => abrirModal(item.titulo, document.getElementById(`tend-img-${i}`).src, item.info, item.desc, item.tmdbQuery, item._tipo, item.nombreKV || null);
                 contenedor.appendChild(tarjeta);
             });
-            await Promise.all(titulosTendencias.map(async (item, i) => {
-                const poster = await obtenerPoster(item.q, item.tipo);
+            await Promise.all(elegidos.map(async (item, i) => {
+                const poster = await obtenerPoster(item.tmdbQuery, item._tipo);
                 const el = document.getElementById(`tend-img-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             }));
@@ -1151,15 +1188,21 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             if (tg) { tg.ready(); tg.expand(); }
-            cargarBanner();
             cargarImagenesGenero();
+
+            // Destacadas y Tendencias eligen 8 al azar de TODO el catálogo, así que
+            // necesitan que los catálogos ya estén cargados antes de armarse.
+            await Promise.all([
+                cargarCatalogo(),
+                cargarSeries(),
+                cargarAnime(),
+                cargarDoramas(),
+                cargarTurcas(),
+                cargarRusas(),
+            ]);
+            cargarBanner();
             cargarTendencias();
-            cargarCatalogo();
-            cargarSeries();
-            cargarAnime();
-            cargarDoramas();
-            cargarTurcas();
-            cargarRusas();
+
             cargarHistorial();
             iniciarTemporizador();
             document.querySelector('.banner-slider').addEventListener('click', () => {
