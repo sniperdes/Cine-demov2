@@ -20,7 +20,9 @@ export async function onRequest(context) {
         return new Response(JSON.stringify({ error: 'Falta ?q=' }), { status: 400, headers: corsHeaders });
     }
 
-    const cacheKey = `poster:${type}:${query.toLowerCase().trim()}`;
+    // v2 en la clave: evita leer caché vieja que solo guardaba el poster (sin
+    // backdrop) — esas entradas quedan huérfanas y expiran solas en 30 días
+    const cacheKey = `posterv2:${type}:${query.toLowerCase().trim()}`;
 
     // 1. Buscar en KV primero (compatible con caché vieja: antes guardaba solo
     //    el string del poster; ahora guarda un JSON con poster + backdrop)
