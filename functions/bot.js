@@ -389,6 +389,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     tmdbQuery: `${tituloOriginal} ${anio}`,
                     nombreKV: nombreKVsugerido,
                     generos: [generoElegido],
+                    tipoContenido: tipo,
                     info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
                     desc: overview,
                     fechaAgregado: Date.now(),
@@ -998,11 +999,11 @@ export async function onRequest(context) {
         const kvKey = KV_KEY_POR_TIPO[tipo];
 
         if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !nombreKV || !campo || !valor) {
-            await enviar(`Uso: /corregir pelicula|serie|anime|dorama nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie`);
+            await enviar(`Uso: /corregir pelicula|serie|anime|dorama|turca nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc, tipoContenido (movie|tv)\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie\n/corregir turca la-ultima-escena tipoContenido movie`);
             return new Response('OK');
         }
 
-        const camposValidos = ['titulo', 'tmdbQuery', 'generos', 'info', 'desc'];
+        const camposValidos = ['titulo', 'tmdbQuery', 'generos', 'info', 'desc', 'tipoContenido'];
         if (!camposValidos.includes(campo)) {
             await enviar(`❌ Campo inválido. Usá uno de: ${camposValidos.join(', ')}`);
             return new Response('OK');
