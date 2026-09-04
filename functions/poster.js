@@ -30,8 +30,9 @@ export async function onRequest(context) {
         }
     } catch {}
 
-    // 2. Separar título y año
-    const yearMatch = query.match(/^(.+?)\s+(\d{4})$/);
+    // 2. Separar título y año — acepta "Titulo 2013" y también "Titulo (2013)"
+    //    por si alguien lo carga a mano con paréntesis
+    const yearMatch = query.match(/^(.+?)\s*\(?(\d{4})\)?\s*$/);
     const titulo    = yearMatch ? yearMatch[1].trim() : query.trim();
     const year      = yearMatch ? yearMatch[2] : null;
 
