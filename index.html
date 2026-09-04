@@ -555,6 +555,25 @@
             }
         }
 
+        // Imagen panorámica (backdrop), para cajas anchas como el banner de
+        // Destacadas — un póster vertical ahí queda recortado/estirado.
+        // Si TMDB no tiene backdrop para ese título, cae al póster como respaldo.
+        const backdropCache = {};
+        async function obtenerBackdrop(query, type = 'movie') {
+            const cacheKey = `${type}:${query}`;
+            if (backdropCache[cacheKey] !== undefined) return backdropCache[cacheKey];
+            try {
+                const res  = await fetch(`/poster?q=${encodeURIComponent(query)}&type=${type}`);
+                const data = await res.json();
+                const url  = data.backdrop || data.poster || null;
+                backdropCache[cacheKey] = url;
+                posterCache[`${type}:${query}`] = data.poster || null; // aprovechamos y cacheamos el poster también
+                return url;
+            } catch {
+                return null;
+            }
+        }
+
 
         // ─── BASE DE DATOS SERIES ─────────────────────────────────────────────────
 // baseDeDatosSeries se carga desde data-*.js
@@ -935,7 +954,7 @@
         async function cargarBanner() {
             const elegidos = elegirAlAzar(poolCatalogoCompleto(), 8);
             for (const item of elegidos) {
-                const p = await obtenerPoster(item.tmdbQuery, item._tipo);
+                const p = await obtenerBackdrop(item.tmdbQuery, item._tipo);
                 bannerUrls.push(p || PLACEHOLDER);
             }
             const el = document.getElementById('banner-img');
