@@ -9,6 +9,23 @@
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <style>
         body { margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:white; -webkit-user-select:none; user-select:none; }
+
+        /* SPLASH DE CARGA */
+        #splash-loading {
+            position:fixed; inset:0; z-index:9999;
+            background:#141414;
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:18px;
+            transition:opacity .4s ease;
+        }
+        #splash-loading.oculto { opacity:0; pointer-events:none; }
+        .splash-logo { color:#3B82F6; font-size:26px; font-weight:800; letter-spacing:1.5px; text-shadow:0 0 8px rgba(96,165,250,.35); }
+        .splash-spinner {
+            width:38px; height:38px; border-radius:50%;
+            border:4px solid #2a2a2a; border-top-color:#3B82F6;
+            animation:girar 0.8s linear infinite;
+        }
+        .splash-texto { color:#888; font-size:13px; }
+        @keyframes girar { to { transform:rotate(360deg); } }
         .header { display:flex; align-items:center; justify-content:space-between; padding:15px; background:#111; position:sticky; top:0; z-index:10; }
         .logo {color: #3B82F6;font-size: 26px;font-weight: 800;letter-spacing: 1.5px;text-shadow: 0 0 8px rgba(96,165,250,.35);}
         .menu { display:flex; gap:10px; overflow-x:auto; padding:10px; background:#0b0b0b; scrollbar-width:none; }
@@ -161,6 +178,13 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
+    <!-- SPLASH DE CARGA: tapa todo hasta que el catálogo esté listo -->
+    <div id="splash-loading">
+        <div class="splash-logo">🎬 NovaPlay</div>
+        <div class="splash-spinner"></div>
+        <div class="splash-texto">Cargando catálogo...</div>
+    </div>
+
     <!-- Bases de datos del catálogo, en archivos separados para que este HTML quede liviano -->
     <script src="data-peliculas.js?v=2"></script>
     <script src="data-series.js?v=2"></script>
@@ -1190,18 +1214,34 @@
             if (tg) { tg.ready(); tg.expand(); }
             cargarImagenesGenero();
 
-            // Destacadas y Tendencias eligen 8 al azar de TODO el catálogo, así que
-            // necesitan que los catálogos ya estén cargados antes de armarse.
-            await Promise.all([
-                cargarCatalogo(),
-                cargarSeries(),
-                cargarAnime(),
-                cargarDoramas(),
-                cargarTurcas(),
-                cargarRusas(),
-            ]);
-            cargarBanner();
-            cargarTendencias();
+            const ocultarSplash = () => {
+                const splash = document.getElementById('splash-loading');
+                if (!splash) return;
+                splash.classList.add('oculto');
+                setTimeout(() => splash.remove(), 500);
+            };
+            // Salvavidas: si algo se cuelga (sin conexión, etc.), sacamos el splash
+            // igual a los 15s en vez de dejarlo trabado para siempre.
+            const timeoutSplash = setTimeout(ocultarSplash, 15000);
+
+            try {
+                // Destacadas y Tendencias eligen 8 al azar de TODO el catálogo, así
+                // que necesitan que los catálogos ya estén cargados antes de armarse.
+                await Promise.all([
+                    cargarCatalogo(),
+                    cargarSeries(),
+                    cargarAnime(),
+                    cargarDoramas(),
+                    cargarTurcas(),
+                    cargarRusas(),
+                ]);
+                await Promise.all([cargarBanner(), cargarTendencias()]);
+            } catch (e) {
+                console.warn('Error cargando el catálogo inicial:', e);
+            } finally {
+                clearTimeout(timeoutSplash);
+                ocultarSplash();
+            }
 
             cargarHistorial();
             iniciarTemporizador();
