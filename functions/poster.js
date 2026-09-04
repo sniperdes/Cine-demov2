@@ -22,11 +22,15 @@ export async function onRequest(context) {
 
     const cacheKey = `poster:${type}:${query.toLowerCase().trim()}`;
 
-    // 1. Buscar en KV primero
+    // 1. Buscar en KV primero (compatible con caché vieja: antes guardaba solo
+    //    el string del poster; ahora guarda un JSON con poster + backdrop)
     try {
-        const cachedUrl = await env.PELICULAS_KV.get(cacheKey);
-        if (cachedUrl) {
-            return new Response(JSON.stringify({ poster: cachedUrl, fuente: 'kv' }), { headers: corsHeaders });
+        const cachedRaw = await env.PELICULAS_KV.get(cacheKey);
+        if (cachedRaw) {
+            let cached;
+            try { cached = JSON.parse(cachedRaw); }
+            catch { cached = { poster: cachedRaw, backdrop: null }; } // formato viejo
+            return new Response(JSON.stringify({ poster: cached.poster, backdrop: cached.backdrop, fuente: 'kv' }), { headers: corsHeaders });
         }
     } catch {}
 
@@ -72,17 +76,21 @@ export async function onRequest(context) {
     const posterUrl = resultado?.poster_path
         ? `https://image.tmdb.org/t/p/w500${resultado.poster_path}`
         : null;
+    const backdropUrl = resultado?.backdrop_path
+        ? `https://image.tmdb.org/t/p/w780${resultado.backdrop_path}`
+        : null;
 
     if (posterUrl) {
         try {
-            await env.PELICULAS_KV.put(cacheKey, posterUrl, { expirationTtl: 60 * 60 * 24 * 30 });
+            await env.PELICULAS_KV.put(cacheKey, JSON.stringify({ poster: posterUrl, backdrop: backdropUrl }), { expirationTtl: 60 * 60 * 24 * 30 });
         } catch {}
     }
 
     return new Response(JSON.stringify({
         poster: posterUrl,
+        backdrop: backdropUrl,
         fuente: 'tmdb',
         total_results: tmdbData?.results?.length || 0,
         primer_resultado: resultado?.title || resultado?.name || null
     }), { headers: corsHeaders });
-            }
+}
