@@ -38,7 +38,11 @@ export async function onRequest(context) {
     // 3. Endpoint según tipo
     const TMDB_KEY      = 'acd65342b986ff7dad902ea7412fc003';
     const TMDB_ENDPOINT = type === 'tv' ? 'search/tv' : 'search/movie';
-    const yearParam     = year ? (type === 'tv' ? `&first_air_date_year=${year}` : `&year=${year}`) : '';
+    // "year" en TMDB es un filtro flojo (mira CUALQUIER fecha de estreno,
+    // reediciones incluidas) y puede devolver resultados de OTRA película con
+    // el mismo título en otro año. "primary_release_year" filtra por el
+    // estreno oficial real, mucho más preciso (mismo arreglo que en bot.js).
+    const yearParam     = year ? (type === 'tv' ? `&first_air_date_year=${year}` : `&primary_release_year=${year}`) : '';
 
     let tmdbData;
     try {
@@ -56,7 +60,14 @@ export async function onRequest(context) {
         } catch {}
     }
 
-    const resultado = tmdbData?.results?.find(r => r.poster_path) || tmdbData?.results?.[0];
+    const resultado = year
+        // Si reintentamos sin año, igual preferimos el resultado cuyo año de
+        // estreno coincida con el pedido, antes de resignarnos al primero que
+        // tenga póster (evita traer la película equivocada con el mismo título)
+        ? tmdbData?.results?.find(r => (r.release_date || r.first_air_date || '').startsWith(year) && r.poster_path)
+            || tmdbData?.results?.find(r => r.poster_path)
+            || tmdbData?.results?.[0]
+        : tmdbData?.results?.find(r => r.poster_path) || tmdbData?.results?.[0];
     const posterUrl = resultado?.poster_path
         ? `https://image.tmdb.org/t/p/w500${resultado.poster_path}`
         : null;
