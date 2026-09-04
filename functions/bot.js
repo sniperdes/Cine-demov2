@@ -1311,6 +1311,41 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
+    if (cmd === '/vervisitas') {
+        // Diagnóstico: muestra cada visita cruda (no el agregado de /estadisticas)
+        // para poder confirmar si los números "activos" realmente se actualizan
+        // o quedaron pegados en una fecha vieja.
+        const ahora = Date.now();
+        let cursor;
+        const filas = [];
+        try {
+            do {
+                const lista = await env.PELICULAS_KV.list({ prefix: 'visita:', cursor });
+                cursor = lista.cursor;
+                for (const key of lista.keys) {
+                    const raw = await env.PELICULAS_KV.get(key.name);
+                    if (!raw) continue;
+                    const v = JSON.parse(raw);
+                    const userId = key.name.replace('visita:', '');
+                    const horasDesde = ((ahora - v.ultimaVisita) / (60 * 60 * 1000)).toFixed(1);
+                    filas.push(`👤 ${v.nombre || userId} (${userId})\n   Última: ${new Date(v.ultimaVisita).toLocaleString('es-AR')} (hace ${horasDesde}h)`);
+                }
+            } while (cursor);
+
+            if (!filas.length) {
+                await enviar('No hay ninguna visita registrada todavía.');
+                return new Response('OK');
+            }
+            // De a 15 por mensaje para no pasarse del límite de Telegram
+            for (let i = 0; i < filas.length; i += 15) {
+                await enviar(filas.slice(i, i + 15).join('\n\n'));
+            }
+        } catch (e) {
+            await enviar(`❌ Error: ${e?.message || e}`);
+        }
+        return new Response('OK');
+    }
+
     if (cmd === '/estadisticas') {
         const ahora = Date.now();
         const DIA = 24 * 60 * 60 * 1000;
