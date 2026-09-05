@@ -192,7 +192,6 @@
     <script src="data-doramas.js?v=2"></script>
     <script src="data-turcas.js?v=3"></script>
     <script src="data-rusas.js?v=2"></script>
-    <script src="data-novelas.js?v=1"></script>
     <script src="data-destacados.js?v=1"></script>
 
 
@@ -278,7 +277,6 @@
         <button onclick="show('series')">📺 Series</button>
         <button onclick="show('anime')">🎌 Anime</button>
         <button onclick="show('doramas')">🌸 Doramas</button>
-        <button onclick="show('novelas')">📼 Novelas</button>
         <button onclick="show('turcas')">🌙 Turcas</button>
         <button onclick="show('rusas')">❄️ Rusas</button>
         <button onclick="show('adulto')">🔞 +18</button>
@@ -337,13 +335,6 @@
         <div id="doramas-secciones"></div>
     </div>
     <div id="doramas-paginas"></div>
-
-    <!-- NOVELAS -->
-    <div id="novelas" class="view">
-        <div class="title">📼 Novelas</div>
-        <div id="novelas-secciones"></div>
-    </div>
-    <div id="novelas-paginas"></div>
 
     <!-- TURCAS -->
     <div id="turcas" class="view">
@@ -507,7 +498,6 @@
                 ...baseDeDatosSeries.map(s => ({ ...s, _tipo: 'tv' })),
                 ...baseDeDatosAnime.map(a => ({ ...a, _tipo: 'tv' })),
                 ...baseDeDatosDoramas.map(d => ({ ...d, _tipo: 'tv' })),
-                ...baseDeDatosNovelas.map(n => ({ ...n, _tipo: 'tv' })),
                 ...baseDeDatosTurcas.map(t => ({ ...t, _tipo: 'tv' })),
                 ...baseDeDatosRusas.map(r => ({ ...r, _tipo: 'tv' })),
             ];
@@ -805,34 +795,6 @@
             } catch {}
 
             await cargarCategoria(baseDeDatosDoramas, GENEROS_DORAMAS.map(g => g.slug), 'tv');
-        }
-
-        // ─── NOVELAS (telenovelas — género "Soap" de TMDB, no turcas ni rusas) ────
-        const GENEROS_NOVELAS = [
-            { slug:'romance-novela',                 label:'Romance',                  emoji:'💕' },
-            { slug:'drama-novela',                    label:'Drama',                    emoji:'🎭' },
-            { slug:'comedia-novela',                  label:'Comedia',                  emoji:'😂' },
-            { slug:'crimen-novela',                    label:'Crimen',                   emoji:'🔫' },
-            { slug:'misterio-novela',                 label:'Misterio',                 emoji:'🕵️' },
-            { slug:'familiar-novela',                  label:'Familiar',                 emoji:'👨‍👩‍👧' },
-        ];
-
-        async function cargarNovelas() {
-            generarSeccionesDinamicas(GENEROS_NOVELAS, 'novelas-secciones', 'novelas-paginas', 'novelas');
-
-            // Combina el catálogo fijo (data-novelas.js) con el que el bot agrega solo
-            try {
-                const res = await fetch('/catalogo?tipo=novelas');
-                const dinamico = await res.json();
-                if (Array.isArray(dinamico) && dinamico.length) {
-                    const nombresExistentes = new Set(baseDeDatosNovelas.map(n => n.nombreKV));
-                    for (const novela of dinamico) {
-                        if (!nombresExistentes.has(novela.nombreKV)) baseDeDatosNovelas.push(novela);
-                    }
-                }
-            } catch {}
-
-            await cargarCategoria(baseDeDatosNovelas, GENEROS_NOVELAS.map(g => g.slug), 'tv');
         }
 
         // ─── CARGAR TURCAS ────────────────────────────────────────────────────────
@@ -1289,7 +1251,6 @@
                     cargarSeries(),
                     cargarAnime(),
                     cargarDoramas(),
-                    cargarNovelas(),
                     cargarTurcas(),
                     cargarRusas(),
                 ]);
