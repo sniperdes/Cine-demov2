@@ -14,7 +14,6 @@ const KV_KEY_POR_TIPO = {
     anime: 'catalogo:animes',
     dorama: 'catalogo:doramas',
     turca: 'catalogo:turcas',
-    novela: 'catalogo:novelas',
 };
 const TIPOS_CATALOGO_VALIDOS = Object.keys(KV_KEY_POR_TIPO);
 
@@ -264,17 +263,12 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             .replace(/\s+/g, '-');
     }
 
-    const SOAP_GENRE_ID = 10766; // "Soap" en TMDB = telenovela
     const esTurca = idioma === 'tr';
     const esRusa  = idioma === 'ru';
     const esAnime = idioma === 'ja' && esAnimacion;
     const esDorama = idioma === 'ko';
-    // Telenovela: cualquier idioma (normalmente español/portugués), pero nunca
-    // turca/rusa/anime/dorama, que ya tienen su propia categoría
-    const esNovela = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama
-        && (resultado.genre_ids || []).includes(SOAP_GENRE_ID);
     const esPeliculaNormal = tipo === 'movie' && !esTurca && !esRusa && !esAnime && !esDorama;
-    const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama && !esNovela;
+    const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama;
 
     // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
     if (esPeliculaNormal && env && nombreKVsugerido) {
@@ -482,51 +476,6 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: dorama -> se agrega SOLO al catálogo
-    // Caso especial: novela (telenovela, género Soap de TMDB) -> se agrega SOLA
-    if (esNovela && env && nombreKVsugerido) {
-        const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-novela');
-
-        try {
-            const raw = await env.PELICULAS_KV.get('catalogo:novelas');
-            const catalogo = raw ? JSON.parse(raw) : [];
-            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
-
-            if (!yaExiste) {
-                catalogo.push({
-                    titulo,
-                    tmdbQuery: `${tituloOriginal} ${anio}`,
-                    nombreKV: nombreKVsugerido,
-                    generos: generosFinal,
-                    tipoContenido: tipo,
-                    info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
-                    desc: overview,
-                    fechaAgregado: Date.now(),
-                    anio: Number(anio) || 0,
-                });
-                await env.PELICULAS_KV.put('catalogo:novelas', JSON.stringify(catalogo));
-            }
-
-            const textoBase = yaExiste
-                ? `📼 "${titulo}" (${anio}) ya estaba en el catálogo de novelas (${nombreKVsugerido}). No se duplicó.`
-                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de novelas.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
-
-            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
-            if (episodio) {
-                return {
-                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
-                    nombreKV: nombreKVsugerido,
-                    temporada,
-                    episodio,
-                    parte,
-                    catalogoTipo: 'novela'
-                };
-            }
-            return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
-        } catch (e) {
-            // Si falla, caemos al bloque de copiar/pegar de siempre
-        }
-    }
-
     if (esDorama && env && nombreKVsugerido) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-dorama');
 
@@ -1065,7 +1014,7 @@ export async function onRequest(context) {
         const kvKey = KV_KEY_POR_TIPO[tipo];
 
         if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !nombreKV || !campo || !valor) {
-            await enviar(`Uso: /corregir pelicula|serie|anime|dorama|turca|novela nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc, tipoContenido (movie|tv)\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie\n/corregir turca la-ultima-escena tipoContenido movie`);
+            await enviar(`Uso: /corregir pelicula|serie|anime|dorama|turca nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc, tipoContenido (movie|tv)\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie\n/corregir turca la-ultima-escena tipoContenido movie`);
             return new Response('OK');
         }
 
