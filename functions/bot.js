@@ -1241,7 +1241,10 @@ export async function onRequest(context) {
         let resp = `📋 *${nombre}* (${lista.keys.length})\n\n`;
         for (const k of lista.keys) {
             const p = k.name.split(':');
-            resp += p.length === 4 ? `T${p[2]}E${p[3]}\n` : `Parte ${p[2]}\n`;
+            // video:nombre:parte (3) | video:nombre:temp:ep (4) | video:nombre:temp:ep:parte (5)
+            if (p.length === 5) resp += `T${p[2]}E${p[3]} Parte ${p[4]}\n`;
+            else if (p.length === 4) resp += `T${p[2]}E${p[3]}\n`;
+            else resp += `Parte ${p[2]}\n`;
         }
         await enviar(resp);
         return new Response('OK');
@@ -1253,13 +1256,13 @@ export async function onRequest(context) {
         let key, label;
 
         if (categoriasEpisodio.includes(tipo)) {
-            const [,, n, t, e] = partes;
+            const [,, n, t, e, parteEp] = partes;
             if (!n || !t || !e) {
-                await enviar(`Uso: /borrar ${tipo} nombreKV temporada episodio\nEj: /borrar anime solo-leveling 1 10\n(temporada y episodio van como número solo, sin la T ni la E)`);
+                await enviar(`Uso: /borrar ${tipo} nombreKV temporada episodio [parte]\nEj: /borrar anime solo-leveling 1 10\nEj (capítulo partido en varios archivos): /borrar serie corona-de-lagrimas 1 58 2\n(temporada y episodio van como número solo, sin la T ni la E)`);
                 return new Response('OK');
             }
-            key = `video:${n}:${t}:${e}`;
-            label = `${n} T${t}E${e}`;
+            key = parteEp ? `video:${n}:${t}:${e}:${parteEp}` : `video:${n}:${t}:${e}`;
+            label = parteEp ? `${n} T${t}E${e} Parte ${parteEp}` : `${n} T${t}E${e}`;
         } else if (tipo === 'pelicula') {
             const [,, n, p] = partes;
             if (!n || !p) {
