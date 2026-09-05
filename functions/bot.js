@@ -14,6 +14,7 @@ const KV_KEY_POR_TIPO = {
     anime: 'catalogo:animes',
     dorama: 'catalogo:doramas',
     turca: 'catalogo:turcas',
+    novela: 'catalogo:novelas',
 };
 const TIPOS_CATALOGO_VALIDOS = Object.keys(KV_KEY_POR_TIPO);
 
@@ -263,12 +264,17 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             .replace(/\s+/g, '-');
     }
 
+    const SOAP_GENRE_ID = 10766; // "Soap" en TMDB = telenovela
     const esTurca = idioma === 'tr';
     const esRusa  = idioma === 'ru';
     const esAnime = idioma === 'ja' && esAnimacion;
     const esDorama = idioma === 'ko';
+    // Telenovela: cualquier idioma (normalmente español/portugués), pero nunca
+    // turca/rusa/anime/dorama, que ya tienen su propia categoría
+    const esNovela = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama
+        && (resultado.genre_ids || []).includes(SOAP_GENRE_ID);
     const esPeliculaNormal = tipo === 'movie' && !esTurca && !esRusa && !esAnime && !esDorama;
-    const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama;
+    const esSerieNormal = tipo === 'tv' && !esTurca && !esRusa && !esAnime && !esDorama && !esNovela;
 
     // Caso especial: película "normal" -> se agrega SOLA al catálogo, sin copiar/pegar
     if (esPeliculaNormal && env && nombreKVsugerido) {
@@ -331,7 +337,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         const generosFinal = generoTMDBaGeneroSerie(resultado.genre_ids);
         // Reusamos detectarSerie solo para sacar temporada/episodio del nombre del archivo
         // (ya sabemos que nombreKV dio null acá, porque si no, no estaríamos en esta rama)
-        const { episodio, temporada } = detectarSerie(textoOriginal);
+        const { episodio, temporada, parte } = detectarSerie(textoOriginal);
 
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:series');
@@ -358,10 +364,11 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
             if (episodio) {
                 return {
-                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
                     nombreKV: nombreKVsugerido,
                     temporada,
                     episodio,
+                    parte,
                     catalogoTipo: 'serie'
                 };
             }
@@ -406,13 +413,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'turca' };
             }
 
-            const { episodio, temporada } = detectarSerie(textoOriginal);
+            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
             if (episodio) {
                 return {
-                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
                     nombreKV: nombreKVsugerido,
                     temporada,
                     episodio,
+                    parte,
                     catalogoTipo: 'turca'
                 };
             }
@@ -456,13 +464,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'anime' };
             }
 
-            const { episodio, temporada } = detectarSerie(textoOriginal);
+            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
             if (episodio) {
                 return {
-                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
                     nombreKV: nombreKVsugerido,
                     temporada,
                     episodio,
+                    parte,
                     catalogoTipo: 'anime'
                 };
             }
@@ -473,6 +482,51 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: dorama -> se agrega SOLO al catálogo
+    // Caso especial: novela (telenovela, género Soap de TMDB) -> se agrega SOLA
+    if (esNovela && env && nombreKVsugerido) {
+        const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-novela');
+
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:novelas');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+
+            if (!yaExiste) {
+                catalogo.push({
+                    titulo,
+                    tmdbQuery: `${tituloOriginal} ${anio}`,
+                    nombreKV: nombreKVsugerido,
+                    generos: generosFinal,
+                    tipoContenido: tipo,
+                    info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
+                    desc: overview,
+                    fechaAgregado: Date.now(),
+                    anio: Number(anio) || 0,
+                });
+                await env.PELICULAS_KV.put('catalogo:novelas', JSON.stringify(catalogo));
+            }
+
+            const textoBase = yaExiste
+                ? `📼 "${titulo}" (${anio}) ya estaba en el catálogo de novelas (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de novelas.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
+
+            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
+            if (episodio) {
+                return {
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
+                    nombreKV: nombreKVsugerido,
+                    temporada,
+                    episodio,
+                    parte,
+                    catalogoTipo: 'novela'
+                };
+            }
+            return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
+        } catch (e) {
+            // Si falla, caemos al bloque de copiar/pegar de siempre
+        }
+    }
+
     if (esDorama && env && nombreKVsugerido) {
         const generosFinal = generoTMDBaGeneroTV(resultado.genre_ids, '-dorama');
 
@@ -506,13 +560,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'dorama' };
             }
 
-            const { episodio, temporada } = detectarSerie(textoOriginal);
+            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
             if (episodio) {
                 return {
-                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}?`,
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
                     nombreKV: nombreKVsugerido,
                     temporada,
                     episodio,
+                    parte,
                     catalogoTipo: 'dorama'
                 };
             }
@@ -590,9 +645,15 @@ function detectarSerie(texto) {
             }
         }
 
-        return { nombreKV, episodio, temporada };
+        // Algunas novelas/series vienen partidas en varios archivos para el MISMO
+        // capítulo (ej: "Capítulo 58 Parte 1", "Capítulo 58 Parte 2"). Si no dice
+        // "parte", queda null y todo funciona exactamente igual que siempre.
+        const matchParte = limpio.match(/\bparte\s*(\d+)\b/i);
+        const parte = matchParte ? matchParte[1] : null;
+
+        return { nombreKV, episodio, temporada, parte };
     } catch(e) {
-        return { nombreKV: null, episodio: null, temporada: '1' };
+        return { nombreKV: null, episodio: null, temporada: '1', parte: null };
     }
 }
 
@@ -703,7 +764,7 @@ export async function onRequest(context) {
                     if (sugerencia.nombreKV && sugerencia.episodio) {
                         payload.reply_markup = {
                             inline_keyboard: [[
-                                { text: '✅ Confirmar', callback_data: `${prefijoConfirmarEpisodio}:${msgId}:${sugerencia.nombreKV}:${sugerencia.temporada}:${sugerencia.episodio}` },
+                                { text: '✅ Confirmar', callback_data: `${prefijoConfirmarEpisodio}:${msgId}:${sugerencia.nombreKV}:${sugerencia.temporada}:${sugerencia.episodio}${sugerencia.parte ? ':' + sugerencia.parte : ''}` },
                                 { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
                             ], [
                                 { text: '❌ Cancelar', callback_data: `cancel:${msgId}:${sugerencia.catalogoTipo}:${sugerencia.nombreKV}` }
@@ -816,7 +877,7 @@ export async function onRequest(context) {
         }
 
         if (data.startsWith('confs:') || data.startsWith('confa:') || data.startsWith('confd:')) {
-            const [, msgId, nombreKV, temporada, episodio] = data.split(':');
+            const [, msgId, nombreKV, temporada, episodio, parte] = data.split(':');
             const fileId = await env.PELICULAS_KV.get(`cola:${msgId}`);
 
             if (!fileId) {
@@ -828,7 +889,12 @@ export async function onRequest(context) {
                 return new Response('OK');
             }
 
-            await env.PELICULAS_KV.put(`video:${nombreKV}:${temporada}:${episodio}`, fileId);
+            // Si viene con "parte" (capítulo partido en varios archivos), la
+            // clave suma un 4to segmento; si no, queda igual que siempre
+            const key = parte
+                ? `video:${nombreKV}:${temporada}:${episodio}:${parte}`
+                : `video:${nombreKV}:${temporada}:${episodio}`;
+            await env.PELICULAS_KV.put(key, fileId);
             await env.PELICULAS_KV.delete(`cola:${msgId}`);
 
             await fetch(`${BOT_API}/editMessageText`, {
@@ -836,7 +902,7 @@ export async function onRequest(context) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     chat_id: chatId, message_id: messageId,
-                    text: `✅ *${nombreKV}* T${temporada}E${episodio} guardado!`,
+                    text: `✅ *${nombreKV}* T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''} guardado!`,
                     parse_mode: 'Markdown'
                 })
             });
@@ -983,7 +1049,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)`);
         return new Response('OK');
     }
 
@@ -999,7 +1065,7 @@ export async function onRequest(context) {
         const kvKey = KV_KEY_POR_TIPO[tipo];
 
         if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !nombreKV || !campo || !valor) {
-            await enviar(`Uso: /corregir pelicula|serie|anime|dorama|turca nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc, tipoContenido (movie|tv)\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie\n/corregir turca la-ultima-escena tipoContenido movie`);
+            await enviar(`Uso: /corregir pelicula|serie|anime|dorama|turca|novela nombreKV campo valor\n\nCampos válidos: titulo, tmdbQuery, generos, info, desc, tipoContenido (movie|tv)\n\nEjemplo:\n/corregir pelicula shaitaan tmdbQuery Shaitaan 2024\n/corregir serie rancho-dutton generos drama,western-serie\n/corregir turca la-ultima-escena tipoContenido movie`);
             return new Response('OK');
         }
 
@@ -1026,6 +1092,38 @@ export async function onRequest(context) {
         } catch (e) {
             await enviar(`❌ Error al corregir: ${e.message}`);
         }
+        return new Response('OK');
+    }
+
+    if (cmd === '/asignarparte') {
+        // Para capítulos partidos en varios archivos (ej: novelas con "Parte 1",
+        // "Parte 2" del mismo capítulo). Separado de /asignar para no complicar
+        // su lógica ya existente.
+        // Uso: /asignarparte serie nombre temp ep parte [msgId]
+        const nombre = partes[1], temp = partes[2], ep = partes[3], parte = partes[4];
+        const ultimoParam = partes[5];
+        const esIdMensaje = /^\d+$/.test(ultimoParam || '');
+
+        let fileId;
+        if (esIdMensaje) {
+            fileId = await env.PELICULAS_KV.get(`cola:${ultimoParam}`);
+            if (fileId) await env.PELICULAS_KV.delete(`cola:${ultimoParam}`);
+        } else {
+            fileId = await env.PELICULAS_KV.get('temp:file_id');
+        }
+
+        if (!nombre || !temp || !ep || !parte) {
+            await enviar('❌ Uso: /asignarparte serie nombre temp ep parte [msgId]\nEj: /asignarparte serie corona-de-lagrimas 1 58 2');
+            return new Response('OK');
+        }
+        if (!fileId) {
+            await enviar('❌ No hay video pendiente o ya fue asignado.');
+            return new Response('OK');
+        }
+
+        await env.PELICULAS_KV.put(`video:${nombre}:${temp}:${ep}:${parte}`, fileId);
+        if (!esIdMensaje) await env.PELICULAS_KV.delete('temp:file_id');
+        await enviar(`✅ *${nombre}* T${temp}E${ep} Parte ${parte} guardado!`);
         return new Response('OK');
     }
 

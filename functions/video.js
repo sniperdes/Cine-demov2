@@ -27,25 +27,41 @@ export async function onRequest(context) {
         const lista = await env.PELICULAS_KV.list({ prefix: `video:${nombre}:` });
 
         if (!lista.keys.length) {
-            return new Response(JSON.stringify({ episodios: [], total: 0 }), { headers: corsHeaders });
+            return new Response(JSON.stringify({ episodios: [], temporadas: {}, total: 0 }), { headers: corsHeaders });
         }
 
-        // Organizar por temporadas
-        const temporadas = {};
+        // Organizar por temporada -> episodio -> partes. La gran mayoría de
+        // episodios tiene 1 sola parte (clave de 4 segmentos, como siempre):
+        // video:nombre:temporada:episodio
+        // Algunas novelas vienen partidas en varios archivos para el MISMO
+        // capítulo (clave de 5 segmentos):
+        // video:nombre:temporada:episodio:parte
+        const agrupado = {};
         for (const k of lista.keys) {
-            const partes     = k.name.split(':'); // video:nombre:temporada:episodio
-            const temporada  = partes[2];
-            const episodio   = partes[3];
-            if (!temporadas[temporada]) temporadas[temporada] = [];
-            temporadas[temporada].push({
-                episodio: parseInt(episodio),
-                key: k.name
-            });
+            const segs      = k.name.split(':'); // video:nombre:temporada:episodio[:parte]
+            const temporada = segs[2];
+            const episodio  = parseInt(segs[3]);
+            const parte     = segs[4] || '1'; // sin sufijo = una sola parte implícita
+
+            if (!agrupado[temporada]) agrupado[temporada] = {};
+            if (!agrupado[temporada][episodio]) agrupado[temporada][episodio] = [];
+            agrupado[temporada][episodio].push({ parte, key: k.name });
         }
 
-        // Ordenar episodios dentro de cada temporada
-        for (const t of Object.keys(temporadas)) {
-            temporadas[t].sort((a, b) => a.episodio - b.episodio);
+        // Convertir a arrays ordenados (temporadas[t] = [{episodio, partes, total}, ...])
+        const temporadas = {};
+        for (const t of Object.keys(agrupado)) {
+            temporadas[t] = Object.keys(agrupado[t])
+                .map(ep => {
+                    const partesOrdenadas = agrupado[t][ep].sort((a, b) => parseInt(a.parte) - parseInt(b.parte));
+                    return {
+                        episodio: parseInt(ep),
+                        key: partesOrdenadas[0].key, // compatibilidad: mismo campo "key" que antes, apunta a la parte 1
+                        partes: partesOrdenadas,
+                        total: partesOrdenadas.length,
+                    };
+                })
+                .sort((a, b) => a.episodio - b.episodio);
         }
 
         return new Response(JSON.stringify({
