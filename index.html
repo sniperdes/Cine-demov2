@@ -7,6 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
     <style>
         body { margin:0; font-family:Arial,sans-serif; background:#0b0b0b; color:white; -webkit-user-select:none; user-select:none; }
 
@@ -238,6 +239,17 @@
         <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" webkitallowfullscreen mozallowfullscreen></iframe>
     </div>
 
+    <!-- REPRODUCTOR DE TV EN VIVO (m3u8) -->
+    <div id="live-modal" class="player-modal">
+        <div class="player-header">
+            <span id="live-title">Cargando...</span>
+            <div style="display:flex;gap:15px;align-items:center;">
+                <span class="player-close" onclick="cerrarLive()">✖</span>
+            </div>
+        </div>
+        <video id="live-video" class="player-frame" style="background:#000; width:100%;" controls autoplay playsinline></video>
+    </div>
+
     <!-- OVERLAY DE PRIVACIDAD -->
     <div id="privacy-overlay" class="privacy-overlay">🔒 Contenido oculto</div>
 
@@ -279,6 +291,7 @@
         <button onclick="show('doramas')">🌸 Doramas</button>
         <button onclick="show('turcas')">🌙 Turcas</button>
         <button onclick="show('rusas')">❄️ Rusas</button>
+        <button onclick="show('canales')">📡 TV en vivo</button>
         <button onclick="show('adulto')">🔞 +18</button>
     </div>
 
@@ -401,6 +414,35 @@
     </div>
 
     <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
+
+    <!-- TV EN VIVO -->
+    <div id="canales" class="view">
+        <div class="title">📡 TV en vivo</div>
+        <div id="seccion-canal-noticias" class="genero-seccion">
+            <div class="genero-header"><h3>📰 Noticias</h3></div>
+            <div class="row" id="fila-canal-noticias"></div>
+        </div>
+        <div id="seccion-canal-deportes" class="genero-seccion">
+            <div class="genero-header"><h3>⚽ Deportes</h3></div>
+            <div class="row" id="fila-canal-deportes"></div>
+        </div>
+        <div id="seccion-canal-entretenimiento" class="genero-seccion">
+            <div class="genero-header"><h3>🎉 Entretenimiento</h3></div>
+            <div class="row" id="fila-canal-entretenimiento"></div>
+        </div>
+        <div id="seccion-canal-peliculas247" class="genero-seccion">
+            <div class="genero-header"><h3>🎬 Películas 24/7</h3></div>
+            <div class="row" id="fila-canal-peliculas247"></div>
+        </div>
+        <div id="seccion-canal-infantil" class="genero-seccion">
+            <div class="genero-header"><h3>🧸 Infantil</h3></div>
+            <div class="row" id="fila-canal-infantil"></div>
+        </div>
+        <div id="seccion-canal-musica" class="genero-seccion">
+            <div class="genero-header"><h3>🎵 Música</h3></div>
+            <div class="row" id="fila-canal-musica"></div>
+        </div>
+    </div>
 
     <!-- PERFIL -->
     <div id="perfil" class="view">
@@ -817,6 +859,85 @@
         // ─── CARGAR RUSAS ─────────────────────────────────────────────────────────
         async function cargarRusas() {
             await cargarCategoria(baseDeDatosRusas, ['rusa-drama','rusa-accion','rusa-thriller'], 'tv');
+        }
+
+        // ─── TV EN VIVO (canales m3u8) ────────────────────────────────────────────
+        const CATEGORIAS_CANALES = ['noticias', 'deportes', 'entretenimiento', 'peliculas247', 'infantil', 'musica'];
+
+        async function cargarCanales() {
+            let canales = [];
+            try {
+                const res = await fetch('/catalogo?tipo=canales');
+                canales = await res.json();
+                if (!Array.isArray(canales)) canales = [];
+            } catch { canales = []; }
+
+            for (const categoria of CATEGORIAS_CANALES) {
+                const seccionEl   = document.getElementById(`seccion-canal-${categoria}`);
+                const contenedor  = document.getElementById(`fila-canal-${categoria}`);
+                if (!contenedor) continue;
+                contenedor.innerHTML = '';
+
+                const items = canales.filter(c => c.categoria === categoria);
+                if (seccionEl) seccionEl.style.display = items.length ? '' : 'none';
+
+                items.forEach(canal => {
+                    const tarjeta = document.createElement('div');
+                    tarjeta.className = 'card pelicula';
+                    tarjeta.style.minWidth = '140px';
+                    tarjeta.innerHTML = `
+                        <div style="position:relative;">
+                            <img src="${canal.logo || PLACEHOLDER}" style="width:100%;height:140px;object-fit:contain;background:#1a1a1a;border-radius:8px;">
+                            <div style="position:absolute;top:6px;left:6px;background:#e50914;color:#fff;font-size:10px;font-weight:bold;padding:2px 6px;border-radius:4px;">🔴 EN VIVO</div>
+                        </div>
+                        <p>${canal.nombre}</p>
+                    `;
+                    tarjeta.onclick = () => reproducirCanal(canal.nombre, canal.url);
+                    contenedor.appendChild(tarjeta);
+                });
+            }
+        }
+
+        function reproducirCanal(nombre, url) {
+            if (usuarioEsPremium) {
+                abrirLive(nombre, url);
+            } else if (typeof show_11208906 === 'function') {
+                show_11208906().then(() => abrirLive(nombre, url)).catch(() => abrirLive(nombre, url));
+            } else {
+                abrirLive(nombre, url);
+            }
+            marcarReproduccion();
+        }
+
+        function abrirLive(nombre, url) {
+            document.getElementById('live-title').innerText = `🔴 ${nombre}`;
+            const video = document.getElementById('live-video');
+            document.getElementById('live-modal').classList.add('active');
+
+            if (window.hlsInstance) { window.hlsInstance.destroy(); window.hlsInstance = null; }
+
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(video);
+                window.hlsInstance = hls;
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                // Safari/iOS reproduce HLS nativo, sin necesitar hls.js
+                video.src = url;
+            } else {
+                const tg = window.Telegram?.WebApp;
+                if (tg) tg.showAlert('⚠️ Tu navegador no puede reproducir este canal.');
+            }
+            video.play().catch(() => {});
+        }
+
+        function cerrarLive() {
+            const video = document.getElementById('live-video');
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+            if (window.hlsInstance) { window.hlsInstance.destroy(); window.hlsInstance = null; }
+            document.getElementById('live-modal').classList.remove('active');
         }
 
         // ─── FUNCIÓN GENÉRICA PARA CARGAR CUALQUIER CATEGORÍA CON SLIDERS ────────
@@ -1253,6 +1374,7 @@
                     cargarDoramas(),
                     cargarTurcas(),
                     cargarRusas(),
+                    cargarCanales(),
                 ]);
                 await Promise.all([cargarBanner(), cargarTendencias()]);
             } catch (e) {
