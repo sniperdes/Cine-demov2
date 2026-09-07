@@ -550,6 +550,41 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     return { texto: `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)` };
 }
 
+// Parsea un archivo M3U (formato #EXTINF con tvg-logo, group-title, etc.) y
+// devuelve un array de { nombre, logo, grupo, url } — uno por canal.
+function parsearM3U(texto) {
+    const lineas = texto.split('\n').map(l => l.trim()).filter(Boolean);
+    const canales = [];
+    for (let i = 0; i < lineas.length; i++) {
+        if (!lineas[i].startsWith('#EXTINF')) continue;
+        const logoMatch   = lineas[i].match(/tvg-logo="([^"]*)"/);
+        const grupoMatch  = lineas[i].match(/group-title="([^"]*)"/);
+        const nombreMatch = lineas[i].match(/,(.*)$/);
+        const siguienteUrl = lineas[i + 1];
+        if (!nombreMatch || !siguienteUrl || siguienteUrl.startsWith('#')) continue;
+
+        canales.push({
+            nombre: nombreMatch[1].trim(),
+            logo: logoMatch ? logoMatch[1] : null,
+            grupo: grupoMatch ? grupoMatch[1] : '',
+            url: siguienteUrl,
+        });
+    }
+    return canales;
+}
+
+// Adivina una de nuestras 6 categorías fijas a partir del group-title del M3U
+// (que suele venir en inglés). Lo que no matchea nada, cae en "entretenimiento".
+function inferirCategoriaM3U(grupo) {
+    const g = (grupo || '').toLowerCase();
+    if (/news|noticia/.test(g)) return 'noticias';
+    if (/sport|deporte/.test(g)) return 'deportes';
+    if (/movie|film|cine|pelicula/.test(g)) return 'peliculas247';
+    if (/kid|infantil|cartoon|ni[ñn]o|animation/.test(g)) return 'infantil';
+    if (/music|música|musica|radio/.test(g)) return 'musica';
+    return 'entretenimiento';
+}
+
 function detectarSerie(texto) {
     try {
         const limpio = texto.toLowerCase()
@@ -998,7 +1033,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
         return new Response('OK');
     }
 
@@ -1393,6 +1428,200 @@ export async function onRequest(context) {
         } catch (e) {
             await enviar(`❌ Error: ${e?.message || e}`);
         }
+        return new Response('OK');
+    }
+
+    // ─── CANALES DE TV EN VIVO (m3u8) ────────────────────────────────────────────
+    const CATEGORIAS_CANALES = ['noticias', 'deportes', 'entretenimiento', 'peliculas247', 'infantil', 'musica'];
+
+    if (cmd === '/previsualizarm3u') {
+        // Uso: /previsualizarm3u urlDelM3U — no agrega nada, solo muestra qué hay
+        const urlM3U = partes[1];
+        if (!urlM3U) {
+            await enviar('Uso: /previsualizarm3u urlDelM3U');
+            return new Response('OK');
+        }
+        try {
+            const res = await fetch(urlM3U);
+            if (!res.ok) {
+                await enviar(`❌ No pude descargar esa URL (HTTP ${res.status}).`);
+                return new Response('OK');
+            }
+            const texto = await res.text();
+            const canales = parsearM3U(texto);
+            if (!canales.length) {
+                await enviar('❌ No encontré canales en ese archivo — ¿es un M3U válido?');
+                return new Response('OK');
+            }
+
+            const LOTE = 25;
+            for (let i = 0; i < Math.min(canales.length, 100); i += LOTE) {
+                const bloque = canales.slice(i, i + LOTE);
+                let resp = i === 0 ? `📡 *Encontré ${canales.length} canales* (mostrando hasta 100)\n\n` : '';
+                bloque.forEach((c, j) => {
+                    const num = i + j + 1;
+                    resp += `${num}. ${c.nombre} → ${inferirCategoriaM3U(c.grupo)}\n`;
+                });
+                await enviar(resp);
+            }
+            await enviar(`Para agregar TODOS: /agregarm3u ${urlM3U} todos\nPara agregar solo algunos: /agregarm3u ${urlM3U} 3,7,12\n\n(la categoría se adivina del group-title del M3U; después la podés corregir con /corregircanal)`);
+        } catch (e) {
+            await enviar(`❌ Error: ${e?.message || e}`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/agregarm3u') {
+        // Uso: /agregarm3u urlDelM3U todos
+        //      /agregarm3u urlDelM3U 3,7,12
+        const urlM3U = partes[1];
+        const seleccion = partes[2];
+        if (!urlM3U || !seleccion) {
+            await enviar('Uso: /agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12');
+            return new Response('OK');
+        }
+        try {
+            const res = await fetch(urlM3U);
+            const texto = await res.text();
+            const canales = parsearM3U(texto);
+
+            const indices = seleccion === 'todos'
+                ? canales.map((_, i) => i)
+                : seleccion.split(',').map(n => Number(n.trim()) - 1).filter(i => i >= 0 && i < canales.length);
+
+            if (!indices.length) {
+                await enviar('❌ No hay nada para agregar con esa selección.');
+                return new Response('OK');
+            }
+
+            const raw = await env.PELICULAS_KV.get('catalogo:canales');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            const nombresExistentes = new Set(catalogo.map(c => c.nombreKV));
+
+            let agregados = 0, saltados = 0;
+            for (const i of indices) {
+                const c = canales[i];
+                if (!c) continue;
+                const nombreKV = c.nombre.toLowerCase().replace(/[^a-z0-9áéíóúñü ]/gi, '').replace(/\s+/g, '-');
+                if (!nombreKV || nombresExistentes.has(nombreKV)) { saltados++; continue; }
+
+                catalogo.push({
+                    nombreKV,
+                    nombre: c.nombre,
+                    url: c.url,
+                    logo: c.logo,
+                    categoria: inferirCategoriaM3U(c.grupo),
+                    fechaAgregado: Date.now(),
+                });
+                nombresExistentes.add(nombreKV);
+                agregados++;
+            }
+
+            await env.PELICULAS_KV.put('catalogo:canales', JSON.stringify(catalogo));
+            await enviar(`✅ Agregados: ${agregados}\n⏭️ Saltados (duplicados o sin nombre): ${saltados}`);
+        } catch (e) {
+            await enviar(`❌ Error: ${e?.message || e}`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/corregircanal') {
+        // Uso: /corregircanal nombreKV campo valor  (campos: nombre, url, logo, categoria)
+        const nombreKV = partes[1], campo = partes[2];
+        const valor = texto.split(' ').slice(3).join(' ');
+        const camposValidos = ['nombre', 'url', 'logo', 'categoria'];
+
+        if (!nombreKV || !camposValidos.includes(campo) || !valor) {
+            await enviar(`Uso: /corregircanal nombreKV campo valor\nCampos: ${camposValidos.join(', ')}`);
+            return new Response('OK');
+        }
+        if (campo === 'categoria' && !CATEGORIAS_CANALES.includes(valor)) {
+            await enviar(`❌ Categoría inválida. Usá una de: ${CATEGORIAS_CANALES.join(', ')}`);
+            return new Response('OK');
+        }
+
+        const raw = await env.PELICULAS_KV.get('catalogo:canales');
+        const catalogo = raw ? JSON.parse(raw) : [];
+        const canal = catalogo.find(c => c.nombreKV === nombreKV);
+        if (!canal) {
+            await enviar(`❌ No encontré el canal "${nombreKV}".`);
+            return new Response('OK');
+        }
+        canal[campo] = valor;
+        await env.PELICULAS_KV.put('catalogo:canales', JSON.stringify(catalogo));
+        await enviar(`✅ "${nombreKV}".${campo} actualizado.`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/agregarcanal') {
+        // Uso: /agregarcanal categoria nombre urlM3U8 [logoUrl]
+        const categoria = partes[1];
+        const nombre = partes[2];
+        const url = partes[3];
+        const logo = partes[4] || null;
+
+        if (!CATEGORIAS_CANALES.includes(categoria) || !nombre || !url) {
+            await enviar(`Uso: /agregarcanal categoria nombre urlM3U8 [logoUrl]\nCategorías: ${CATEGORIAS_CANALES.join(', ')}\nEj: /agregarcanal deportes ESPN https://ejemplo.com/stream.m3u8 https://ejemplo.com/logo.png`);
+            return new Response('OK');
+        }
+        if (!url.includes('.m3u8')) {
+            await enviar('⚠️ La URL no parece un stream .m3u8 — la guardo igual, pero fijate que esté bien.');
+        }
+
+        const raw = await env.PELICULAS_KV.get('catalogo:canales');
+        const canales = raw ? JSON.parse(raw) : [];
+        const nombreKV = nombre.toLowerCase().replace(/[^a-z0-9áéíóúñü ]/gi, '').replace(/\s+/g, '-');
+
+        if (canales.some(c => c.nombreKV === nombreKV)) {
+            await enviar(`❌ Ya existe un canal con ese nombre (${nombreKV}). Borralo primero si querés reemplazarlo.`);
+            return new Response('OK');
+        }
+
+        canales.push({ nombreKV, nombre, url, logo, categoria, fechaAgregado: Date.now() });
+        await env.PELICULAS_KV.put('catalogo:canales', JSON.stringify(canales));
+        await enviar(`✅ Canal agregado: *${nombre}* (${categoria})\n🔑 ${nombreKV}`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/listarcanales') {
+        const categoria = partes[1]; // opcional, filtra si se pasa
+        const raw = await env.PELICULAS_KV.get('catalogo:canales');
+        const canales = raw ? JSON.parse(raw) : [];
+        const filtrados = categoria ? canales.filter(c => c.categoria === categoria) : canales;
+
+        if (!filtrados.length) {
+            await enviar(categoria ? `Sin canales en "${categoria}" todavía.` : 'Sin canales cargados todavía.');
+            return new Response('OK');
+        }
+
+        let resp = `📡 *Canales*${categoria ? ` (${categoria})` : ''} (${filtrados.length})\n\n`;
+        filtrados.forEach((c, i) => {
+            resp += `${i + 1}. ${c.nombre} [${c.categoria}] → ${c.nombreKV}\n`;
+        });
+        resp += `\nPara borrar por número: /borrarcanalidx numero`;
+        await enviar(resp);
+        return new Response('OK');
+    }
+
+    if (cmd === '/borrarcanalidx') {
+        // Usa el número que muestra /listarcanales (sin filtrar por categoría,
+        // para que el número coincida exacto)
+        const numero = Number(partes[1]);
+        if (!numero || numero < 1) {
+            await enviar('Uso: /borrarcanalidx numero (usá el número de /listarcanales, sin filtro de categoría)');
+            return new Response('OK');
+        }
+        const raw = await env.PELICULAS_KV.get('catalogo:canales');
+        const canales = raw ? JSON.parse(raw) : [];
+        const idx = numero - 1;
+        if (idx < 0 || idx >= canales.length) {
+            await enviar(`❌ No hay un canal #${numero} (hay ${canales.length} en total).`);
+            return new Response('OK');
+        }
+        const eliminado = canales[idx];
+        canales.splice(idx, 1);
+        await env.PELICULAS_KV.put('catalogo:canales', JSON.stringify(canales));
+        await enviar(`🗑️ Canal borrado: "${eliminado.nombre}"`);
         return new Response('OK');
     }
 
