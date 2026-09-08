@@ -1,9 +1,9 @@
 #EXTM3U
 
-#EXTINF:0 group-title="Película",AXN HD
+#EXTINF:0 group-title="Pelicula",AXN HD
 http://181.78.79.131:8000/play/a0q0
 
-#EXTINF:0 group-title="Película",Cinecanal
+#EXTINF:0 group-title="Pelicula",Cinecanal
 http://181.78.79.131:8000/play/a0pp
 
 #EXTINF:0 group-title="Entretenimiento",Comedy Central HD
@@ -12,7 +12,7 @@ http://181.78.79.131:8000/play/a0mu
 #EXTINF:0 group-title="Infantiles",DHE HD
 http://181.78.79.131:8000/play/a0qv
 
-#EXTINF:0 group-title="Película",De Pelicula
+#EXTINF:0 group-title="Pelicula",De Pelicula
 http://181.78.79.131:8000/play/a0qb
 
 #EXTINF:0 group-title="Entretenimiento",Discovery Science
@@ -42,7 +42,7 @@ http://181.78.79.131:8000/play/a0s9
 #EXTINF:0 group-title="Deportes",Espn Premium
 http://181.78.79.131:8000/play/a0r2
 
-#EXTINF:0 group-title="Película",HBO Xtreme HD
+#EXTINF:0 group-title="Pelicula",HBO Xtreme HD
 http://181.78.79.131:8000/play/a0qy
 
 #EXTINF:0 group-title="Entretenimiento",Nat Geo HD
@@ -51,34 +51,34 @@ http://181.78.79.131:8000/play/a0pt
 #EXTINF:0 group-title="Entretenimiento",Nickelodeon HD
 http://181.78.79.131:8000/play/a0qm
 
-#EXTINF:0 group-title="Película",Pasiones HD
+#EXTINF:0 group-title="Pelicula",Pasiones HD
 http://181.78.79.131:8000/play/a0qh
 
-#EXTINF:0 group-title="Película",Space HD
+#EXTINF:0 group-title="Pelicula",Space HD
 http://181.78.79.131:8000/play/a0q2
 
-#EXTINF:0 group-title="Película",TNT Novelas HD
+#EXTINF:0 group-title="Pelicula",TNT Novelas HD
 http://181.78.79.131:8000/play/a0na
 
 #EXTINF:0 group-title="Deportes",TNT Sports Premium SD
 http://181.78.79.131:8000/play/a0q9
 
-#EXTINF:0 group-title="Película",Tlnovelas
+#EXTINF:0 group-title="Pelicula",Tlnovelas
 http://181.78.79.131:8000/play/a0t6
 
 #EXTINF:0 group-title="Entretenimiento",Tooncast
 http://181.78.79.131:8000/play/a0pe
 
-#EXTINF:0 group-title="Película",UNIVERSAL CHANNEL HD
+#EXTINF:0 group-title="Pelicula",UNIVERSAL CHANNEL HD
 http://181.78.79.131:8000/play/a0mw
 
-#EXTINF:0 group-title="Película",Warner TV HD
+#EXTINF:0 group-title="Pelicula",Warner TV HD
 http://181.78.79.131:8000/play/a0pz
 
 #EXTINF:0 group-title="Entretenimiento",ANIMAL PLANET
 http://181.78.8.199:8000/play/a0by
 
-#EXTINF:0 group-title="Película",AXN
+#EXTINF:0 group-title="Pelicula",AXN
 http://181.78.8.199:8000/play/a0am
 
 #EXTINF:0 group-title="Entretenimiento",Animal Planet HD AMAZONAS
