@@ -1,141 +1,85 @@
 #EXTM3U
 
 #EXTINF:0 group-title="Películas 24/7",AXN HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q0
 
 #EXTINF:0 group-title="Películas 24/7",Cinecanal
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pp
 
 #EXTINF:0 group-title="Entretenimiento",Comedy Central HD
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0mu
 
 #EXTINF:0 group-title="Infantiles",DHE HD
-#EXTGRP:Infantiles
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qv
 
 #EXTINF:0 group-title="Películas 24/7",De Pelicula
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qb
 
 #EXTINF:0 group-title="Entretenimiento",Discovery Science
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pb
 
 #EXTINF:0 group-title="Entretenimiento",Discovery Turbo
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0p8
 
 #EXTINF:0 group-title="Entretenimiento",Discovery World HD
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0n8
 
 #EXTINF:0 group-title="Entretenimiento",Disney Jr.
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0p7
 
 #EXTINF:0 group-title="Deportes",ESPN
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s7
 
 #EXTINF:0 group-title="Deportes",ESPN 2 HD
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qj
 
 #EXTINF:0 group-title="Deportes",ESPN 3 HD
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s6
 
 #EXTINF:0 group-title="Deportes",ESPN 4 HD
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s9
 
 #EXTINF:0 group-title="Deportes",Espn Premium
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0r2
 
 #EXTINF:0 group-title="Películas 24/7",HBO Xtreme HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qy
 
 #EXTINF:0 group-title="Entretenimiento",Nat Geo HD
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pt
 
 #EXTINF:0 group-title="Entretenimiento",Nickelodeon HD
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qm
 
 #EXTINF:0 group-title="Películas 24/7",Pasiones HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qh
 
 #EXTINF:0 group-title="Películas 24/7",Space HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q2
 
 #EXTINF:0 group-title="Películas 24/7",TNT Novelas HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0na
 
 #EXTINF:0 group-title="Deportes",TNT Sports Premium SD
-#EXTGRP:Deportes
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q9
 
 #EXTINF:0 group-title="Películas 24/7",Tlnovelas
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0t6
 
 #EXTINF:0 group-title="Entretenimiento",Tooncast
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pe
 
 #EXTINF:0 group-title="Películas 24/7",UNIVERSAL CHANNEL HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0mw
 
 #EXTINF:0 group-title="Películas 24/7",Warner TV HD
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pz
 
 #EXTINF:0 group-title="Entretenimiento",ANIMAL PLANET
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.8.199:8000/play/a0by
 
 #EXTINF:0 group-title="Películas 24/7",AXN
-#EXTGRP:Películas 24/7
-#EXTVLCOPT:network-caching=3000
 http://181.78.8.199:8000/play/a0am
 
 #EXTINF:0 group-title="Entretenimiento",Animal Planet HD AMAZONAS
-#EXTGRP:Entretenimiento
-#EXTVLCOPT:network-caching=3000
 http://181.78.8.199:8000/play/a06w
