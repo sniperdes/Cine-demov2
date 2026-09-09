@@ -1,85 +1,136 @@
 #EXTM3U
 
-#EXTINF:0 group-title="Pelicula",AXN HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/6/61/AXN_HD_Logo_2015.png",AXN HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q0
 
-#EXTINF:0 group-title="Pelicula",Cinecanal
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cinecanal_Logo_2020.svg/512px-Cinecanal_Logo_2020.svg.png",Cinecanal
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pp
 
-#EXTINF:0 group-title="Entretenimiento",Comedy Central HD
+#EXTINF:0 group-title="Entretenimiento" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Comedy_Central_2018_logo.svg/512px-Comedy_Central_2018_logo.svg.png",Comedy Central HD
+#EXTGRP:Entretenimiento
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0mu
 
-#EXTINF:0 group-title="Infantiles",DHE HD
+#EXTINF:0 group-title="Infantiles" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/a/a0/2024_Disney_Jr._logo_Alternate.svg",DHE HD
+#EXTGRP:Infantiles
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qv
 
-#EXTINF:0 group-title="Pelicula",De Pelicula
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cinecanal_Logo_2020.svg/512px-Cinecanal_Logo_2020.svg.png",De Pelicula
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qb
 
-#EXTINF:0 group-title="Entretenimiento",Discovery Science
+#EXTINF:0 group-title="Documentales" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/b/be/Discovery_Science_2021.svg/512px-Discovery_Science_2021.svg.png",Discovery Science
+#EXTGRP:Documentales
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pb
 
-#EXTINF:0 group-title="Entretenimiento",Discovery Turbo
+#EXTINF:0 group-title="Documentales" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/1/11/Discovery_Turbo.png",Discovery Turbo
+#EXTGRP:Documentales
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0p8
 
-#EXTINF:0 group-title="Entretenimiento",Discovery World HD
+#EXTINF:0 group-title="Documentales" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Discovery_World_HD_logo.svg/512px-Discovery_World_HD_logo.svg.png",Discovery World HD
+#EXTGRP:Documentales
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0n8
 
-#EXTINF:0 group-title="Entretenimiento",Disney Jr.
+#EXTINF:0 group-title="Entretenimiento" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/a/a0/2024_Disney_Jr._logo_Alternate.svg",Disney Jr.
+#EXTGRP:Entretenimiento
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0p7
 
-#EXTINF:0 group-title="Deportes",ESPN
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",ESPN
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s7
 
-#EXTINF:0 group-title="Deportes",ESPN 2 HD
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/b/bf/ESPN2_logo.svg",ESPN 2 HD
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qj
 
-#EXTINF:0 group-title="Deportes",ESPN 3 HD
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",ESPN 3 HD
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s6
 
-#EXTINF:0 group-title="Deportes",ESPN 4 HD
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",ESPN 4 HD
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0s9
 
-#EXTINF:0 group-title="Deportes",Espn Premium
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",Espn Premium
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0r2
 
-#EXTINF:0 group-title="Pelicula",HBO Xtreme HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/HBO_Logo.svg/512px-HBO_Logo.svg.png",HBO Xtreme HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qy
 
-#EXTINF:0 group-title="Entretenimiento",Nat Geo HD
+#EXTINF:0 group-title="Documentales" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5d/NatGeo_Logo.svg/512px-NatGeo_Logo.svg.png",Nat Geo HD
+#EXTGRP:Documentales
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pt
 
-#EXTINF:0 group-title="Entretenimiento",Nickelodeon HD
+#EXTINF:0 group-title="Entretenimiento" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Nickelodeon_2023_logo.svg/512px-Nickelodeon_2023_logo.svg.png",Nickelodeon HD
+#EXTGRP:Entretenimiento
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qm
 
-#EXTINF:0 group-title="Pelicula",Pasiones HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cinecanal_Logo_2020.svg/512px-Cinecanal_Logo_2020.svg.png",Pasiones HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0qh
 
-#EXTINF:0 group-title="Pelicula",Space HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e8/Space_Logo_2016.svg/512px-Space_Logo_2016.svg.png",Space HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q2
 
-#EXTINF:0 group-title="Pelicula",TNT Novelas HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cinecanal_Logo_2020.svg/512px-Cinecanal_Logo_2020.svg.png",TNT Novelas HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0na
 
-#EXTINF:0 group-title="Deportes",TNT Sports Premium SD
+#EXTINF:0 group-title="Deportes" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/ESPN_wordmark.svg/512px-ESPN_wordmark.svg.png",TNT Sports Premium SD
+#EXTGRP:Deportes
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0q9
 
-#EXTINF:0 group-title="Pelicula",Tlnovelas
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Cinecanal_Logo_2020.svg/512px-Cinecanal_Logo_2020.svg.png",Tlnovelas
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0t6
 
-#EXTINF:0 group-title="Entretenimiento",Tooncast
+#EXTINF:0 group-title="Entretenimiento" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/3/3b/Comedy_Central_2018_logo.svg/512px-Comedy_Central_2018_logo.svg.png",Tooncast
+#EXTGRP:Entretenimiento
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pe
 
-#EXTINF:0 group-title="Pelicula",UNIVERSAL CHANNEL HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Universal_Channel_logo.svg/512px-Universal_Channel_logo.svg.png",UNIVERSAL CHANNEL HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0mw
 
-#EXTINF:0 group-title="Pelicula",Warner TV HD
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Warner_Bros._Television_Studio.svg/512px-Warner_Bros._Television_Studio.svg.png",Warner TV HD
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.79.131:8000/play/a0pz
 
-#EXTINF:0 group-title="Entretenimiento",ANIMAL PLANET
+#EXTINF:0 group-title="Documentales" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/7/78/Animal_Planet_2021.svg",ANIMAL PLANET
+#EXTGRP:Documentales
+#EXTVLCOPT:network-caching=3000
 http://181.78.8.199:8000/play/a0by
 
-#EXTINF:0 group-title="Pelicula",AXN
+#EXTINF:0 group-title="Peliculas" tvg-logo="https://upload.wikimedia.org/wikipedia/commons/6/61/AXN_HD_Logo_2015.png",AXN
+#EXTGRP:Peliculas
+#EXTVLCOPT:network-caching=3000
 http://181.78.8.199:8000/play/a0am
-
-#EXTINF:0 group-title="Entretenimiento",Animal Planet HD AMAZONAS
-http://181.78.8.199:8000/play/a06w
