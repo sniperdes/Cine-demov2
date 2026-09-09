@@ -116,11 +116,6 @@
         .ep-item .ep-play { color:#e50914; font-size:20px; }
         .ep-cargando { color:#aaa; text-align:center; padding:30px; font-size:14px; }
         .ep-vacio { color:#666; text-align:center; padding:30px; font-size:14px; }
-        /* TARJETA DE CANAL (TV en vivo) — logo en vez de póster */
-        .card-canal img { height:100px; object-fit:contain; background:#111; padding:15px; box-sizing:border-box; }
-        .card-canal::after { height:100px; }
-        .card-canal p { text-align:center; }
-
         /* GRILLA VER TODO */
         .grid-genero { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; padding-bottom:20px; }
         .grid-genero .card { min-width:unset; width:100%; }
@@ -181,7 +176,6 @@
     </style>
     <script src='//libtl.com/sdk.js' data-zone='11208906' data-sdk='show_11208906'></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.15/hls.min.js"></script>
 </head>
 <body>
     <!-- SPLASH DE CARGA: tapa todo hasta que el catálogo esté listo -->
@@ -244,15 +238,6 @@
         <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" webkitallowfullscreen mozallowfullscreen></iframe>
     </div>
 
-    <!-- REPRODUCTOR TV EN VIVO (elemento <video> + hls.js, separado del iframe de películas/series) -->
-    <div id="tv-player-modal" class="player-modal">
-        <div class="player-header">
-            <span id="tv-player-title">Cargando...</span>
-            <span class="player-close" onclick="cerrarPlayerTV()">✖</span>
-        </div>
-        <video id="tv-video" class="player-frame" controls autoplay playsinline></video>
-    </div>
-
     <!-- OVERLAY DE PRIVACIDAD -->
     <div id="privacy-overlay" class="privacy-overlay">🔒 Contenido oculto</div>
 
@@ -294,7 +279,6 @@
         <button onclick="show('doramas')">🌸 Doramas</button>
         <button onclick="show('turcas')">🌙 Turcas</button>
         <button onclick="show('rusas')">❄️ Rusas</button>
-        <button onclick="show('tv')">📡 TV en vivo</button>
         <button onclick="show('adulto')">🔞 +18</button>
     </div>
 
@@ -414,12 +398,6 @@
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
         <div class="title">🔪 Rusas Thriller</div>
         <div class="grid-genero" id="contenedor-rusa-thriller"></div>
-    </div>
-
-    <!-- TV EN VIVO -->
-    <div id="tv" class="view">
-        <div class="title">📡 TV en Vivo</div>
-        <div id="tv-secciones"></div>
     </div>
 
     <div id="adulto" class="view"><div class="title">🔞 Contenido +18 Protegido</div></div>
@@ -1317,7 +1295,6 @@
 
             if (id === 'perfil') cargarPerfil();
             if (id === 'premium') cargarPremium();
-            if (id === 'tv') cargarCanalesTV();
         }
 
         // ─── PERFIL ───────────────────────────────────────────────────────────────
@@ -1979,118 +1956,6 @@
             document.getElementById('player-frame').src = '';
             document.getElementById('player-modal').classList.remove('active');
             ocultarOverlayPrivacidad();
-            if (document.fullscreenElement) document.exitFullscreen();
-        }
-
-        // ─── TV EN VIVO ─────────────────────────────────────────────────────────
-        const CATEGORIAS_TV = [
-            { slug:'noticias',        label:'Noticias',        emoji:'📰' },
-            { slug:'deportes',        label:'Deportes',        emoji:'⚽' },
-            { slug:'entretenimiento', label:'Entretenimiento', emoji:'🎭' },
-            { slug:'peliculas-24-7',  label:'Películas 24/7',  emoji:'🎬' },
-            { slug:'infantil',        label:'Infantil',        emoji:'🧸' },
-            { slug:'musica',          label:'Música',          emoji:'🎵' },
-        ];
-
-        let canalesTVCargados = false;
-
-        // Proxy de Cloudflare para evitar el bloqueo por IP de datacenter en los
-        // streams .m3u8 (mismo problema que causaba el 403 antes de armarlo)
-        const PROXY_TV = 'https://tv-proxy-affc.sniperdes898.workers.dev/?url=';
-
-        function generarSeccionesTV() {
-            const secciones = document.getElementById('tv-secciones');
-            secciones.innerHTML = '';
-            CATEGORIAS_TV.forEach(c => {
-                const sec = document.createElement('div');
-                sec.className = 'genero-seccion';
-                sec.id = `seccion-tv-${c.slug}`;
-                sec.innerHTML = `<div class="genero-header"><h3>${c.emoji} ${c.label}</h3></div><div class="row" id="slider-tv-${c.slug}"></div>`;
-                secciones.appendChild(sec);
-            });
-        }
-
-        // NOTA: el endpoint '/catalogo?tipo=canales' es una suposición, siguiendo
-        // el mismo patrón que '/catalogo?tipo=series' y '/catalogo?tipo=animes'.
-        // Si el Worker expone otro endpoint o nombres de campo distintos
-        // (nombre/categoria/url/logo), avisame y lo ajusto.
-        async function cargarCanalesTV() {
-            if (canalesTVCargados) return; // no repetir el fetch cada vez que se entra a la vista
-            generarSeccionesTV();
-
-            let canales = [];
-            try {
-                const res = await fetch('/catalogo?tipo=canales');
-                const data = await res.json();
-                if (Array.isArray(data)) canales = data;
-            } catch {}
-
-            CATEGORIAS_TV.forEach(c => {
-                const slider = document.getElementById(`slider-tv-${c.slug}`);
-                const delCategoria = canales.filter(ch => ch.categoria === c.slug);
-
-                delCategoria.forEach(canal => {
-                    const tarjeta = document.createElement('div');
-                    tarjeta.className = 'card card-canal';
-                    tarjeta.innerHTML = `<img src="${canal.logo || PLACEHOLDER}"><p>${canal.nombre}</p>`;
-                    tarjeta.onclick = () => reproducirCanal(canal.url, canal.nombre);
-                    slider.appendChild(tarjeta);
-                });
-
-                const seccionEl = document.getElementById(`seccion-tv-${c.slug}`);
-                if (seccionEl) seccionEl.style.display = delCategoria.length ? '' : 'none';
-            });
-
-            canalesTVCargados = true;
-        }
-
-        // Reproductor de streams .m3u8 vía hls.js (Chrome/Android); Safari/iOS
-        // reproduce HLS nativo sin necesitar la librería.
-        let hlsInstanciaActual = null;
-
-        function reproducirCanal(url, nombre) {
-            const tg    = window.Telegram?.WebApp;
-            const video = document.getElementById('tv-video');
-            const urlProxeada = PROXY_TV + encodeURIComponent(url);
-
-            document.getElementById('tv-player-title').innerText = nombre;
-
-            if (hlsInstanciaActual) {
-                hlsInstanciaActual.destroy();
-                hlsInstanciaActual = null;
-            }
-
-            if (window.Hls && Hls.isSupported()) {
-                hlsInstanciaActual = new Hls();
-                hlsInstanciaActual.loadSource(urlProxeada);
-                hlsInstanciaActual.attachMedia(video);
-                hlsInstanciaActual.on(Hls.Events.ERROR, (event, data) => {
-                    if (data.fatal) {
-                        const msg = '⚠️ No se pudo cargar este canal. Puede estar caído o bloqueado.';
-                        if (tg) tg.showAlert(msg); else alert(msg);
-                    }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = urlProxeada;
-            } else {
-                const msg = '⚠️ Tu navegador no soporta la reproducción de este canal.';
-                if (tg) tg.showAlert(msg); else alert(msg);
-                return;
-            }
-
-            document.getElementById('tv-player-modal').classList.add('active');
-        }
-
-        function cerrarPlayerTV() {
-            const video = document.getElementById('tv-video');
-            video.pause();
-            video.removeAttribute('src');
-            video.load();
-            if (hlsInstanciaActual) {
-                hlsInstanciaActual.destroy();
-                hlsInstanciaActual = null;
-            }
-            document.getElementById('tv-player-modal').classList.remove('active');
             if (document.fullscreenElement) document.exitFullscreen();
         }
 
