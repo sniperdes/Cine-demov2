@@ -909,6 +909,15 @@
             marcarReproduccion();
         }
 
+        // Proxy para streams servidos por HTTP (mixed content: la Mini App
+        // corre en HTTPS y el navegador bloquea pedir HTTP directo). Solo
+        // envuelve si la URL es insegura; si algún día cargás un canal ya
+        // en HTTPS, la deja pasar directo sin proxear de más.
+        const TV_PROXY_BASE = 'https://tv-proxy-affc.sniperdes898.workers.dev/proxy?url=';
+        function urlProxeada(url) {
+            return url.startsWith('http://') ? TV_PROXY_BASE + encodeURIComponent(url) : url;
+        }
+
         function abrirLive(nombre, url) {
             document.getElementById('live-title').innerText = `🔴 ${nombre}`;
             const video = document.getElementById('live-video');
@@ -916,14 +925,16 @@
 
             if (window.hlsInstance) { window.hlsInstance.destroy(); window.hlsInstance = null; }
 
+            const urlFinal = urlProxeada(url);
+
             if (Hls.isSupported()) {
                 const hls = new Hls();
-                hls.loadSource(url);
+                hls.loadSource(urlFinal);
                 hls.attachMedia(video);
                 window.hlsInstance = hls;
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                 // Safari/iOS reproduce HLS nativo, sin necesitar hls.js
-                video.src = url;
+                video.src = urlFinal;
             } else {
                 const tg = window.Telegram?.WebApp;
                 if (tg) tg.showAlert('⚠️ Tu navegador no puede reproducir este canal.');
