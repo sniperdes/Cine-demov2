@@ -1987,12 +1987,16 @@
             { slug:'noticias',        label:'Noticias',        emoji:'📰' },
             { slug:'deportes',        label:'Deportes',        emoji:'⚽' },
             { slug:'entretenimiento', label:'Entretenimiento', emoji:'🎭' },
-            { slug:'peliculas-24-7',  label:'Películas',       emoji:'🎬' },
+            { slug:'peliculas-24-7',  label:'Películas 24/7',  emoji:'🎬' },
             { slug:'infantil',        label:'Infantil',        emoji:'🧸' },
             { slug:'musica',          label:'Música',          emoji:'🎵' },
         ];
 
         let canalesTVCargados = false;
+
+        // Proxy de Cloudflare para evitar el bloqueo por IP de datacenter en los
+        // streams .m3u8 (mismo problema que causaba el 403 antes de armarlo)
+        const PROXY_TV = 'https://tv-proxy-affc.sniperdes898.workers.dev/?url=';
 
         function generarSeccionesTV() {
             const secciones = document.getElementById('tv-secciones');
@@ -2047,6 +2051,7 @@
         function reproducirCanal(url, nombre) {
             const tg    = window.Telegram?.WebApp;
             const video = document.getElementById('tv-video');
+            const urlProxeada = PROXY_TV + encodeURIComponent(url);
 
             document.getElementById('tv-player-title').innerText = nombre;
 
@@ -2057,16 +2062,16 @@
 
             if (window.Hls && Hls.isSupported()) {
                 hlsInstanciaActual = new Hls();
-                hlsInstanciaActual.loadSource(url);
+                hlsInstanciaActual.loadSource(urlProxeada);
                 hlsInstanciaActual.attachMedia(video);
                 hlsInstanciaActual.on(Hls.Events.ERROR, (event, data) => {
                     if (data.fatal) {
-                        const msg = '⚠️ No se pudo cargar este canal. Puede estar caído o bloqueado (CORS).';
+                        const msg = '⚠️ No se pudo cargar este canal. Puede estar caído o bloqueado.';
                         if (tg) tg.showAlert(msg); else alert(msg);
                     }
                 });
             } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                video.src = url;
+                video.src = urlProxeada;
             } else {
                 const msg = '⚠️ Tu navegador no soporta la reproducción de este canal.';
                 if (tg) tg.showAlert(msg); else alert(msg);
