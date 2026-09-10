@@ -192,6 +192,17 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     const matchAnio = (textoOriginal || '').match(/\b(19\d{2}|20\d{2})\b/);
     const anioParam = matchAnio ? matchAnio[1] : null;
 
+    // Nos quedamos con el más relevante: primero priorizamos coincidencia EXACTA
+    // de título (evita casos como "Lucky" vs "Lucky Strike", donde la película
+    // tenía más popularidad pero el título correcto era el de la serie), y solo
+    // si hay empate o ninguno coincide exacto, usamos la popularidad de TMDB
+    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
+        // Ignora prefijos de estudio/plataforma tipo "Marvel's", "Netflix", "HBO",
+        // que suelen estar en el título oficial de TMDB pero no en el nombre del
+        // archivo (ej: "Marvel - The Punisher" vs "Marvel's The Punisher")
+        .replace(/^(marvel'?s?|netflix|disney\+?|hbo\smax|hbo|amazon(\sprime)?|dc)[\s-]+/i, '')
+        .trim();
+
     const buscar = async (tipo) => {
         const endpoint = tipo === 'tv' ? 'search/tv' : 'search/movie';
         const yearParam = anioParam
@@ -204,23 +215,24 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         try {
             const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
             const data = await res.json();
-            return data?.results?.[0] || null;
+            const resultados = data?.results || [];
+            if (!resultados.length) return null;
+
+            // TMDB ordena por popularidad/relevancia, NO por coincidencia exacta
+            // de título — buscar "Ash" puede traer primero "Avatar: Fire and Ash"
+            // (mucho más popular) antes que la película que se llama Ash de
+            // verdad. Si alguno de los resultados matchea el título exacto, ese
+            // gana sobre el más popular; results[0] queda solo como último
+            // respaldo si ninguno matchea exacto.
+            const queryNorm = normalizar(tituloGuess);
+            const exacto = resultados.find(r => normalizar(r.title || r.name) === queryNorm);
+            return exacto || resultados[0];
         } catch { return null; }
     };
 
     // Buscamos en los dos tipos a la vez, sin asumir de antemano si es serie o película
     const [resultadoTv, resultadoMovie] = await Promise.all([buscar('tv'), buscar('movie')]);
 
-    // Nos quedamos con el más relevante: primero priorizamos coincidencia EXACTA
-    // de título (evita casos como "Lucky" vs "Lucky Strike", donde la película
-    // tenía más popularidad pero el título correcto era el de la serie), y solo
-    // si hay empate o ninguno coincide exacto, usamos la popularidad de TMDB
-    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim()
-        // Ignora prefijos de estudio/plataforma tipo "Marvel's", "Netflix", "HBO",
-        // que suelen estar en el título oficial de TMDB pero no en el nombre del
-        // archivo (ej: "Marvel - The Punisher" vs "Marvel's The Punisher")
-        .replace(/^(marvel'?s?|netflix|disney\+?|hbo\smax|hbo|amazon(\sprime)?|dc)[\s-]+/i, '')
-        .trim();
     let resultado, tipo;
     if (resultadoTv && resultadoMovie) {
         const queryNorm    = normalizar(tituloGuess);
