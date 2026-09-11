@@ -1045,7 +1045,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
         return new Response('OK');
     }
 
@@ -1124,6 +1124,28 @@ export async function onRequest(context) {
             const cacheKey = `posterv2:${tipoTmdb}:${entrada.tmdbQuery.toLowerCase().trim()}`;
             await env.PELICULAS_KV.delete(cacheKey);
             await enviar(`🗑️ Borré la caché del póster de "${nombreKV}" (clave: ${cacheKey}).\n\nLa próxima vez que la Mini App lo pida, va a volver a consultar TMDB.`);
+        } catch (e) {
+            await enviar(`❌ Error al borrar la caché: ${e.message}`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/borrarcachepsterquery') {
+        // /borrarcachepsterquery movie|tv texto de búsqueda → borra la caché
+        // de poster.js directo por el texto exacto (mismo "q=" que arma
+        // tmdbQuery, ej: "Ash 2025"), sin depender de que la ficha siga en el
+        // catálogo. Sirve para cuando ya usaste /borrarcatalogo antes de
+        // acordarte de limpiar la caché del póster.
+        const tipoTmdb = partes[1];
+        const query = partes.slice(2).join(' ');
+        if (!['movie', 'tv'].includes(tipoTmdb) || !query) {
+            await enviar(`Uso: /borrarcachepsterquery movie|tv texto\n\nEjemplo:\n/borrarcachepsterquery movie Ash 2025`);
+            return new Response('OK');
+        }
+        const cacheKey = `posterv2:${tipoTmdb}:${query.toLowerCase().trim()}`;
+        try {
+            await env.PELICULAS_KV.delete(cacheKey);
+            await enviar(`🗑️ Borré la caché del póster (clave: ${cacheKey}).\n\nLa próxima vez que la Mini App lo pida, va a volver a consultar TMDB.`);
         } catch (e) {
             await enviar(`❌ Error al borrar la caché: ${e.message}`);
         }
