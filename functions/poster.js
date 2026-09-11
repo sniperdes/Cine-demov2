@@ -67,14 +67,28 @@ export async function onRequest(context) {
         } catch {}
     }
 
-    const resultado = year
+    // Igual que en bot.js: TMDB ordena por popularidad, no por coincidencia
+    // exacta de título — buscar "Ash" puede traer primero "Avatar: Fire and
+    // Ash" (mucho más popular) aunque comparta el mismo año que la película
+    // buscada. Priorizamos el resultado cuyo título coincide exacto (respetando
+    // el año si lo tenemos) antes de resignarnos al criterio viejo de "el
+    // primero con póster".
+    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const tituloNorm  = normalizar(titulo);
+    const resultados  = tmdbData?.results || [];
+    const exactoTitulo = resultados.filter(r => normalizar(r.title || r.name) === tituloNorm);
+    const exacto = year
+        ? exactoTitulo.find(r => (r.release_date || r.first_air_date || '').startsWith(year)) || exactoTitulo[0]
+        : exactoTitulo[0];
+
+    const resultado = exacto || (year
         // Si reintentamos sin año, igual preferimos el resultado cuyo año de
         // estreno coincida con el pedido, antes de resignarnos al primero que
         // tenga póster (evita traer la película equivocada con el mismo título)
         ? tmdbData?.results?.find(r => (r.release_date || r.first_air_date || '').startsWith(year) && r.poster_path)
             || tmdbData?.results?.find(r => r.poster_path)
             || tmdbData?.results?.[0]
-        : tmdbData?.results?.find(r => r.poster_path) || tmdbData?.results?.[0];
+        : tmdbData?.results?.find(r => r.poster_path) || tmdbData?.results?.[0]);
     const posterUrl = resultado?.poster_path
         ? `https://image.tmdb.org/t/p/w500${resultado.poster_path}`
         : null;
