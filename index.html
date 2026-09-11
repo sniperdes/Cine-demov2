@@ -116,6 +116,28 @@
         .ep-item .ep-play { color:#e50914; font-size:20px; }
         .ep-cargando { color:#aaa; text-align:center; padding:30px; font-size:14px; }
         .ep-vacio { color:#666; text-align:center; padding:30px; font-size:14px; }
+        /* TOAST DE REFERIDOS — sube desde abajo, arriba de la nav inferior */
+        .toast-referidos {
+            position: fixed;
+            left: 50%;
+            bottom: 80px;
+            transform: translate(-50%, 150%);
+            max-width: 90%;
+            width: 380px;
+            background: #1c1c1c;
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1px solid #3B82F6;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+            font-size: 14px;
+            line-height: 1.4;
+            z-index: 500;
+            cursor: pointer;
+            transition: transform 0.4s ease;
+        }
+        .toast-referidos.mostrar { transform: translate(-50%, 0); }
+
         /* GRILLA VER TODO */
         .grid-genero { display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; padding-bottom:20px; }
         .grid-genero .card { min-width:unset; width:100%; }
@@ -236,6 +258,11 @@
             <div class="ep-row" id="ep-row"></div>
         </div>
         <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" webkitallowfullscreen mozallowfullscreen></iframe>
+    </div>
+
+    <!-- TOAST DE REFERIDOS -->
+    <div id="toast-referidos" class="toast-referidos" onclick="show('perfil'); ocultarToastReferidos();">
+        🎁 No te olvides de compartir con 10 amigos para conseguir Premium gratis por 30 días. Tocá acá para invitar.
     </div>
 
     <!-- OVERLAY DE PRIVACIDAD -->
@@ -520,6 +547,22 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
+        // ─── TOAST DE REFERIDOS ─────────────────────────────────────────────────
+        // Aparece a los 15s de abrir la app, se queda 10s en pantalla y se
+        // oculta sola — una vez por sesión (no se repite hasta que se vuelve a
+        // abrir la Mini App). No se muestra a quien ya tiene Premium activo.
+        setTimeout(() => {
+            if (usuarioEsPremium) return;
+            const toast = document.getElementById('toast-referidos');
+            if (!toast) return;
+            toast.classList.add('mostrar');
+            setTimeout(() => toast.classList.remove('mostrar'), 10000);
+        }, 15000);
+
+        function ocultarToastReferidos() {
+            document.getElementById('toast-referidos')?.classList.remove('mostrar');
+        }
+
         const TOQUES_POR_ANUNCIO = 8;
         let contadorToques = 0;
         document.addEventListener('click', () => {
