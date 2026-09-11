@@ -120,10 +120,11 @@
         .toast-referidos {
             position: fixed;
             left: 50%;
-            bottom: 80px;
+            bottom: calc(65px + env(safe-area-inset-bottom));
             transform: translate(-50%, 150%);
-            max-width: 90%;
-            width: 380px;
+            width: calc(100% - 40px);
+            max-width: 380px;
+            box-sizing: border-box;
             background: #1c1c1c;
             color: #fff;
             padding: 14px 18px;
