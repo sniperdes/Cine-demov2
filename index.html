@@ -556,8 +556,17 @@
         // Aparece a los 15s de abrir la app, se queda 10s en pantalla y se
         // oculta sola — una vez por sesión (no se repite hasta que se vuelve a
         // abrir la Mini App). No se muestra a quien ya tiene Premium activo.
-        setTimeout(() => {
+        setTimeout(async () => {
+            // Doble chequeo: además de la variable ya resuelta al abrir la app,
+            // reconsultamos acá por si esa consulta inicial viniera lenta —
+            // así nunca se le muestra el cartel a alguien Premium por una
+            // carrera de tiempos.
+            if (!usuarioEsPremium) {
+                const sub = await consultarSuscripcion().catch(() => null);
+                usuarioEsPremium = !!sub?.activo;
+            }
             if (usuarioEsPremium) return;
+
             const toast = document.getElementById('toast-referidos');
             if (!toast) return;
             toast.classList.add('mostrar');
@@ -1281,6 +1290,11 @@
             if (tg) { tg.ready(); tg.expand(); }
             cargarImagenesGenero();
 
+            // Estado Premium: se dispara ya mismo, en paralelo con el catálogo,
+            // para que esté resuelto rápido (el toast de referidos a los 15s
+            // depende de este valor, y el catálogo solo puede tardar más que eso)
+            consultarSuscripcion().then(sub => { usuarioEsPremium = !!sub?.activo; });
+
             const ocultarSplash = () => {
                 const splash = document.getElementById('splash-loading');
                 if (!splash) return;
@@ -1315,10 +1329,6 @@
             document.querySelector('.banner-slider').addEventListener('click', () => {
                 rotarBanner(); iniciarTemporizador();
             });
-
-            // Estado Premium: se consulta una sola vez al abrir la app
-            const sub = await consultarSuscripcion();
-            usuarioEsPremium = !!sub?.activo;
 
             // Registro de visita (para poder ver cuántos usuarios entraron desde el bot)
             fetch('/registrar-visita', {
