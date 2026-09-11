@@ -116,24 +116,28 @@
         .ep-item .ep-play { color:#e50914; font-size:20px; }
         .ep-cargando { color:#aaa; text-align:center; padding:30px; font-size:14px; }
         .ep-vacio { color:#666; text-align:center; padding:30px; font-size:14px; }
-        /* TOAST DE REFERIDOS — sube desde abajo, arriba de la nav inferior */
+        /* TOAST DE REFERIDOS — sube desde abajo, se asienta arriba de la nav
+           inferior. z-index MENOR al de la nav (50) a propósito: así durante
+           la animación entra "por detrás" de los botones en vez de taparlos,
+           y una vez arriba del todo ya no se solapa porque el bottom lo
+           despega lo suficiente. */
         .toast-referidos {
             position: fixed;
             left: 50%;
-            bottom: calc(65px + env(safe-area-inset-bottom));
+            bottom: calc(78px + env(safe-area-inset-bottom));
             transform: translate(-50%, 150%);
             width: calc(100% - 40px);
             max-width: 380px;
             box-sizing: border-box;
-            background: #1c1c1c;
-            color: #fff;
+            background: #b8860b;
+            color: #000;
+            font-weight: 600;
             padding: 14px 18px;
             border-radius: 14px;
-            border: 1px solid #3B82F6;
             box-shadow: 0 6px 24px rgba(0,0,0,0.5);
             font-size: 14px;
             line-height: 1.4;
-            z-index: 500;
+            z-index: 40;
             cursor: pointer;
             transition: transform 0.4s ease;
         }
