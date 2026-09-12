@@ -784,7 +784,9 @@ export async function onRequest(context) {
                     });
                 }
             } catch (e) {
-                // no rompemos el flujo si TMDB falla
+                // Antes esto se tragaba en silencio — ahora avisa el error real
+                // para poder diagnosticar casos como éste sin adivinar a ciegas
+                await avisarAdmin(`⚠️ Falló la sugerencia TMDB para "${textoOriginal}":\n${e.message}`);
             }
         }
         return new Response('OK');
@@ -1045,7 +1047,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/probartmdb texto (prueba la detección automática sin subir un archivo real)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
         return new Response('OK');
     }
 
@@ -1148,6 +1150,30 @@ export async function onRequest(context) {
             await enviar(`🗑️ Borré la caché del póster (clave: ${cacheKey}).\n\nLa próxima vez que la Mini App lo pida, va a volver a consultar TMDB.`);
         } catch (e) {
             await enviar(`❌ Error al borrar la caché: ${e.message}`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/probartmdb') {
+        // /probartmdb texto completo (como vendría el nombre del archivo o el
+        // caption) → corre la misma detección automática que se dispara al
+        // subir un video, para diagnosticar casos que fallan sin tener que
+        // volver a subir el archivo real
+        const textoOriginal = partes.slice(1).join(' ');
+        if (!textoOriginal) {
+            await enviar('Uso: /probartmdb texto completo (como vendría el nombre del archivo)\n\nEjemplo:\n/probartmdb El señor de los anillos La guerra de los Rohirrim (2024).mp4');
+            return new Response('OK');
+        }
+        const tituloGuess = extraerTituloGuess(textoOriginal);
+        try {
+            const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal, null);
+            if (!sugerencia) {
+                await enviar(`❌ No encontró nada.\n\ntituloGuess extraído: "${tituloGuess}"`);
+            } else {
+                await enviar(`✅ Encontró algo:\n\ntituloGuess extraído: "${tituloGuess}"\n\n${sugerencia.texto}`);
+            }
+        } catch (e) {
+            await enviar(`⚠️ Tiró error: ${e.message}\n\ntituloGuess extraído: "${tituloGuess}"`);
         }
         return new Response('OK');
     }
