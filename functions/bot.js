@@ -201,6 +201,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         // que suelen estar en el título oficial de TMDB pero no en el nombre del
         // archivo (ej: "Marvel - The Punisher" vs "Marvel's The Punisher")
         .replace(/^(marvel'?s?|netflix|disney\+?|hbo\smax|hbo|amazon(\sprime)?|dc)[\s-]+/i, '')
+        // Ignora puntuación (el título real casi siempre trae ":" antes del
+        // subtítulo — "El Señor de los Anillos: La Guerra de los Rohirrim" —
+        // pero el nombre del archivo casi nunca; sin esto, la comparación de
+        // "coincidencia exacta" fallaba por ese detalle y todo terminaba
+        // decidiéndose por popularidad, favoreciendo a series mucho más
+        // populares que resultan de una búsqueda parecida)
+        .replace(/[:,.!?¡¿'"´`()–—-]/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim();
 
     const buscar = async (tipo) => {
@@ -552,6 +560,13 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     } else if (esDorama) {
         archivoSugerido = 'data-doramas.js';
         generoSugerido = 'dorama-drama (o dorama-romance/dorama-accion, ajustá)';
+    } else if (tipo === 'movie') {
+        // Caso raro: película "normal" que llegó hasta acá sin auto-agregarse
+        // (por ejemplo, sin `env` como en /probartmdb, o porque ya existía y
+        // nombreKVsugerido vino vacío) — antes esto siempre decía
+        // "data-series.js" sin importar que fuera película
+        archivoSugerido = 'data-peliculas.js';
+        generoSugerido = 'accion (o el que corresponda, ajustá)';
     } else {
         archivoSugerido = 'data-series.js';
         generoSugerido = 'drama (o comedia/accion-serie, ajustá)';

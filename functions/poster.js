@@ -73,7 +73,8 @@ export async function onRequest(context) {
     // buscada. Priorizamos el resultado cuyo título coincide exacto (respetando
     // el año si lo tenemos) antes de resignarnos al criterio viejo de "el
     // primero con póster".
-    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    const normalizar = t => (t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[:,.!?¡¿'"´`()–—-]/g, ' ').replace(/\s+/g, ' ').trim();
     const tituloNorm  = normalizar(titulo);
     const resultados  = tmdbData?.results || [];
     const exactoTitulo = resultados.filter(r => normalizar(r.title || r.name) === tituloNorm);
