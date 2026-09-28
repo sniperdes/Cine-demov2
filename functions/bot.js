@@ -251,6 +251,12 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             resultado = resultadoTv; tipo = 'tv';
         } else if (movieExacto && !tvExacto) {
             resultado = resultadoMovie; tipo = 'movie';
+        } else if (movieExacto && tvExacto) {
+            // Empate exacto (ej: "Monstrous" 2022 existe como película de EE.UU.
+            // y como serie coreana). Este flujo solo se llega cuando el archivo
+            // NO trae marcas de temporada/episodio, así que lo más probable es
+            // que sea una película: no dejamos que decida la popularidad.
+            resultado = resultadoMovie; tipo = 'movie';
         } else if ((resultadoMovie.popularity || 0) >= (resultadoTv.popularity || 0)) {
             resultado = resultadoMovie; tipo = 'movie';
         } else {
