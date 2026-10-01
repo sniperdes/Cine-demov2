@@ -185,6 +185,13 @@ function generoTMDBaGeneroTV(genreIds, sufijo) {
     return encontrados.length ? encontrados : [`drama${sufijo}`];
 }
 
+// Escapa los caracteres que Telegram interpreta como formato Markdown
+// (*, _, `, [) cuando van en texto que no es formato a propósito — un título
+// real como "Thunderbolts*" rompía el parser de Telegram (asterisco sin
+// pareja) y el mensaje de confirmación se perdía en silencio, aunque la
+// ficha sí se hubiera guardado bien en el catálogo.
+const escapeMD = t => (t || '').replace(/([_*`\[])/g, '\\$1');
+
 async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     if (!tituloGuess || tituloGuess.length < 2) return null;
 
@@ -323,7 +330,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
             if (yaExiste) {
                 return {
-                    texto: `🎬 "${titulo}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`,
+                    texto: `🎬 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`,
                     nombreKV: nombreKVsugerido,
                     catalogoTipo: 'pelicula'
                 };
@@ -343,7 +350,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             await env.PELICULAS_KV.put('catalogo:peliculas', JSON.stringify(catalogo));
 
             return {
-                texto: `✅ "${titulo}" (${anio}) se agregó sola al catálogo de películas.\n📁 Géneros: ${generoFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`,
+                texto: `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de películas.\n📁 Géneros: ${generoFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`,
                 nombreKV: nombreKVsugerido,
                 catalogoTipo: 'pelicula'
             };
@@ -379,8 +386,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             }
 
             const textoBase = yaExiste
-                ? `📺 "${titulo}" (${anio}) ya estaba en el catálogo de series (${nombreKVsugerido}). No se duplicó.`
-                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de series.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
+                ? `📺 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de series (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de series.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
             if (episodio) {
                 return {
@@ -426,8 +433,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             }
 
             const textoBase = yaExiste
-                ? `🌙 "${titulo}" (${anio}) ya estaba en el catálogo de turcas (${nombreKVsugerido}). No se duplicó.`
-                : `✅ "${titulo}" (${anio}) se agregó sola al catálogo de turcas.\n📁 Género elegido automáticamente: ${generoElegido}\n🔑 nombreKV: ${nombreKVsugerido}`;
+                ? `🌙 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de turcas (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de turcas.\n📁 Género elegido automáticamente: ${generoElegido}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
             if (tipo === 'movie') {
                 return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'turca' };
@@ -475,8 +482,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             }
 
             const textoBase = yaExiste
-                ? `🎌 "${titulo}" (${anio}) ya estaba en el catálogo de anime (${nombreKVsugerido}). No se duplicó.`
-                : `✅ "${titulo}" (${anio}) se agregó solo al catálogo de anime.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
+                ? `🎌 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de anime (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${escapeMD(titulo)}" (${anio}) se agregó solo al catálogo de anime.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
             // Una película de anime no tiene episodios: se guarda como "parte 1",
             // igual que cualquier película (mismo camino que confp: ya usa)
@@ -526,8 +533,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             }
 
             const textoBase = yaExiste
-                ? `🎎 "${titulo}" (${anio}) ya estaba en el catálogo de doramas (${nombreKVsugerido}). No se duplicó.`
-                : `✅ "${titulo}" (${anio}) se agregó solo al catálogo de doramas.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
+                ? `🎎 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de doramas (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${escapeMD(titulo)}" (${anio}) se agregó solo al catálogo de doramas.\n📁 Géneros: ${generosFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
             // Una película de dorama (poco común, pero pasa) tampoco tiene
             // episodios: se guarda como "parte 1"
@@ -580,7 +587,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
 
     const bloque = `{ titulo:'${titulo}', tmdbQuery:'${tituloOriginal} ${anio}', nombreKV:'${nombreKVsugerido}', genero:'${generoSugerido}', info:'⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺', desc:'${overview.replace(/'/g, "")}' },`;
 
-    return { texto: `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${titulo} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)` };
+    return { texto: `🎬 No reconocí el título, pero lo encontré en TMDB:\n\n📌 ${escapeMD(titulo)} (${anio || '?'})\n📁 Pegar en: ${archivoSugerido}\n\n${bloque}\n\n(Revisá género y nombreKV antes de pegarlo)` };
 }
 
 // Parsea un archivo M3U (formato #EXTINF con tvg-logo, group-title, etc.) y
