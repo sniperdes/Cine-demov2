@@ -176,10 +176,16 @@ function elegirGeneroTurca(genreIds) {
 // Igual que generoTMDBaGeneroSerie pero genérico con sufijo, para no chocar
 // slugs entre anime/doramas/series (ej: 'accion-anime' vs 'accion-dorama')
 function generoTMDBaGeneroTV(genreIds, sufijo) {
+    // OJO: "animacion" y "western" quedan afuera a propósito — ni GENEROS_ANIME
+    // ni GENEROS_DORAMAS en index.html tienen sección para esos slugs. Casi
+    // todo anime trae "Animación" (16) como género en TMDB, así que si fuera
+    // el único que matchea, la ficha quedaba con animacion-anime: un género
+    // sin fila en ninguna parte de la Mini App, invisible aunque el buscador
+    // sí la encontraba (busca sobre el array completo, no por género)
     const mapa = [
-        [10759, 'accion'], [16, 'animacion'], [35, 'comedia'], [80, 'crimen'],
+        [10759, 'accion'], [35, 'comedia'], [80, 'crimen'],
         [99, 'documental'], [18, 'drama'], [10751, 'familiar'], [9648, 'misterio'],
-        [10765, 'ciencia-ficcion-fantasia'], [10768, 'belica'], [37, 'western'],
+        [10765, 'ciencia-ficcion-fantasia'], [10768, 'belica'],
     ];
     const encontrados = mapa.filter(([id]) => (genreIds || []).includes(id)).map(([, g]) => `${g}${sufijo}`);
     return encontrados.length ? encontrados : [`drama${sufijo}`];
