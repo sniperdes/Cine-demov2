@@ -333,12 +333,22 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             const raw = await env.PELICULAS_KV.get('catalogo:peliculas');
             const catalogo = raw ? JSON.parse(raw) : [];
 
-            const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
+            // Si colisiona el nombreKV pero el AÑO es distinto, no es el mismo
+        // contenido (ej: "The Jungle Book" 2016 vs 1967) — le sumamos el año al
+        // nombreKV para no pisar la ficha existente ni rechazar por error algo
+        // que en realidad es otra película/serie distinta
+        const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+        if (colision && String(colision.anio || '') !== String(anio)) {
+            nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+        }
+
+        const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
             if (yaExiste) {
                 return {
                     texto: `🎬 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`,
                     nombreKV: nombreKVsugerido,
-                    catalogoTipo: 'pelicula'
+                    catalogoTipo: 'pelicula',
+                    nuevo: false
                 };
             }
 
@@ -358,7 +368,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             return {
                 texto: `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de películas.\n📁 Géneros: ${generoFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`,
                 nombreKV: nombreKVsugerido,
-                catalogoTipo: 'pelicula'
+                catalogoTipo: 'pelicula',
+                nuevo: true
             };
         } catch (e) {
             // Si falla el guardado automático, caemos al mensaje de copiar/pegar de siempre
@@ -375,7 +386,16 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:series');
             const catalogo = raw ? JSON.parse(raw) : [];
-            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+            // Si colisiona el nombreKV pero el AÑO es distinto, no es el mismo
+        // contenido (ej: "The Jungle Book" 2016 vs 1967) — le sumamos el año al
+        // nombreKV para no pisar la ficha existente ni rechazar por error algo
+        // que en realidad es otra película/serie distinta
+        const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+        if (colision && String(colision.anio || '') !== String(anio)) {
+            nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+        }
+
+        const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
 
             if (!yaExiste) {
                 catalogo.push({
@@ -402,7 +422,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     temporada,
                     episodio,
                     parte,
-                    catalogoTipo: 'serie'
+                    catalogoTipo: 'serie',
+                    nuevo: !yaExiste
                 };
             }
             // No se pudo sacar el episodio del nombre del archivo: guarda la ficha
@@ -421,7 +442,16 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:turcas');
             const catalogo = raw ? JSON.parse(raw) : [];
-            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+            // Si colisiona el nombreKV pero el AÑO es distinto, no es el mismo
+        // contenido (ej: "The Jungle Book" 2016 vs 1967) — le sumamos el año al
+        // nombreKV para no pisar la ficha existente ni rechazar por error algo
+        // que en realidad es otra película/serie distinta
+        const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+        if (colision && String(colision.anio || '') !== String(anio)) {
+            nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+        }
+
+        const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
 
             if (!yaExiste) {
                 catalogo.push({
@@ -443,7 +473,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 : `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de turcas.\n📁 Género elegido automáticamente: ${generoElegido}\n🔑 nombreKV: ${nombreKVsugerido}`;
 
             if (tipo === 'movie') {
-                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'turca' };
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'turca', nuevo: !yaExiste };
             }
 
             const { episodio, temporada, parte } = detectarSerie(textoOriginal);
@@ -454,7 +484,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     temporada,
                     episodio,
                     parte,
-                    catalogoTipo: 'turca'
+                    catalogoTipo: 'turca',
+                    nuevo: !yaExiste
                 };
             }
             return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
@@ -470,7 +501,16 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:animes');
             const catalogo = raw ? JSON.parse(raw) : [];
-            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+            // Si colisiona el nombreKV pero el AÑO es distinto, no es el mismo
+        // contenido (ej: "The Jungle Book" 2016 vs 1967) — le sumamos el año al
+        // nombreKV para no pisar la ficha existente ni rechazar por error algo
+        // que en realidad es otra película/serie distinta
+        const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+        if (colision && String(colision.anio || '') !== String(anio)) {
+            nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+        }
+
+        const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
 
             if (!yaExiste) {
                 catalogo.push({
@@ -494,7 +534,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // Una película de anime no tiene episodios: se guarda como "parte 1",
             // igual que cualquier película (mismo camino que confp: ya usa)
             if (tipo === 'movie') {
-                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'anime' };
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'anime', nuevo: !yaExiste };
             }
 
             const { episodio, temporada, parte } = detectarSerie(textoOriginal);
@@ -505,7 +545,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     temporada,
                     episodio,
                     parte,
-                    catalogoTipo: 'anime'
+                    catalogoTipo: 'anime',
+                    nuevo: !yaExiste
                 };
             }
             return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
@@ -521,7 +562,16 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         try {
             const raw = await env.PELICULAS_KV.get('catalogo:doramas');
             const catalogo = raw ? JSON.parse(raw) : [];
-            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+            // Si colisiona el nombreKV pero el AÑO es distinto, no es el mismo
+        // contenido (ej: "The Jungle Book" 2016 vs 1967) — le sumamos el año al
+        // nombreKV para no pisar la ficha existente ni rechazar por error algo
+        // que en realidad es otra película/serie distinta
+        const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+        if (colision && String(colision.anio || '') !== String(anio)) {
+            nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+        }
+
+        const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
 
             if (!yaExiste) {
                 catalogo.push({
@@ -545,7 +595,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // Una película de dorama (poco común, pero pasa) tampoco tiene
             // episodios: se guarda como "parte 1"
             if (tipo === 'movie') {
-                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'dorama' };
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'dorama', nuevo: !yaExiste };
             }
 
             const { episodio, temporada, parte } = detectarSerie(textoOriginal);
@@ -556,7 +606,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     temporada,
                     episodio,
                     parte,
-                    catalogoTipo: 'dorama'
+                    catalogoTipo: 'dorama',
+                    nuevo: !yaExiste
                 };
             }
             return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
@@ -791,13 +842,21 @@ export async function onRequest(context) {
                     // (confs/confa/confd) depende de la categoría auto-detectada.
                     const prefijoConfirmarEpisodio = { serie: 'confs', anime: 'confa', dorama: 'confd' }[sugerencia.catalogoTipo] || 'confs';
 
+                    // Cancelar solo puede borrar del catálogo si la ficha la creó ESTA
+                    // detección (sugerencia.nuevo). Si ya existía de antes (duplicado
+                    // real, o colisión), cancelar no debe tocarla — si no, "Cancelar"
+                    // en un video repetido te borraba la ficha original ya existente.
+                    const cancelData = sugerencia.nuevo
+                        ? `cancel:${msgId}:${sugerencia.catalogoTipo}:${sugerencia.nombreKV}`
+                        : `cancel:${msgId}:none:`;
+
                     if (sugerencia.nombreKV && sugerencia.episodio) {
                         payload.reply_markup = {
                             inline_keyboard: [[
                                 { text: '✅ Confirmar', callback_data: `${prefijoConfirmarEpisodio}:${msgId}:${sugerencia.nombreKV}:${sugerencia.temporada}:${sugerencia.episodio}${sugerencia.parte ? ':' + sugerencia.parte : ''}` },
                                 { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
                             ], [
-                                { text: '❌ Cancelar', callback_data: `cancel:${msgId}:${sugerencia.catalogoTipo}:${sugerencia.nombreKV}` }
+                                { text: '❌ Cancelar', callback_data: cancelData }
                             ]]
                         };
                     } else if (sugerencia.nombreKV) {
@@ -807,7 +866,7 @@ export async function onRequest(context) {
                                 { text: '✅ Confirmar', callback_data: `confp:${msgId}:${sugerencia.nombreKV}:1` },
                                 { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
                             ], [
-                                { text: '❌ Cancelar', callback_data: `cancel:${msgId}:${sugerencia.catalogoTipo}:${sugerencia.nombreKV}` }
+                                { text: '❌ Cancelar', callback_data: cancelData }
                             ]]
                         };
                     }
