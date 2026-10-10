@@ -1205,14 +1205,14 @@ export async function onRequest(context) {
                 // "-" borra el campo: vuelve a depender de TMDB en vez del link manual
                 delete catalogo[idx].posterUrl;
                 await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
-                await enviar(`✅ Saqué el posterUrl manual de "${nombreKV}" — ahora vuelve a usar TMDB.`);
+                await enviar(`✅ Saqué el posterUrl manual de "${escapeMD(nombreKV)}" — ahora vuelve a usar TMDB.`);
                 return new Response('OK');
             }
 
             // 'generos' es un array: admite varios separados por coma (ej: terror,suspenso)
             catalogo[idx][campo] = campo === 'generos' ? valor.split(',').map(g => g.trim()) : valor;
             await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
-            await enviar(`✅ Corregido "${nombreKV}" → ${campo}: ${valor}`);
+            await enviar(`✅ Corregido "${escapeMD(nombreKV)}" → ${campo}: ${escapeMD(valor)}`);
         } catch (e) {
             await enviar(`❌ Error al corregir: ${e.message}`);
         }
