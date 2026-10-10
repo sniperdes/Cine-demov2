@@ -747,7 +747,7 @@
             for (let i = 0; i < baseDeDatosSeries.length; i += LOTE) {
                 await Promise.all(baseDeDatosSeries.slice(i, i + LOTE).map(async (serie) => {
                     const idx    = baseDeDatosSeries.indexOf(serie);
-                    const poster = await obtenerPoster(serie.tmdbQuery, 'tv');
+                    const poster = serie.posterUrl || await obtenerPoster(serie.tmdbQuery, 'tv');
                     (serie.generos || []).forEach(genero => {
                         const s = document.getElementById(`serie-img-s-${genero}-${idx}`);
                         const t = document.getElementById(`serie-img-t-${genero}-${idx}`);
@@ -932,7 +932,7 @@
             const LOTE = 5;
             for (let i = 0; i < base.length; i += LOTE) {
                 await Promise.all(base.slice(i, i + LOTE).map(async (item) => {
-                    const poster = await obtenerPoster(item.tmdbQuery, item.tipoContenido || type);
+                    const poster = item.posterUrl || await obtenerPoster(item.tmdbQuery, item.tipoContenido || type);
                     item.generos.forEach(genero => {
                         const index = base
                             .filter(p => p.generos.includes(genero))
@@ -1168,7 +1168,7 @@
             for (let i = 0; i < baseDeDatosPeliculas.length; i += LOTE) {
                 await Promise.all(baseDeDatosPeliculas.slice(i, i + LOTE).map(async (peli) => {
                     const idx    = baseDeDatosPeliculas.indexOf(peli);
-                    const poster = await obtenerPoster(peli.tmdbQuery);
+                    const poster = peli.posterUrl || await obtenerPoster(peli.tmdbQuery);
                     (peli.generos || []).forEach(genero => {
                         const s = document.getElementById(`img-s-${genero}-${idx}`);
                         const t = document.getElementById(`img-t-${genero}-${idx}`);
@@ -1237,7 +1237,7 @@
                 contenedor.appendChild(card);
             });
             await Promise.all(recientes.map(async (peli, i) => {
-                const poster = await obtenerPoster(peli.tmdbQuery);
+                const poster = peli.posterUrl || await obtenerPoster(peli.tmdbQuery);
                 const el = document.getElementById(`img-rec-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             }));
@@ -1259,7 +1259,7 @@
                 contenedor.appendChild(card);
             });
             await Promise.all(conRating.map(async ({ p }, i) => {
-                const poster = await obtenerPoster(p.tmdbQuery);
+                const poster = p.posterUrl || await obtenerPoster(p.tmdbQuery);
                 const el = document.getElementById(`img-top-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             }));
@@ -1277,7 +1277,7 @@
                 contenedor.appendChild(tarjeta);
             });
             await Promise.all(elegidos.map(async (item, i) => {
-                const poster = await obtenerPoster(item.tmdbQuery, item._tipo);
+                const poster = item.posterUrl || await obtenerPoster(item.tmdbQuery, item._tipo);
                 const el = document.getElementById(`tend-img-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             }));
@@ -1839,7 +1839,7 @@
             });
 
             resultados.forEach(async (item, i) => {
-                const poster = await obtenerPoster(item.tmdbQuery, item._type);
+                const poster = item.posterUrl || await obtenerPoster(item.tmdbQuery, item._type);
                 const el = document.getElementById(`buscar-img-${i}`);
                 if (el) { el.src = poster || PLACEHOLDER; el.classList.remove('skeleton'); }
             });
