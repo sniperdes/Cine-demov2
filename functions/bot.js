@@ -1508,7 +1508,7 @@ export async function onRequest(context) {
             await enviar(`❌ No encontré "${nombreKV}" en el catálogo auto-agregado.\n(Si la agregaste vos a mano en el data-*.js, no va a aparecer acá — esto solo lista lo que agregó el bot solo.)`);
             return new Response('OK');
         }
-        await enviar(`📋 *${peli.titulo}*\n\n🔑 nombreKV: ${peli.nombreKV}\n🔎 tmdbQuery: ${peli.tmdbQuery}\n📁 generos: ${(peli.generos || []).join(', ')}\nℹ️ info: ${peli.info}\n📝 desc: ${peli.desc}\n\nPara borrarla: /borrarcatalogo ${tipo} ${peli.nombreKV}`);
+        await enviar(`📋 *${escapeMD(peli.titulo)}*\n\n🔑 nombreKV: ${escapeMD(peli.nombreKV)}\n🔎 tmdbQuery: ${escapeMD(peli.tmdbQuery)}\n📁 generos: ${escapeMD((peli.generos || []).join(', '))}\nℹ️ info: ${escapeMD(peli.info)}\n📝 desc: ${escapeMD(peli.desc)}${peli.posterUrl ? `\n🖼️ posterUrl: ${escapeMD(peli.posterUrl)}` : '\n🖼️ posterUrl: (sin poner, usa TMDB)'}\n\nPara borrarla: /borrarcatalogo ${tipo} ${peli.nombreKV}`);
         return new Response('OK');
     }
 
