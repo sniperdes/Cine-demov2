@@ -368,11 +368,19 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         }
 
         const yaExiste = catalogo.some(p => p.nombreKV === nombreKVsugerido);
+            // Las películas no tienen episodio, pero sí pueden venir partidas en
+            // varios archivos ("Parte 1", "Parte 2"...) — antes esto no se
+            // miraba acá y siempre se ofrecía guardar como "parte 1" sin
+            // importar qué dijera el nombre del archivo, así que la segunda
+            // parte terminaba pisando a la primera.
+            const { parte: parteDetectada } = detectarSerie(textoOriginal);
+            const parteFinal = parteDetectada || '1';
             if (yaExiste) {
                 return {
                     texto: `🎬 "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de películas (${nombreKVsugerido}). No se duplicó.`,
                     nombreKV: nombreKVsugerido,
                     catalogoTipo: 'pelicula',
+                    parte: parteFinal,
                     nuevo: false
                 };
             }
@@ -394,6 +402,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                 texto: `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de películas.\n📁 Géneros: ${generoFinal.join(', ')}\n🔑 nombreKV: ${nombreKVsugerido}`,
                 nombreKV: nombreKVsugerido,
                 catalogoTipo: 'pelicula',
+                parte: parteFinal,
                 nuevo: true
             };
         } catch (e) {
@@ -885,10 +894,15 @@ export async function onRequest(context) {
                             ]]
                         };
                     } else if (sugerencia.nombreKV) {
-                        payload.text += `\n\n¿Guardo este video como *${sugerencia.nombreKV}* parte 1?`;
+                        // Las películas (y las de turca/anime/dorama que son tipo
+                        // 'movie') no tienen episodio, pero sí pueden venir
+                        // partidas en varios archivos. Si detectarSerie encontró
+                        // "Parte N" en el nombre, se respeta; si no, 1 por defecto.
+                        const parteBoton = sugerencia.parte || 1;
+                        payload.text += `\n\n¿Guardo este video como *${sugerencia.nombreKV}* parte ${parteBoton}?`;
                         payload.reply_markup = {
                             inline_keyboard: [[
-                                { text: '✅ Confirmar', callback_data: `confp:${msgId}:${sugerencia.nombreKV}:1` },
+                                { text: '✅ Confirmar', callback_data: `confp:${msgId}:${sugerencia.nombreKV}:${parteBoton}` },
                                 { text: '✏️ Corregir', callback_data: `corr:${msgId}` }
                             ], [
                                 { text: '❌ Cancelar', callback_data: cancelData }
