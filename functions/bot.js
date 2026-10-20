@@ -249,6 +249,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             : '';
         try {
             let resultados = await buscarConFiltro(endpoint, yearParam);
+            let conAnio = !!yearParam;
 
             // Si el año que sacamos del nombre del archivo no coincide con el
             // que tiene TMDB (pasa bastante con contenido viejo: el archivo
@@ -257,6 +258,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // Reintentamos sin año antes de rendirnos.
             if (!resultados.length && yearParam) {
                 resultados = await buscarConFiltro(endpoint, '');
+                conAnio = false;
             }
             if (!resultados.length) return null;
 
@@ -268,12 +270,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // respaldo si ninguno matchea exacto.
             const queryNorm = normalizar(tituloGuess);
             const exacto = resultados.find(r => normalizar(r.title || r.name) === queryNorm);
-            return exacto || resultados[0];
+            return { resultado: exacto || resultados[0], conAnio };
         } catch { return null; }
     };
 
     // Buscamos en los dos tipos a la vez, sin asumir de antemano si es serie o película
-    const [resultadoTv, resultadoMovie] = await Promise.all([buscar('tv'), buscar('movie')]);
+    const [busquedaTv, busquedaMovie] = await Promise.all([buscar('tv'), buscar('movie')]);
+    const resultadoTv = busquedaTv?.resultado || null;
+    const resultadoMovie = busquedaMovie?.resultado || null;
 
     let resultado, tipo;
     if (resultadoTv && resultadoMovie) {
@@ -285,6 +289,16 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // El archivo ya viene marcado como episodio — no tiene sentido
             // dejarlo caer en una película aunque esta sea más popular o
             // "gane" el desempate por defecto.
+            resultado = resultadoTv; tipo = 'tv';
+        } else if (busquedaMovie.conAnio && !busquedaTv.conAnio) {
+            // Uno de los dos solo apareció después de reintentar SIN año (no
+            // respeta el año del archivo) y el otro sí matcheó con año exacto:
+            // el que respeta el año gana, pase lo que pase con el título exacto.
+            // (ej: "Las Aventuras de Tintín" 2011 -> la peli respeta el año,
+            // pero existe una serie animada de los 90 con el título corto
+            // exacto que solo aparece ignorando el año)
+            resultado = resultadoMovie; tipo = 'movie';
+        } else if (busquedaTv.conAnio && !busquedaMovie.conAnio) {
             resultado = resultadoTv; tipo = 'tv';
         } else if (tvExacto && !movieExacto) {
             resultado = resultadoTv; tipo = 'tv';
