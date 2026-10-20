@@ -1319,6 +1319,21 @@ export async function onRequest(context) {
             return new Response('OK');
         }
         const tituloGuess = extraerTituloGuess(textoOriginal);
+
+        // Debug crudo: pega directo contra TMDB (tv y movie, sin año) y muestra
+        // los primeros títulos tal cual vienen, sin pasar por ninguna lógica de
+        // decisión — para diagnosticar casos raros sin adivinar a ciegas.
+        try {
+            const [resTv, resMovie] = await Promise.all([
+                fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}`).then(r => r.json()),
+                fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}`).then(r => r.json())
+            ]);
+            const listarTop3 = arr => (arr || []).slice(0, 3).map(r => `  - ${r.title || r.name} (${(r.release_date || r.first_air_date || '?').slice(0, 4)})`).join('\n') || '  (ninguno)';
+            await enviar(`🔧 Debug crudo TMDB para "${escapeMD(tituloGuess)}":\n\n📺 TV (${resTv?.results?.length || 0} resultados):\n${listarTop3(resTv?.results)}\n\n🎬 Movie (${resMovie?.results?.length || 0} resultados):\n${listarTop3(resMovie?.results)}`);
+        } catch (e) {
+            await enviar(`⚠️ El debug crudo tiró error: ${e.message}`);
+        }
+
         try {
             const sugerencia = await buscarSugerenciaTMDB(tituloGuess, textoOriginal, null);
             if (!sugerencia) {
