@@ -232,8 +232,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         .replace(/\s+/g, ' ')
         .trim();
 
-    const buscarConFiltro = async (endpoint, yearParam) => {
-        const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=es-ES&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
+    const buscarConFiltro = async (endpoint, yearParam, idioma) => {
+        const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=${idioma}&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
         const data = await res.json();
         return data?.results || [];
     };
@@ -248,7 +248,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             ? (tipo === 'tv' ? `&first_air_date_year=${anioParam}` : `&primary_release_year=${anioParam}`)
             : '';
         try {
-            let resultados = await buscarConFiltro(endpoint, yearParam);
+            let resultados = await buscarConFiltro(endpoint, yearParam, 'es-ES');
             let conAnio = !!yearParam;
 
             // Si el año que sacamos del nombre del archivo no coincide con el
@@ -257,8 +257,21 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // estricto de año deja 0 resultados aunque el título exista.
             // Reintentamos sin año antes de rendirnos.
             if (!resultados.length && yearParam) {
-                resultados = await buscarConFiltro(endpoint, '');
+                resultados = await buscarConFiltro(endpoint, '', 'es-ES');
                 conAnio = false;
+            }
+
+            // Algunas fichas (sobre todo contenido viejo o poco conocido, como
+            // "The Maxx" 1995) directamente no tienen NADA cargado en español
+            // en TMDB, y la búsqueda en es-ES devuelve 0 aunque la ficha
+            // exista. Último respaldo: reintentar en inglés antes de rendirnos.
+            if (!resultados.length) {
+                resultados = await buscarConFiltro(endpoint, yearParam, 'en-US');
+                conAnio = !!yearParam;
+                if (!resultados.length && yearParam) {
+                    resultados = await buscarConFiltro(endpoint, '', 'en-US');
+                    conAnio = false;
+                }
             }
             if (!resultados.length) return null;
 
