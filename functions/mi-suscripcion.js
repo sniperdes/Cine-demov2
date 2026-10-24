@@ -4,6 +4,10 @@
 // X-Telegram-Init-Data), NO por un userId que venga suelto en la URL — así nadie
 // puede consultar (ni falsear) la suscripción de otra persona.
 
+// Mismo ID que ADMIN_ID en bot.js — le permite entrar a secciones que exigen
+// Premium pagado (como +18) sin pagar, para poder probar cómo quedan armadas.
+const ADMIN_ID = 1590059037;
+
 async function validarInitData(initData, botToken) {
     if (!initData || !botToken) return null;
 
@@ -54,13 +58,25 @@ export async function onRequest(context) {
     const user = await validarInitData(initData, env.BOT_TOKEN);
     if (!user) return json({ activo: false });
 
+    if (user.id === ADMIN_ID) {
+        return json({ activo: true, pagado: true, expiraEn: Date.now() + 365 * 24 * 60 * 60 * 1000 });
+    }
+
     try {
         const raw = await env.PELICULAS_KV.get(`sub:${user.id}`);
         if (!raw) return json({ activo: false });
 
         const sub = JSON.parse(raw);
         const activo = !!sub.activo && sub.expiraEn > Date.now();
-        return json({ activo, expiraEn: sub.expiraEn });
+
+        // "pagado" = Premium conseguido pagando con Stars de verdad, no regalado
+        // por /darpremium (chargeId 'manual-admin') ni por referidos (chargeId
+        // 'referidos') — se usa para secciones que solo deben ver quienes
+        // pagaron (ej: +18, donde el pago actúa como filtro de responsabilidad/edad)
+        const chargeId = sub.ultimoPago?.chargeId;
+        const pagado = activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos';
+
+        return json({ activo, pagado, expiraEn: sub.expiraEn });
     } catch (e) {
         return json({ activo: false });
     }
