@@ -116,6 +116,12 @@
         .ep-item .ep-play { color:#e50914; font-size:20px; }
         .ep-cargando { color:#aaa; text-align:center; padding:30px; font-size:14px; }
         .ep-vacio { color:#666; text-align:center; padding:30px; font-size:14px; }
+        /* FONDO TEMÁTICO (Halloween, Navidad, Año Nuevo) — lo prende aplicarTema() */
+        #tema-bg { position:fixed; inset:0; z-index:-1; background-size:cover; background-position:center; opacity:0; transition:opacity .6s; pointer-events:none; }
+        #tema-bg.on { opacity:1; }
+        #tema-bg::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.5); }
+        body.tema-activo .menu { background:transparent; }
+
         /* TOAST DE REFERIDOS — sube desde abajo, se asienta arriba de la nav
            inferior. z-index MENOR al de la nav (50) a propósito: así durante
            la animación entra "por detrás" de los botones en vez de taparlos,
@@ -265,6 +271,8 @@
         <iframe id="player-frame" class="player-frame" src="" allowfullscreen allow="autoplay; fullscreen; picture-in-picture" webkitallowfullscreen mozallowfullscreen></iframe>
     </div>
 
+    <div id="tema-bg"></div>
+
     <!-- TOAST DE REFERIDOS -->
     <div id="toast-referidos" class="toast-referidos" onclick="show('perfil'); ocultarToastReferidos();">
         🎁 No te olvides de compartir con 10 amigos para conseguir Premium gratis por 30 días. Tocá acá para invitar.
@@ -311,7 +319,7 @@
         <button onclick="show('doramas')">🌸 Doramas</button>
         <button onclick="show('turcas')">🌙 Turcas</button>
         <button onclick="show('rusas')">❄️ Rusas</button>
-        <button onclick="show('adulto')">🔞 +18</button>
+        <button onclick="intentarAbrirAdulto()">🔞 +18</button>
     </div>
 
     <div id="home" class="view active">
@@ -508,6 +516,10 @@
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         let usuarioEsPremium = false;
+        // Premium conseguido pagando de verdad con Stars (no regalado por admin
+        // ni ganado por referidos) — se usa para la sección +18, como barrera
+        // extra además del Premium normal.
+        let usuarioPremiumPagado = false;
         const DIAS_PREMIO_REFERIDOS = 30; // debe coincidir con DIAS_PREMIO en marcar-reproduccion.js
 
         // Devuelve el año de un ítem del catálogo para poder ordenar por estreno.
@@ -552,6 +564,30 @@
         // de impresiones — pero dispararlo MUY seguido sí puede levantar la misma
         // sospecha. Arrancá conservador y subí de a poco mirando el dashboard de
         // Monetag (ingresos/CPM) para ver si la frecuencia te afecta la calidad del tráfico.
+        // ─── FONDO TEMÁTICO ─────────────────────────────────────────────────────
+        // Pide /tema (automático por fecha o forzado desde el bot con /tema).
+        // Si el tema tiene imagen (/temaimg) la usa; si no, un degradé festivo.
+        const TEMAS_GRADIENTE = {
+            halloween: 'linear-gradient(160deg,#2b0a3d 0%,#7a2e00 55%,#0b0b0b 100%)',
+            navidad:   'linear-gradient(160deg,#0b3d1e 0%,#7a0a0a 55%,#0b0b0b 100%)',
+            anionuevo: 'linear-gradient(160deg,#1a1a3d 0%,#8a6d00 55%,#0b0b0b 100%)'
+        };
+        async function aplicarTema() {
+            try {
+                const res  = await fetch('/tema');
+                const data = await res.json();
+                if (!data.tema || data.tema === 'normal') return;
+                const fondo = data.img
+                    ? `url("${String(data.img).replace(/"/g, '%22')}")`
+                    : TEMAS_GRADIENTE[data.tema];
+                if (!fondo) return;
+                const bg = document.getElementById('tema-bg');
+                bg.style.backgroundImage = fondo;
+                bg.classList.add('on');
+                document.body.classList.add('tema-activo');
+            } catch (e) {} // si falla, queda el fondo liso de siempre
+        }
+
         // ─── TOAST DE REFERIDOS ─────────────────────────────────────────────────
         // Aparece a los 15s de abrir la app, se queda 10s en pantalla y se
         // oculta sola — una vez por sesión (no se repite hasta que se vuelve a
@@ -564,6 +600,7 @@
             if (!usuarioEsPremium) {
                 const sub = await consultarSuscripcion().catch(() => null);
                 usuarioEsPremium = !!sub?.activo;
+                usuarioPremiumPagado = !!sub?.pagado;
             }
             if (usuarioEsPremium) return;
 
@@ -1289,11 +1326,15 @@
         document.addEventListener('DOMContentLoaded', async () => {
             if (tg) { tg.ready(); tg.expand(); }
             cargarImagenesGenero();
+            aplicarTema();
 
             // Estado Premium: se dispara ya mismo, en paralelo con el catálogo,
             // para que esté resuelto rápido (el toast de referidos a los 15s
             // depende de este valor, y el catálogo solo puede tardar más que eso)
-            consultarSuscripcion().then(sub => { usuarioEsPremium = !!sub?.activo; });
+            consultarSuscripcion().then(sub => {
+                usuarioEsPremium = !!sub?.activo;
+                usuarioPremiumPagado = !!sub?.pagado;
+            });
 
             const ocultarSplash = () => {
                 const splash = document.getElementById('splash-loading');
@@ -1414,6 +1455,30 @@
             } catch {
                 return { activo: false };
             }
+        }
+
+        // Puerta de entrada a +18: exige Premium PAGADO de verdad con Stars, no
+        // alcanza con Premium regalado por el admin o ganado por referidos —
+        // pagar es una barrera extra para que no sea tan fácil que entre un
+        // menor con una cuenta que juntó Premium gratis compartiendo un link.
+        async function intentarAbrirAdulto() {
+            const tg = window.Telegram?.WebApp;
+            if (!usuarioPremiumPagado) {
+                // Por si la consulta inicial todavía no resolvió o cambió desde
+                // entonces, reconsultamos en vivo antes de bloquear.
+                const sub = await consultarSuscripcion().catch(() => null);
+                usuarioEsPremium = !!sub?.activo;
+                usuarioPremiumPagado = !!sub?.pagado;
+            }
+
+            if (!usuarioPremiumPagado) {
+                const msg = 'Esta sección es solo para usuarios con Premium pagado. El Premium ganado invitando amigos no da acceso acá.';
+                if (tg) tg.showAlert(msg); else alert(msg);
+                show('premium');
+                return;
+            }
+
+            show('adulto');
         }
 
         // Avisa al backend que este usuario reprodujo algo (solo cuenta la primera
