@@ -1206,7 +1206,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc, posterUrl)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/probartmdb texto (prueba la detección automática sin subir un archivo real)\n/buscarcatalogo pelicula|serie|anime|dorama|turca texto (busca por título o nombreKV, sin escanear a mano)\n/crearficha pelicula|serie|anime|dorama|turca nombreKV año Título (crea una ficha sin pasar por TMDB)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc, posterUrl)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/probartmdb texto (prueba la detección automática sin subir un archivo real)\n/buscarcatalogo pelicula|serie|anime|dorama|turca texto (busca por título o nombreKV, sin escanear a mano)\n/crearficha pelicula|serie|anime|dorama|turca nombreKV año movie|tv Título (crea una ficha sin pasar por TMDB)\n/tema auto|normal|halloween|navidad|anionuevo (fondo festivo de la Mini App)\n/temaimg tema URL (imagen de fondo de un tema)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
         return new Response('OK');
     }
 
@@ -1426,18 +1426,67 @@ export async function onRequest(context) {
         return new Response('OK');
     }
 
+    if (cmd === '/tema') {
+        // /tema            → muestra el modo actual
+        // /tema auto       → cambia solo por fecha (Halloween, Navidad, Año Nuevo)
+        // /tema halloween|navidad|anionuevo → fuerza ese tema
+        // /tema normal     → fondo liso de siempre
+        const validos = ['auto', 'normal', 'halloween', 'navidad', 'anionuevo'];
+        const nuevo = (partes[1] || '').toLowerCase();
+        if (!nuevo) {
+            const actual = (await env.PELICULAS_KV.get('config:tema')) || 'auto';
+            await enviar(`🎨 Tema actual: ${actual}\n\nCambiar: /tema ${validos.join('|')}`);
+            return new Response('OK');
+        }
+        if (!validos.includes(nuevo)) {
+            await enviar(`❌ Tema inválido. Usá uno de: ${validos.join(', ')}`);
+            return new Response('OK');
+        }
+        await env.PELICULAS_KV.put('config:tema', nuevo);
+        await enviar(`✅ Tema: ${nuevo}\n\n(La Mini App lo toma en unos minutos — se guarda en caché ~5 min.)`);
+        return new Response('OK');
+    }
+
+    if (cmd === '/temaimg') {
+        // /temaimg halloween|navidad|anionuevo https://link-directo-a-imagen.jpg
+        // /temaimg halloween -   → saca la imagen y vuelve al degradé por defecto
+        const tema = (partes[1] || '').toLowerCase();
+        const url = partes[2];
+        if (!['halloween', 'navidad', 'anionuevo'].includes(tema) || !url) {
+            await enviar('Uso: /temaimg halloween|navidad|anionuevo URL-directa-de-la-imagen\nPara sacarla: /temaimg halloween -');
+            return new Response('OK');
+        }
+        if (url === '-') {
+            await env.PELICULAS_KV.delete(`config:tema-img:${tema}`);
+            await enviar(`✅ Saqué la imagen de ${tema} — vuelve al degradé por defecto.`);
+        } else {
+            await env.PELICULAS_KV.put(`config:tema-img:${tema}`, url);
+            await enviar(`✅ Imagen de ${tema} guardada.`);
+        }
+        return new Response('OK');
+    }
+
     if (cmd === '/crearficha') {
-        // /crearficha pelicula|serie|anime|dorama|turca nombreKV año Título completo
+        // /crearficha pelicula|serie|anime|dorama|turca nombreKV año movie|tv Título completo
         // Crea una ficha desde cero, sin pasar por TMDB — para contenido que
-        // TMDB no tiene bien indexado (viejo, poco conocido, etc). Después se
+        // TMDB no tiene bien indexado (viejo, poco conocido, etc), o que TMDB
+        // clasifica distinto a como lo querés vos (ej: una peli que TMDB marca
+        // como "rusa" por idioma original, pero la querés en Anime). Después se
         // completa con /corregir (generos, desc, info, posterUrl) y se linkea
         // el video real con /asignar.
+        //
+        // OJO con movie|tv: en anime/dorama/turca, poster.js necesita saber si
+        // es película o serie para buscar en el lugar correcto de TMDB — sin
+        // esto puesto bien, el póster nunca aparece aunque pongas tmdbQuery o
+        // posterUrl correctos (pasó con "El Primer Escuadrón", que es película
+        // y había quedado sin este campo).
         const tipo = partes[1];
         const nombreKV = partes[2];
         const anio = partes[3];
-        const titulo = partes.slice(4).join(' ');
-        if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !nombreKV || !anio || !titulo) {
-            await enviar(`Uso: /crearficha ${TIPOS_CATALOGO_VALIDOS.join('|')} nombreKV año Título completo\n\nEjemplo:\n/crearficha serie sabrina-bruja-adolescente-1970 1970 Sabrina, la bruja adolescente\n\nDespués completás con:\n/corregir ${tipo} nombreKV posterUrl https://...\n/corregir ${tipo} nombreKV generos drama-serie\n/corregir ${tipo} nombreKV desc Descripción acá\n\nY linkeás el video real con /asignar.`);
+        const tipoContenido = partes[4];
+        const titulo = partes.slice(5).join(' ');
+        if (!TIPOS_CATALOGO_VALIDOS.includes(tipo) || !nombreKV || !anio || !['movie', 'tv'].includes(tipoContenido) || !titulo) {
+            await enviar(`Uso: /crearficha ${TIPOS_CATALOGO_VALIDOS.join('|')} nombreKV año movie|tv Título completo\n\nEjemplo:\n/crearficha serie sabrina-bruja-adolescente-1970 1970 tv Sabrina, la bruja adolescente\n/crearficha anime el-primer-escuadron-2009 2009 movie El Primer Escuadrón\n\nDespués completás con:\n/corregir ${tipo} nombreKV posterUrl https://...\n/corregir ${tipo} nombreKV generos drama-serie\n/corregir ${tipo} nombreKV desc Descripción acá\n\nY linkeás el video real con /asignar.`);
             return new Response('OK');
         }
         const kvKey = KV_KEY_POR_TIPO[tipo];
@@ -1456,10 +1505,11 @@ export async function onRequest(context) {
                 anio: Number(anio) || 0,
                 generos: [`drama${sufijoGenero}`],
                 info: '',
-                desc: ''
+                desc: '',
+                tipoContenido
             });
             await env.PELICULAS_KV.put(kvKey, JSON.stringify(catalogo));
-            await enviar(`✅ Ficha creada: "${escapeMD(titulo)}" (${anio}) en ${tipo}, nombreKV: ${nombreKV}\n\nAhora completá con /corregir (posterUrl, generos, desc, info) y linkeá el video con /asignar.`);
+            await enviar(`✅ Ficha creada: "${escapeMD(titulo)}" (${anio}, ${tipoContenido}) en ${tipo}, nombreKV: ${nombreKV}\n\nAhora completá con /corregir (posterUrl, generos, desc, info) y linkeá el video con /asignar.`);
         } catch (e) {
             await enviar(`❌ Error al crear la ficha: ${e.message}`);
         }
