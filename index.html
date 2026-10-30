@@ -567,24 +567,27 @@
         // ─── FONDO TEMÁTICO ─────────────────────────────────────────────────────
         // Pide /tema (automático por fecha o forzado desde el bot con /tema).
         // Si el tema tiene imagen (/temaimg) la usa; si no, un degradé festivo.
-        const TEMAS_GRADIENTE = {
-            halloween: 'linear-gradient(160deg,#2b0a3d 0%,#7a2e00 55%,#0b0b0b 100%)',
-            navidad:   'linear-gradient(160deg,#0b3d1e 0%,#7a0a0a 55%,#0b0b0b 100%)',
-            anionuevo: 'linear-gradient(160deg,#1a1a3d 0%,#8a6d00 55%,#0b0b0b 100%)'
-        };
         async function aplicarTema() {
             try {
                 const res  = await fetch('/tema');
                 const data = await res.json();
                 if (!data.tema || data.tema === 'normal') return;
-                const fondo = data.img
-                    ? `url("${String(data.img).replace(/"/g, '%22')}")`
-                    : TEMAS_GRADIENTE[data.tema];
-                if (!fondo) return;
+
                 const bg = document.getElementById('tema-bg');
-                bg.style.backgroundImage = fondo;
-                bg.classList.add('on');
-                document.body.classList.add('tema-activo');
+                const activar = (fondo) => {
+                    bg.style.backgroundImage = fondo;
+                    bg.classList.add('on');
+                    document.body.classList.add('tema-activo');
+                };
+
+                // Prioridad: imagen puesta con /temaimg > imagen de la carpeta
+                // /temas/<tema>.jpg (se toma sola, sin comando) > degradé festivo.
+                // Se precarga para confirmar que existe y carga; si no, cae al degradé.
+                const candidata = data.img || `/temas/${data.tema}.jpg`;
+                const probe = new Image();
+                probe.onload  = () => activar(`url("${candidata.replace(/"/g, '%22')}")`);
+                probe.onerror = () => { if (data.gradiente) activar(data.gradiente); };
+                probe.src = candidata;
             } catch (e) {} // si falla, queda el fondo liso de siempre
         }
 
