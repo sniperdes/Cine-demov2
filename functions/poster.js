@@ -77,7 +77,7 @@ export async function onRequest(context) {
         .replace(/[:,.!?¡¿'"´`()–—-]/g, ' ').replace(/\s+/g, ' ').trim();
     const tituloNorm  = normalizar(titulo);
     const resultados  = tmdbData?.results || [];
-    const exactoTitulo = resultados.filter(r => normalizar(r.title || r.name) === tituloNorm);
+    const exactoTitulo = resultados.filter(r => [r.title, r.name, r.original_title, r.original_name].some(t => t && normalizar(t) === tituloNorm));
     const exacto = year
         ? exactoTitulo.find(r => (r.release_date || r.first_air_date || '').startsWith(year)) || exactoTitulo[0]
         : exactoTitulo[0];
