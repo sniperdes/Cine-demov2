@@ -235,6 +235,14 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         .replace(/\s+/g, ' ')
         .trim();
 
+    // ¿El título buscado coincide exacto con el título traducido O con el
+    // original? TMDB devuelve el título en español (es-ES), que a veces es
+    // otro nombre distinto al del archivo: "The 2nd" (2020) sale como "Moneda
+    // de cambio (The 2nd)" y no matcheaba, así que perdía contra una serie que
+    // sí se llamaba exactamente "The 2nd". El título original arregla eso.
+    const coincideTitulo = (r, queryNorm) =>
+        [r.title, r.name, r.original_title, r.original_name].some(t => t && normalizar(t) === queryNorm);
+
     const buscarConFiltro = async (endpoint, yearParam, idioma) => {
         const res = await fetch(`https://api.themoviedb.org/3/${endpoint}?api_key=${TMDB_KEY}&language=${idioma}&query=${encodeURIComponent(tituloGuess)}${yearParam}`);
         const data = await res.json();
@@ -285,7 +293,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
             // gana sobre el más popular; results[0] queda solo como último
             // respaldo si ninguno matchea exacto.
             const queryNorm = normalizar(tituloGuess);
-            const exacto = resultados.find(r => normalizar(r.title || r.name) === queryNorm);
+            const exacto = resultados.find(r => coincideTitulo(r, queryNorm));
             return { resultado: exacto || resultados[0], conAnio };
         } catch { return null; }
     };
@@ -298,8 +306,8 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     let resultado, tipo;
     if (resultadoTv && resultadoMovie) {
         const queryNorm    = normalizar(tituloGuess);
-        const tvExacto      = normalizar(resultadoTv.name) === queryNorm;
-        const movieExacto   = normalizar(resultadoMovie.title) === queryNorm;
+        const tvExacto      = coincideTitulo(resultadoTv, queryNorm);
+        const movieExacto   = coincideTitulo(resultadoMovie, queryNorm);
 
         if (tieneMarcasDeEpisodio) {
             // El archivo ya viene marcado como episodio — no tiene sentido
