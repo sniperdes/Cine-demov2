@@ -14,6 +14,7 @@ const KV_KEY_POR_TIPO = {
     anime: 'catalogo:animes',
     dorama: 'catalogo:doramas',
     turca: 'catalogo:turcas',
+    rusa: 'catalogo:rusas',
 };
 const TIPOS_CATALOGO_VALIDOS = Object.keys(KV_KEY_POR_TIPO);
 
@@ -178,6 +179,14 @@ function elegirGeneroTurca(genreIds) {
 
 // Igual que generoTMDBaGeneroSerie pero genérico con sufijo, para no chocar
 // slugs entre anime/doramas/series (ej: 'accion-anime' vs 'accion-dorama')
+function elegirGeneroRusa(genreIds) {
+    const ids = genreIds || [];
+    if (ids.includes(28) || ids.includes(10759)) return 'rusa-accion'; // 28=Acción(película) / 10759=Acción y Aventura(serie)
+    // 53=Suspenso, 9648=Misterio, 80=Crimen, 27=Terror
+    if (ids.includes(53) || ids.includes(9648) || ids.includes(80) || ids.includes(27)) return 'rusa-thriller';
+    return 'rusa-drama';
+}
+
 function generoTMDBaGeneroTV(genreIds, sufijo) {
     // OJO: "animacion" y "western" quedan afuera a propósito — ni GENEROS_ANIME
     // ni GENEROS_DORAMAS en index.html tienen sección para esos slugs. Casi
@@ -557,6 +566,63 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
                     episodio,
                     parte,
                     catalogoTipo: 'turca',
+                    nuevo: !yaExiste
+                };
+            }
+            return { texto: `${textoBase}\n\nNo pude leer el episodio del nombre del archivo — asignalo a mano:\n/asignar serie ${nombreKVsugerido} 1 1` };
+        } catch (e) {
+            // Si falla, caemos al bloque de copiar/pegar de siempre
+        }
+    }
+
+    // Caso especial: rusa -> se agrega SOLA al catálogo, con UNO de los 3
+    // subgéneros fijos elegido automáticamente (acción > thriller > drama).
+    // Antes las rusas solo daban el texto para copiar/pegar a mano.
+    if (esRusa && env && nombreKVsugerido) {
+        const generoElegido = elegirGeneroRusa(resultado.genre_ids);
+
+        try {
+            const raw = await env.PELICULAS_KV.get('catalogo:rusas');
+            const catalogo = raw ? JSON.parse(raw) : [];
+            // Mismo nombre pero otro año = otro contenido: le sumamos el año
+            const colision = catalogo.find(x => x.nombreKV === nombreKVsugerido);
+            if (colision && String(colision.anio || '') !== String(anio)) {
+                nombreKVsugerido = `${nombreKVsugerido}-${anio || 'na'}`;
+            }
+            const yaExiste = catalogo.some(s => s.nombreKV === nombreKVsugerido);
+
+            if (!yaExiste) {
+                catalogo.push({
+                    titulo,
+                    tmdbQuery: `${tituloOriginal} ${anio}`,
+                    nombreKV: nombreKVsugerido,
+                    generos: [generoElegido],
+                    tipoContenido: tipo,
+                    info: `⭐ ${resultado.vote_average?.toFixed(1) || '?'} | 📺`,
+                    desc: overview,
+                    fechaAgregado: Date.now(),
+                    anio: Number(anio) || 0,
+                });
+                await env.PELICULAS_KV.put('catalogo:rusas', JSON.stringify(catalogo));
+            }
+
+            const textoBase = yaExiste
+                ? `❄️ "${escapeMD(titulo)}" (${anio}) ya estaba en el catálogo de rusas (${nombreKVsugerido}). No se duplicó.`
+                : `✅ "${escapeMD(titulo)}" (${anio}) se agregó sola al catálogo de rusas.\n📁 Género elegido automáticamente: ${generoElegido}\n🔑 nombreKV: ${nombreKVsugerido}`;
+
+            if (tipo === 'movie') {
+                return { texto: textoBase, nombreKV: nombreKVsugerido, catalogoTipo: 'rusa', nuevo: !yaExiste };
+            }
+
+            const { episodio, temporada, parte } = detectarSerie(textoOriginal);
+            if (episodio) {
+                return {
+                    texto: `${textoBase}\n\n¿Guardo este video como T${temporada}E${episodio}${parte ? ` Parte ${parte}` : ''}?`,
+                    nombreKV: nombreKVsugerido,
+                    temporada,
+                    episodio,
+                    parte,
+                    catalogoTipo: 'rusa',
                     nuevo: !yaExiste
                 };
             }
@@ -1299,7 +1365,7 @@ export async function onRequest(context) {
             // el campo tipoContenido de la ficha manda si está seteado (lo
             // necesitan anime/dorama/turca, que pueden ser cualquiera de los
             // dos); si no está, un valor por defecto razonable según el tipo.
-            const tipoTmdbPorDefecto = { pelicula: 'movie', serie: 'tv', anime: 'tv', dorama: 'tv', turca: 'tv' };
+            const tipoTmdbPorDefecto = { pelicula: 'movie', serie: 'tv', anime: 'tv', dorama: 'tv', turca: 'tv', rusa: 'tv' };
             const tipoTmdb = entrada.tipoContenido || tipoTmdbPorDefecto[tipo];
             const cacheKey = `posterv2:${tipoTmdb}:${entrada.tmdbQuery.toLowerCase().trim()}`;
             await env.PELICULAS_KV.delete(cacheKey);
@@ -1508,13 +1574,14 @@ export async function onRequest(context) {
                 await enviar(`❌ Ya existe una ficha con nombreKV "${nombreKV}" en ${tipo}. Usá otro, o corregí la existente con /corregir.`);
                 return new Response('OK');
             }
-            const sufijoGenero = { pelicula: '', serie: '-serie', anime: '-anime', dorama: '-dorama', turca: '-turca' }[tipo];
+            const sufijoGenero = { pelicula: '', serie: '-serie', anime: '-anime', dorama: '-dorama' }[tipo] || '';
             catalogo.push({
                 titulo, // se guarda tal cual; el escape de Markdown es solo al armar mensajes de Telegram, no toca el dato
                 tmdbQuery: '',
                 nombreKV,
                 anio: Number(anio) || 0,
-                generos: [`drama${sufijoGenero}`],
+                // turca y rusa usan el slug con prefijo (turca-drama / rusa-drama), el resto con sufijo
+                generos: [tipo === 'turca' || tipo === 'rusa' ? `${tipo}-drama` : `drama${sufijoGenero}`],
                 info: '',
                 desc: '',
                 tipoContenido
