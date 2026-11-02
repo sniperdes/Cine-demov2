@@ -411,6 +411,10 @@
     <!-- RUSAS -->
     <div id="rusas" class="view">
         <div class="title">❄️ Series Rusas</div>
+        <div id="seccion-rusa-romance" class="genero-seccion">
+            <div class="genero-header"><h3>💕 Romance y Melodrama</h3></div>
+            <div class="row" id="slider-rusa-romance"></div>
+        </div>
         <div id="seccion-rusa-drama" class="genero-seccion">
             <div class="genero-header"><h3>🎭 Drama</h3></div>
             <div class="row" id="slider-rusa-drama"></div>
@@ -423,6 +427,11 @@
             <div class="genero-header"><h3>🔪 Thriller</h3></div>
             <div class="row" id="slider-rusa-thriller"></div>
         </div>
+    </div>
+    <div id="rusa-romance" class="view">
+        <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
+        <div class="title">💕 Rusas Romance y Melodrama</div>
+        <div class="grid-genero" id="contenedor-rusa-romance"></div>
     </div>
     <div id="rusa-drama" class="view">
         <button class="btn" style="background:#333;width:auto;display:inline-block;padding:8px 16px;margin-bottom:15px;" onclick="show('rusas')">⬅ Volver</button>
@@ -925,7 +934,7 @@
                 }
             } catch {}
 
-            await cargarCategoria(baseDeDatosRusas, ['rusa-drama','rusa-accion','rusa-thriller'], 'tv');
+            await cargarCategoria(baseDeDatosRusas, ['rusa-romance','rusa-drama','rusa-accion','rusa-thriller'], 'tv');
         }
 
         // ─── FUNCIÓN GENÉRICA PARA CARGAR CUALQUIER CATEGORÍA CON SLIDERS ────────
