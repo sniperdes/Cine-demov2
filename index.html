@@ -913,6 +913,18 @@
 
         // ─── CARGAR RUSAS ─────────────────────────────────────────────────────────
         async function cargarRusas() {
+            // Combina el catálogo fijo (data-rusas.js) con el que el bot agrega solo
+            try {
+                const res = await fetch('/catalogo?tipo=rusas');
+                const dinamico = await res.json();
+                if (Array.isArray(dinamico) && dinamico.length) {
+                    const nombresExistentes = new Set(baseDeDatosRusas.map(r => r.nombreKV));
+                    for (const item of dinamico) {
+                        if (!nombresExistentes.has(item.nombreKV)) baseDeDatosRusas.push(item);
+                    }
+                }
+            } catch {}
+
             await cargarCategoria(baseDeDatosRusas, ['rusa-drama','rusa-accion','rusa-thriller'], 'tv');
         }
 
