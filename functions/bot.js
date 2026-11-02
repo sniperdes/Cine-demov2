@@ -184,6 +184,8 @@ function elegirGeneroRusa(genreIds) {
     if (ids.includes(28) || ids.includes(10759)) return 'rusa-accion'; // 28=Acción(película) / 10759=Acción y Aventura(serie)
     // 53=Suspenso, 9648=Misterio, 80=Crimen, 27=Terror
     if (ids.includes(53) || ids.includes(9648) || ids.includes(80) || ids.includes(27)) return 'rusa-thriller';
+    // 10749=Romance (película), 10766=Telenovela/Soap (serie): melodramas y novelas
+    if (ids.includes(10749) || ids.includes(10766)) return 'rusa-romance';
     return 'rusa-drama';
 }
 
@@ -576,7 +578,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
     }
 
     // Caso especial: rusa -> se agrega SOLA al catálogo, con UNO de los 3
-    // subgéneros fijos elegido automáticamente (acción > thriller > drama).
+    // subgéneros fijos elegido automáticamente (acción > thriller > romance > drama).
     // Antes las rusas solo daban el texto para copiar/pegar a mano.
     if (esRusa && env && nombreKVsugerido) {
         const generoElegido = elegirGeneroRusa(resultado.genre_ids);
@@ -761,7 +763,7 @@ async function buscarSugerenciaTMDB(tituloGuess, textoOriginal, env) {
         generoSugerido = 'turca-drama (o turca-romance/turca-accion, ajustá)';
     } else if (esRusa) {
         archivoSugerido = 'data-rusas.js';
-        generoSugerido = 'rusa-drama (o rusa-accion/rusa-thriller, ajustá)';
+        generoSugerido = 'rusa-drama (o rusa-romance/rusa-accion/rusa-thriller, ajustá)';
     } else if (esAnime) {
         archivoSugerido = 'data-anime.js';
         generoSugerido = '(anime no usa género, revisá el formato de data-anime.js)';
