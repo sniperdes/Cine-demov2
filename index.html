@@ -27,6 +27,7 @@
         .splash-texto { color:#888; font-size:26px; }
         @keyframes girar { to { transform:rotate(360deg); } }
         .header { display:flex; align-items:center; justify-content:space-between; padding:15px; background:#111; position:sticky; top:0; z-index:10; }
+        body.tg-pantalla-completa .header { padding-top: calc(15px + var(--tg-safe-area-inset-top, 0px) + var(--tg-content-safe-area-inset-top, 0px)); }
         .logo {color: #3B82F6;font-size: 26px;font-weight: 800;letter-spacing: 1.5px;text-shadow: 0 0 8px rgba(96,165,250,.35);}
         .menu { display:flex; gap:10px; overflow-x:auto; padding:10px; background:#0b0b0b; scrollbar-width:none; }
         .menu::-webkit-scrollbar { display:none; }
@@ -524,6 +525,8 @@
 
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
+        // Pantalla completa de Telegram (oculta la barra blanca/superior). Probar con true.
+        const PANTALLA_COMPLETA = false;
         let usuarioEsPremium = false;
         // Premium conseguido pagando de verdad con Stars (no regalado por admin
         // ni ganado por referidos) — se usa para la sección +18, como barrera
@@ -1348,7 +1351,24 @@
         const tg = window.Telegram?.WebApp;
 
         document.addEventListener('DOMContentLoaded', async () => {
-            if (tg) { tg.ready(); tg.expand(); }
+            if (tg) {
+                tg.ready(); tg.expand();
+                // La barra de arriba (X, flecha y tres puntos) es de Telegram y no
+                // se puede sacar en modo normal, pero sí pintarla del mismo color
+                // que el header de la app para que se funda con el resto.
+                try {
+                    tg.setHeaderColor('#111111');
+                    tg.setBackgroundColor('#0b0b0b');
+                    if (tg.setBottomBarColor) tg.setBottomBarColor('#0b0b0b');
+                } catch (e) {}
+                // Pantalla completa de verdad: oculta la barra (Telegram 8.0+).
+                // La X y los tres puntos quedan flotando sobre la app, por eso el
+                // header se baja con el "safe area". Cambiar PANTALLA_COMPLETA a
+                // true para probarlo.
+                if (PANTALLA_COMPLETA && tg.isVersionAtLeast && tg.isVersionAtLeast('8.0') && tg.requestFullscreen) {
+                    try { tg.requestFullscreen(); document.body.classList.add('tg-pantalla-completa'); } catch (e) {}
+                }
+            }
             cargarImagenesGenero();
             aplicarTema();
 
