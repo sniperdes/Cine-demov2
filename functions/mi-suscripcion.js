@@ -58,13 +58,14 @@ export async function onRequest(context) {
     const user = await validarInitData(initData, env.BOT_TOKEN);
     if (!user) return json({ activo: false });
 
-    if (user.id === ADMIN_ID) {
-        return json({ activo: true, pagado: true, expiraEn: Date.now() + 365 * 24 * 60 * 60 * 1000 });
-    }
+    // El admin ve su suscripción REAL (activo/vencimiento salen de KV, así
+    // /darpremium y /quitarpremium se notan al probar). Lo único especial es
+    // que cuenta como "pagado" para entrar a +18 sin tener que pagar.
+    const esAdmin = user.id === ADMIN_ID;
 
     try {
         const raw = await env.PELICULAS_KV.get(`sub:${user.id}`);
-        if (!raw) return json({ activo: false });
+        if (!raw) return json({ activo: false, pagado: esAdmin });
 
         const sub = JSON.parse(raw);
         const activo = !!sub.activo && sub.expiraEn > Date.now();
@@ -74,10 +75,10 @@ export async function onRequest(context) {
         // 'referidos') — se usa para secciones que solo deben ver quienes
         // pagaron (ej: +18, donde el pago actúa como filtro de responsabilidad/edad)
         const chargeId = sub.ultimoPago?.chargeId;
-        const pagado = activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos';
+        const pagado = esAdmin || (activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos');
 
         return json({ activo, pagado, expiraEn: sub.expiraEn });
     } catch (e) {
-        return json({ activo: false });
+        return json({ activo: false, pagado: esAdmin });
     }
 }
