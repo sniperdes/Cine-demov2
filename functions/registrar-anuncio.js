@@ -3,19 +3,19 @@
 //   GET  /registrar-anuncio → progreso de hoy (cuántos anuncios vio y el próximo tramo)
 //   POST /registrar-anuncio → suma un anuncio visto completo; si llega a un tramo,
 //                             regala horas de Premium
-// Los tramos son acumulados del día: llegar a 6 anuncios deja 14 h en total (se
-// le suman las 8 h que le faltaban), no 14 h encima de las 6.
-// Cuenta tanto los anuncios que se ven antes de un video como los del botón
-// "Ver anuncio" de la pantalla Premium.
+// Los tramos son acumulados del día: llegar a 20 anuncios deja 12 h en total (se
+// le suman las 6 h que le faltaban), no 12 h encima de las 6. El contador se
+// reinicia cada día, así que la recompensa completa se gana 1 vez por día.
+// Solo cuentan los anuncios vistos desde el cartel o desde el botón
+// "Ver anuncio" del Perfil (no los de antes de cada video).
 //
 // OJO: el "lo vio completo" lo informa la app, el servidor no puede
 // comprobarlo. Por eso hay un mínimo entre anuncios y un tope diario (el último
-// tramo): el daño máximo de alguien que falsee llamadas es 24 h de Premium por día.
+// tramo): el daño máximo de alguien que falsee llamadas es 12 h de Premium por día.
 
 const TRAMOS = [
-    { anuncios: 3,  horasTotales: 6 },
-    { anuncios: 6,  horasTotales: 14 },
-    { anuncios: 10, horasTotales: 24 },
+    { anuncios: 10, horasTotales: 6 },
+    { anuncios: 20, horasTotales: 12 },
 ];
 const TOPE_DIARIO = TRAMOS[TRAMOS.length - 1].anuncios;
 const INTERVALO_MIN_MS = 20 * 1000; // mínimo entre un anuncio contado y el siguiente
