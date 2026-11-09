@@ -75,7 +75,7 @@ export async function onRequest(context) {
         // 'referidos') — se usa para secciones que solo deben ver quienes
         // pagaron (ej: +18, donde el pago actúa como filtro de responsabilidad/edad)
         const chargeId = sub.ultimoPago?.chargeId;
-        const pagado = esAdmin || (activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos');
+        const pagado = esAdmin || (activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos' && chargeId !== 'recompensa');
 
         return json({ activo, pagado, expiraEn: sub.expiraEn });
     } catch (e) {
