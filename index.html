@@ -281,7 +281,7 @@
 
     <!-- CARTEL DE ANUNCIOS POR PREMIUM: tocarlo abre el anuncio -->
     <div id="toast-anuncios" class="toast-referidos" onclick="ocultarToastAnuncios(); verAnuncioPorRecompensa();">
-        🎁 Ganá 6 h de Premium viendo 5 anuncios. Tocá acá y mirá el primero.
+        🎁 Ganá 6 h de Premium viendo 10 anuncios. Tocá acá y mirá el primero.
     </div>
 
     <!-- OVERLAY DE PRIVACIDAD -->
@@ -475,10 +475,9 @@
         <div class="perfil-card" id="premium-gratis-card">
             <h4>🎁 Ganá Premium gratis viendo anuncios</h4>
             <p style="margin:0 0 6px; color:#ccc; font-size:14px;">
-                📺 5 anuncios = 6 h sin anuncios<br>
-                📺 10 anuncios = 12 h en total<br>
-                📺 15 anuncios = 18 h en total<br>
-                📺 20 anuncios = 24 h en total
+                📺 10 anuncios = 6 h sin anuncios<br>
+                📺 20 anuncios = 12 h en total<br>
+                🗓️ Se puede ganar 1 vez por día
             </p>
             <p id="premium-gratis-progreso" style="margin:8px 0 12px; font-size:13px; color:#aaa;"></p>
             <button class="btn" id="premium-gratis-btn" onclick="verAnuncioPorRecompensa()">📺 Ver anuncio</button>
@@ -542,7 +541,7 @@
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         // Pantalla completa de Telegram (oculta la barra superior de Telegram). Activada.
-        const PANTALLA_COMPLETA = false;
+        const PANTALLA_COMPLETA = true;
         let usuarioEsPremium = false;
         // Premium conseguido pagando de verdad con Stars (no regalado por admin
         // ni ganado por referidos) — se usa para la sección +18, como barrera
