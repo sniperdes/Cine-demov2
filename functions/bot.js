@@ -1637,18 +1637,40 @@ export async function onRequest(context) {
             await enviar(`📋 Todavía no hay ${tipo} auto-agregadas.`);
             return new Response('OK');
         }
-        // Telegram corta mensajes muy largos, así que mandamos de a 25
-        const LOTE = 25;
-        for (let i = 0; i < catalogo.length; i += LOTE) {
-            const bloque = catalogo.slice(i, i + LOTE);
-            let resp = i === 0 ? `📋 *Auto-agregadas* (${catalogo.length} en total)\n\n` : '';
-            bloque.forEach((p, j) => {
-                const num = i + j + 1;
-                resp += `${num}. 🔑 ${p.nombreKV || '(sin clave)'} → ${p.titulo}\n`;
-            });
-            await enviar(resp);
+        // Cloudflare corta cada ejecución a ~50 conexiones externas (una por
+        // mensaje enviado), y con lotes de 25 eso dejaba el listado en 1250
+        // ítems. Ahora se arman mensajes de hasta ~3500 caracteres (unos 50
+        // ítems cada uno) y se reparten en páginas de máximo 35 mensajes:
+        // /listarcatalogo pelicula 2 muestra la siguiente.
+        const MAX_CHARS = 3500;
+        const MAX_MENSAJES = 35;
+        const pagina = Math.max(1, parseInt(partes[2], 10) || 1);
+
+        const mensajes = [];
+        let actual = '';
+        catalogo.forEach((p, idx) => {
+            const linea = `${idx + 1}. 🔑 ${escapeMD(p.nombreKV || '(sin clave)')} → ${escapeMD(p.titulo)}\n`;
+            if ((actual + linea).length > MAX_CHARS) { mensajes.push(actual); actual = ''; }
+            actual += linea;
+        });
+        if (actual) mensajes.push(actual);
+
+        const totalPaginas = Math.ceil(mensajes.length / MAX_MENSAJES);
+        if (pagina > totalPaginas) {
+            await enviar(`❌ Solo hay ${totalPaginas} página${totalPaginas === 1 ? '' : 's'} de ${tipo}.`);
+            return new Response('OK');
         }
-        await enviar(`Para ver el detalle de una: /vercatalogo ${tipo} nombreKV\nPara borrar por número (útil si tiene la clave vacía o duplicada): /borrarcatalogoidx ${tipo} numero`);
+
+        const desde = (pagina - 1) * MAX_MENSAJES;
+        const aEnviar = mensajes.slice(desde, desde + MAX_MENSAJES);
+        for (let k = 0; k < aEnviar.length; k++) {
+            const cabecera = k === 0
+                ? `📋 *Auto-agregadas* (${catalogo.length} en total) — página ${pagina}/${totalPaginas}\n\n`
+                : '';
+            await enviar(cabecera + aEnviar[k]);
+        }
+        const siguiente = pagina < totalPaginas ? `➡️ Siguiente página: /listarcatalogo ${tipo} ${pagina + 1}\n\n` : '';
+        await enviar(`${siguiente}Para ver el detalle de una: /vercatalogo ${tipo} nombreKV\nPara buscar por nombre: /buscarcatalogo ${tipo} texto\nPara borrar por número (útil si tiene la clave vacía o duplicada): /borrarcatalogoidx ${tipo} numero`);
         return new Response('OK');
     }
 
