@@ -279,6 +279,11 @@
         🎁 No te olvides de compartir con 10 amigos para conseguir Premium gratis por 30 días. Tocá acá para invitar.
     </div>
 
+    <!-- CARTEL DE ANUNCIOS POR PREMIUM: tocarlo abre el anuncio -->
+    <div id="toast-anuncios" class="toast-referidos" onclick="ocultarToastAnuncios(); verAnuncioPorRecompensa();">
+        🎁 Ganá 6 h de Premium viendo 3 anuncios. Tocá acá y mirá el primero.
+    </div>
+
     <!-- OVERLAY DE PRIVACIDAD -->
     <div id="privacy-overlay" class="privacy-overlay">🔒 Contenido oculto</div>
 
@@ -505,6 +510,17 @@
             </ul>
             <button class="btn vip" onclick="comprarPremium()">💎 Suscribirme</button>
         </div>
+        <div class="premium-plan" id="premium-gratis-card" style="margin-top:15px;">
+            <div class="precio" style="font-size:20px;">🎁 Premium gratis</div>
+            <ul class="premium-beneficios">
+                <li>📺 3 anuncios completos = 6 h sin anuncios</li>
+                <li>📺 6 anuncios = 14 h en total</li>
+                <li>📺 10 anuncios = 24 h en total</li>
+                <li>🔄 Los anuncios de antes de cada video también cuentan</li>
+            </ul>
+            <div id="premium-gratis-progreso" style="text-align:center;font-size:13px;color:#aaa;margin-bottom:10px;"></div>
+            <button class="btn" id="premium-gratis-btn" onclick="verAnuncioPorRecompensa()">📺 Ver anuncio</button>
+        </div>
     </div>
 
     <!-- NAV INFERIOR -->
@@ -525,8 +541,8 @@
 
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
-        // Pantalla completa de Telegram (oculta la barra blanca/superior). Probar con true.
-        const PANTALLA_COMPLETA = false;
+        // Pantalla completa de Telegram (oculta la barra superior de Telegram). Activada.
+        const PANTALLA_COMPLETA = true;
         let usuarioEsPremium = false;
         // Premium conseguido pagando de verdad con Stars (no regalado por admin
         // ni ganado por referidos) — se usa para la sección +18, como barrera
@@ -623,7 +639,41 @@
             if (!toast) return;
             toast.classList.add('mostrar');
             setTimeout(() => toast.classList.remove('mostrar'), 10000);
+        }, 40000);
+
+        // ─── CARTEL DE ANUNCIOS POR PREMIUM ─────────────────────────────────────
+        // A los 15s de abrir la app sube un cartel con el próximo premio de
+        // horas; si lo tocan se abre el anuncio directo. Se queda 10s y sale
+        // una vez por sesión. No se muestra a quien ya tiene Premium, ni a quien
+        // ya llegó al máximo de recompensas del día.
+        setTimeout(async () => {
+            if (!usuarioEsPremium) {
+                const sub = await consultarSuscripcion().catch(() => null);
+                usuarioEsPremium = !!sub?.activo;
+                usuarioPremiumPagado = !!sub?.pagado;
+            }
+            if (usuarioEsPremium) return;
+
+            const toast = document.getElementById('toast-anuncios');
+            if (!toast) return;
+
+            // Texto según el progreso de hoy (si no se puede consultar, el de por defecto)
+            const prog = await consultarProgresoAnuncios();
+            if (prog && !prog.proximo) return; // ya llegó al máximo del día
+            if (prog && prog.proximo) {
+                const { anuncios, horasTotales } = prog.proximo;
+                toast.textContent = prog.total > 0
+                    ? `🎁 Ya viste ${prog.total} anuncio${prog.total === 1 ? '' : 's'} hoy: con ${anuncios} llegás a ${horasTotales} h de Premium. Tocá acá para ver otro.`
+                    : `🎁 Ganá ${horasTotales} h de Premium viendo ${anuncios} anuncios. Tocá acá y mirá el primero.`;
+            }
+
+            toast.classList.add('mostrar');
+            setTimeout(() => toast.classList.remove('mostrar'), 10000);
         }, 15000);
+
+        function ocultarToastAnuncios() {
+            document.getElementById('toast-anuncios')?.classList.remove('mostrar');
+        }
 
         function ocultarToastReferidos() {
             document.getElementById('toast-referidos')?.classList.remove('mostrar');
@@ -1459,7 +1509,10 @@
                 estadoEl.textContent = 'Premium activo';
                 estadoEl.className = 'perfil-sub-estado activo';
                 const fecha = new Date(sub.expiraEn).toLocaleDateString('es-AR');
-                detalleEl.textContent = `Tu plan vence el ${fecha}.`;
+                const hora = (sub.expiraEn - Date.now()) < 48 * 60 * 60 * 1000
+                    ? ` a las ${new Date(sub.expiraEn).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`
+                    : '';
+                detalleEl.textContent = `Tu plan vence el ${fecha}${hora}.`;
             } else {
                 estadoEl.textContent = 'Sin plan Premium';
                 estadoEl.className = 'perfil-sub-estado inactivo';
@@ -1536,6 +1589,99 @@
             }).catch(() => {});
         }
 
+        // Aviso chico que sube desde abajo (reusa el cartel de referidos, que
+        // vuelve a su texto original cuando se cierra)
+        let toastInfoTimer = null;
+        function mostrarAvisoToast(texto) {
+            const toast = document.getElementById('toast-referidos');
+            if (!toast) return;
+            if (!toast.dataset.original) toast.dataset.original = toast.innerHTML;
+            toast.innerHTML = texto;
+            toast.classList.add('mostrar');
+            clearTimeout(toastInfoTimer);
+            toastInfoTimer = setTimeout(() => {
+                toast.classList.remove('mostrar');
+                setTimeout(() => { toast.innerHTML = toast.dataset.original; }, 500);
+            }, 6000);
+        }
+
+        // ─── RECOMPENSAS POR ANUNCIOS ───────────────────────────────────────────
+        // Cada anuncio visto completo suma al día; el backend (registrar-anuncio.js)
+        // decide cuándo regalar horas de Premium. Cuentan los anuncios de antes de
+        // un video y los del botón "Ver anuncio" de la pantalla Premium.
+        function textoProgresoAnuncios(d) {
+            if (!d) return '';
+            const total = d.total || 0;
+            if (!d.proximo) return `Hoy viste ${total} anuncios — llegaste al máximo de recompensas del día 🎉`;
+            const faltan = d.proximo.anuncios - total;
+            return `Hoy: ${total} anuncio${total === 1 ? '' : 's'} visto${total === 1 ? '' : 's'} — te falta${faltan === 1 ? '' : 'n'} ${faltan} para llegar a ${d.proximo.horasTotales} h de Premium`;
+        }
+
+        async function consultarProgresoAnuncios() {
+            const tg = window.Telegram?.WebApp;
+            try {
+                const res = await fetch('/registrar-anuncio', { headers: { 'X-Telegram-Init-Data': tg?.initData || '' } });
+                return await res.json();
+            } catch (e) { return null; }
+        }
+
+        async function registrarAnuncio() {
+            if (usuarioEsPremium) return null;
+            const tg = window.Telegram?.WebApp;
+            try {
+                const res = await fetch('/registrar-anuncio', {
+                    method: 'POST',
+                    headers: { 'X-Telegram-Init-Data': tg?.initData || '' }
+                });
+                const d = await res.json();
+
+                const progresoEl = document.getElementById('premium-gratis-progreso');
+                if (progresoEl && d.total !== undefined) progresoEl.textContent = textoProgresoAnuncios(d);
+
+                if (d.premio) {
+                    usuarioEsPremium = true;
+                    mostrarAvisoToast(`🎁 ¡Ganaste ${d.premio} h de Premium! Sin anuncios por un rato.`);
+                    // Cuando se vence, volver a consultar para no seguir salteando anuncios
+                    const ms = Math.max(0, (d.expiraEn || 0) - Date.now()) + 2000;
+                    setTimeout(async () => {
+                        const sub = await consultarSuscripcion();
+                        usuarioEsPremium = !!sub?.activo;
+                    }, ms);
+                    if (document.getElementById('premium')?.classList.contains('active')) cargarPremium();
+                } else if (d.contado && d.proximo && !document.getElementById('premium')?.classList.contains('active')) {
+                    mostrarAvisoToast(`📺 ${d.total} anuncio${d.total > 1 ? 's' : ''} hoy — con ${d.proximo.anuncios} ganás Premium (${d.proximo.horasTotales} h en total)`);
+                }
+                return d;
+            } catch (e) { return null; }
+        }
+
+        // Botón "Ver anuncio" de la pantalla Premium: un anuncio completo = un punto
+        async function verAnuncioPorRecompensa() {
+            const tg = window.Telegram?.WebApp;
+            const avisar = (msg) => { if (tg?.showAlert) tg.showAlert(msg); else alert(msg); };
+            const btn = document.getElementById('premium-gratis-btn');
+
+            if (typeof show_11208906 !== 'function') {
+                avisar('📺 No pudimos cargar el anuncio. Si tenés un bloqueador de anuncios, desactivalo y probá de nuevo.');
+                return;
+            }
+            if (btn) btn.disabled = true;
+            try {
+                const resultado = await show_11208906();
+                if (resultado?.reward_event_type === 'not_valued') {
+                    avisar('📺 Tenés que ver el anuncio completo para que cuente.');
+                    return;
+                }
+                const d = await registrarAnuncio();
+                if (d?.tope) avisar('🎉 Ya llegaste al máximo de recompensas de hoy. ¡Volvé mañana!');
+                else if (d && !d.contado && !d.premium) avisar('⏳ Esperá unos segundos antes de ver el siguiente anuncio.');
+            } catch (e) {
+                avisar('📺 El anuncio no se pudo completar. Probá de nuevo en un rato.');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
         async function consultarReferidos() {
             const tg = window.Telegram?.WebApp;
             try {
@@ -1584,15 +1730,27 @@
             const sub = await consultarSuscripcion();
             const estadoEl = document.getElementById('premium-estado-actual');
             const cardEl   = document.getElementById('premium-plan-card');
+            const gratisEl = document.getElementById('premium-gratis-card');
 
             if (sub?.activo) {
                 const fecha = new Date(sub.expiraEn).toLocaleDateString('es-AR');
-                estadoEl.textContent = `✅ Ya tenés Premium activo hasta el ${fecha}`;
+                const hora = (sub.expiraEn - Date.now()) < 48 * 60 * 60 * 1000
+                    ? ` a las ${new Date(sub.expiraEn).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}`
+                    : '';
+                estadoEl.textContent = `✅ Ya tenés Premium activo hasta el ${fecha}${hora}`;
                 estadoEl.style.display = 'block';
                 cardEl.style.display = 'none';
+                if (gratisEl) gratisEl.style.display = 'none';
             } else {
                 estadoEl.style.display = 'none';
                 cardEl.style.display = 'block';
+                if (gratisEl) {
+                    gratisEl.style.display = 'block';
+                    consultarProgresoAnuncios().then(d => {
+                        const el = document.getElementById('premium-gratis-progreso');
+                        if (el && d) el.textContent = textoProgresoAnuncios(d);
+                    });
+                }
             }
         }
 
@@ -1857,6 +2015,7 @@
                             if (resultado?.reward_event_type === 'not_valued') {
                                 anuncioIncompleto(ejecutar);
                             } else {
+                                registrarAnuncio(); // cuenta para las recompensas (no espera)
                                 ejecutar();
                             }
                         })
