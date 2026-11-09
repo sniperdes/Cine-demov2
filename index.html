@@ -541,12 +541,14 @@
         // Estado de la suscripción Premium del usuario actual — se carga una vez
         // al abrir la app y se usa para saltear el anuncio antes de reproducir.
         // Pantalla completa de Telegram (oculta la barra superior de Telegram). Activada.
-        const PANTALLA_COMPLETA = false;
+        const PANTALLA_COMPLETA = true;
         let usuarioEsPremium = false;
         // Premium conseguido pagando de verdad con Stars (no regalado por admin
         // ni ganado por referidos) — se usa para la sección +18, como barrera
         // extra además del Premium normal.
         let usuarioPremiumPagado = false;
+        // Su Premium actual es el de recompensas (por anuncios): puede seguir sumando
+        let usuarioPremiumRecompensa = false;
         const DIAS_PREMIO_REFERIDOS = 30; // debe coincidir con DIAS_PREMIO en marcar-reproduccion.js
 
         // Devuelve el año de un ítem del catálogo para poder ordenar por estreno.
@@ -629,7 +631,7 @@
             // carrera de tiempos.
             if (!usuarioEsPremium) {
                 const sub = await consultarSuscripcion().catch(() => null);
-                usuarioEsPremium = !!sub?.activo;
+                usuarioEsPremium = !!sub?.activo; usuarioPremiumRecompensa = !!sub?.recompensa;
                 usuarioPremiumPagado = !!sub?.pagado;
             }
             if (usuarioEsPremium) return;
@@ -648,10 +650,10 @@
         setTimeout(async () => {
             if (!usuarioEsPremium) {
                 const sub = await consultarSuscripcion().catch(() => null);
-                usuarioEsPremium = !!sub?.activo;
+                usuarioEsPremium = !!sub?.activo; usuarioPremiumRecompensa = !!sub?.recompensa;
                 usuarioPremiumPagado = !!sub?.pagado;
             }
-            if (usuarioEsPremium) return;
+            if (usuarioEsPremium && !usuarioPremiumRecompensa) return;
 
             const toast = document.getElementById('toast-anuncios');
             if (!toast) return;
@@ -1425,7 +1427,7 @@
             // para que esté resuelto rápido (el toast de referidos a los 15s
             // depende de este valor, y el catálogo solo puede tardar más que eso)
             consultarSuscripcion().then(sub => {
-                usuarioEsPremium = !!sub?.activo;
+                usuarioEsPremium = !!sub?.activo; usuarioPremiumRecompensa = !!sub?.recompensa;
                 usuarioPremiumPagado = !!sub?.pagado;
             });
 
@@ -1521,8 +1523,9 @@
             // Tarjeta de anuncios por Premium: solo para quien no tiene Premium
             const gratisEl = document.getElementById('premium-gratis-card');
             if (gratisEl) {
-                gratisEl.style.display = sub?.activo ? 'none' : 'block';
-                if (!sub?.activo) {
+                const puedeSumar = !sub?.activo || !!sub?.recompensa;
+                gratisEl.style.display = puedeSumar ? 'block' : 'none';
+                if (puedeSumar) {
                     consultarProgresoAnuncios().then(d => {
                         const el = document.getElementById('premium-gratis-progreso');
                         if (el && d) el.textContent = textoProgresoAnuncios(d);
@@ -1575,7 +1578,7 @@
                 // Por si la consulta inicial todavía no resolvió o cambió desde
                 // entonces, reconsultamos en vivo antes de bloquear.
                 const sub = await consultarSuscripcion().catch(() => null);
-                usuarioEsPremium = !!sub?.activo;
+                usuarioEsPremium = !!sub?.activo; usuarioPremiumRecompensa = !!sub?.recompensa;
                 usuarioPremiumPagado = !!sub?.pagado;
             }
 
@@ -1637,7 +1640,7 @@
         }
 
         async function registrarAnuncio() {
-            if (usuarioEsPremium) return null;
+            if (usuarioEsPremium && !usuarioPremiumRecompensa) return null;
             const tg = window.Telegram?.WebApp;
             try {
                 const res = await fetch('/registrar-anuncio', {
@@ -1651,12 +1654,13 @@
 
                 if (d.premio) {
                     usuarioEsPremium = true;
+                    usuarioPremiumRecompensa = true;
                     mostrarAvisoToast(`🎁 ¡Ganaste ${d.premio} h de Premium! Sin anuncios por un rato.`);
                     // Cuando se vence, volver a consultar para no seguir salteando anuncios
                     const ms = Math.max(0, (d.expiraEn || 0) - Date.now()) + 2000;
                     setTimeout(async () => {
                         const sub = await consultarSuscripcion();
-                        usuarioEsPremium = !!sub?.activo;
+                        usuarioEsPremium = !!sub?.activo; usuarioPremiumRecompensa = !!sub?.recompensa;
                     }, ms);
                     if (document.getElementById('perfil')?.classList.contains('active')) cargarPerfil();
                 } else if (d.contado && d.proximo && !document.getElementById('perfil')?.classList.contains('active')) {
