@@ -83,10 +83,16 @@ export async function onRequest(context) {
             return json({ total: data.total, proximo: proximoTramo(), tramos: TRAMOS });
         }
 
-        // Con Premium activo no se cuenta: así no se encadenan recompensas
+        // Si ya tiene un Premium que NO viene de recompensas (pago, referidos o
+        // regalado a mano) no hace falta contar. Pero si su Premium activo es el
+        // de recompensas, sigue contando: así puede llegar al siguiente tramo del
+        // día (ej: pasar de 10 a 20 anuncios mientras tiene las primeras 6 h).
+        // El tope diario evita que se encadene más de lo previsto.
         const subRaw = await env.PELICULAS_KV.get(`sub:${user.id}`);
         const sub = subRaw ? JSON.parse(subRaw) : null;
-        if (sub && sub.activo && sub.expiraEn > now) return json({ contado: false, premium: true });
+        const subActiva = !!(sub && sub.activo && sub.expiraEn > now);
+        const subDeRecompensa = subActiva && sub.ultimoPago?.chargeId === 'recompensa';
+        if (subActiva && !subDeRecompensa) return json({ contado: false, premium: true });
 
         if (data.total >= TOPE_DIARIO) return json({ contado: false, tope: true, total: data.total });
         if (now - data.ultimo < INTERVALO_MIN_MS) return json({ contado: false, total: data.total, proximo: proximoTramo() });
@@ -102,7 +108,8 @@ export async function onRequest(context) {
         if (horasObjetivo > data.horas) {
             premio = horasObjetivo - data.horas;
             data.horas = horasObjetivo;
-            expiraEn = now + premio * HORA_MS;
+            // Si todavía tiene horas de recompensa, las nuevas se suman al final
+            expiraEn = (subDeRecompensa ? sub.expiraEn : now) + premio * HORA_MS;
 
             await env.PELICULAS_KV.put(`sub:${user.id}`, JSON.stringify({
                 activo: true,

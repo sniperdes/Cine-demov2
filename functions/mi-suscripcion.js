@@ -77,7 +77,10 @@ export async function onRequest(context) {
         const chargeId = sub.ultimoPago?.chargeId;
         const pagado = esAdmin || (activo && !!chargeId && chargeId !== 'manual-admin' && chargeId !== 'referidos' && chargeId !== 'recompensa');
 
-        return json({ activo, pagado, expiraEn: sub.expiraEn });
+        // recompensa: su Premium actual viene de ver anuncios (puede seguir sumando horas)
+        const recompensa = activo && chargeId === 'recompensa';
+
+        return json({ activo, pagado, recompensa, expiraEn: sub.expiraEn });
     } catch (e) {
         return json({ activo: false, pagado: esAdmin });
     }
