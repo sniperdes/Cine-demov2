@@ -1285,7 +1285,7 @@ export async function onRequest(context) {
     }
 
     if (texto.startsWith('/start')) {
-        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc, posterUrl)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/probartmdb texto (prueba la detección automática sin subir un archivo real)\n/buscarcatalogo pelicula|serie|anime|dorama|turca texto (busca por título o nombreKV, sin escanear a mano)\n/crearficha pelicula|serie|anime|dorama|turca nombreKV año movie|tv Título (crea una ficha sin pasar por TMDB)\n/tema auto|normal|sanvalentin|halloween|diamuertos|navidad|anionuevo (fondo festivo de la Mini App)\n/temaimg tema URL (imagen de fondo de un tema)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
+        await enviar(`👋 *Bot Admin NovaPlay*\n\n*Automático:*\nSubí el video al canal. Si reconozco el título (serie, anime o dorama) te muestro botones para Confirmar, Corregir o Cancelar.\n\n*Manual:*\n/asignar serie nombre temp ep [id]\n/asignar pelicula nombre parte [id]\n/asignarparte serie nombre temp ep parte [id] (capítulo partido en varios archivos)\n\n*Ver/corregir auto-agregada:*\n/listarcatalogo pelicula|serie|anime|dorama\n/vercatalogo pelicula|serie|anime|dorama nombre\n/corregir pelicula|serie|anime|dorama nombre campo valor\n(campos: titulo, tmdbQuery, generos, info, desc, posterUrl)\n/borrarcachepster pelicula|serie|anime|dorama|turca nombre (fuerza que vuelva a buscar el póster en TMDB)\n/borrarcachepsterquery movie|tv texto (igual, pero si ya borraste la ficha del catálogo)\n/probartmdb texto (prueba la detección automática sin subir un archivo real)\n/buscarcatalogo pelicula|serie|anime|dorama|turca texto (busca por título o nombreKV, sin escanear a mano)\n/crearficha pelicula|serie|anime|dorama|turca nombreKV año movie|tv Título (crea una ficha sin pasar por TMDB)\n/exportarcatalogo [tipo] (te manda el catálogo en un archivo para Excel)\n/tema auto|normal|sanvalentin|halloween|diamuertos|navidad|anionuevo (fondo festivo de la Mini App)\n/temaimg tema URL (imagen de fondo de un tema)\n/borrarcatalogo pelicula|serie|anime|dorama nombre\n/borrarcatalogoidx pelicula|serie|anime|dorama numero (por posición, para claves vacías/duplicadas)\n\n*Link externo:*\n/agregar serie nombre temp ep url\n/agregar pelicula nombre parte url\n\n*Consultar:*\n/ver serie|anime|dorama|turca|rusa nombre temp ep\n/listar nombre\n\n*Borrar video:*\n/borrar serie|anime|dorama|turca|rusa nombre temp ep\n/borrar pelicula nombre parte\n\n*Premium (manual, sin cobro):*\n/darpremium [userId] [dias]\n/quitarpremium [userId]\n/reembolsar userId\n/estadisticas (usuarios que entraron a la app)\n/vervisitas (detalle de cada visita, para diagnóstico)\n\n*Canales de TV en vivo:*\n/agregarcanal categoria nombre urlM3U8 [logoUrl]\n/listarcanales [categoria]\n/borrarcanalidx numero\n/corregircanal nombreKV campo valor\n/borrartodosloscanales confirmar (borra TODOS de una)\n\n*Importar lista M3U completa:*\n/previsualizarm3u urlDelM3U\n/agregarm3u urlDelM3U todos\n/agregarm3u urlDelM3U 3,7,12`);
         return new Response('OK');
     }
 
@@ -1541,6 +1541,62 @@ export async function onRequest(context) {
         } else {
             await env.PELICULAS_KV.put(`config:tema-img:${tema}`, url);
             await enviar(`✅ Imagen de ${tema} guardada.`);
+        }
+        return new Response('OK');
+    }
+
+    if (cmd === '/exportarcatalogo') {
+        // /exportarcatalogo            → un archivo con TODOS los catálogos
+        // /exportarcatalogo pelicula   → solo ese catálogo
+        // Te manda un .csv (abre en Excel / Google Sheets) con: tipo, nombreKV,
+        // título, año, géneros y cuántos videos tiene cargados cada ficha — sirve
+        // para revisar repetidos y fichas sin video. Solo incluye lo que agregó
+        // el bot (KV), no el contenido fijo de los data-*.js.
+        const pedido = (partes[1] || '').toLowerCase();
+        if (pedido && !TIPOS_CATALOGO_VALIDOS.includes(pedido)) {
+            await enviar(`Uso: /exportarcatalogo [${TIPOS_CATALOGO_VALIDOS.join('|')}]`);
+            return new Response('OK');
+        }
+        const tipos = pedido ? [pedido] : TIPOS_CATALOGO_VALIDOS;
+
+        try {
+            // Cuántos videos tiene cada ficha: se cuentan las claves video:<nombreKV>:...
+            const videosPorFicha = {};
+            let cursor;
+            for (let vuelta = 0; vuelta < 30; vuelta++) {
+                const lista = await env.PELICULAS_KV.list({ prefix: 'video:', cursor });
+                for (const k of lista.keys) {
+                    const nombre = k.name.split(':')[1];
+                    videosPorFicha[nombre] = (videosPorFicha[nombre] || 0) + 1;
+                }
+                if (lista.list_complete) break;
+                cursor = lista.cursor;
+            }
+
+            const celda = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+            const filas = [['tipo', 'nombreKV', 'titulo', 'anio', 'generos', 'videos'].map(celda).join(';')];
+            let total = 0;
+            for (const tipo of tipos) {
+                const raw = await env.PELICULAS_KV.get(KV_KEY_POR_TIPO[tipo]);
+                const catalogo = raw ? JSON.parse(raw) : [];
+                catalogo
+                    .slice()
+                    .sort((a, b) => String(a.titulo || '').localeCompare(String(b.titulo || ''), 'es'))
+                    .forEach(p => {
+                        total++;
+                        filas.push([tipo, p.nombreKV, p.titulo, p.anio || '', (p.generos || []).join(', '), videosPorFicha[p.nombreKV] || 0].map(celda).join(';'));
+                    });
+            }
+
+            // BOM para que Excel respete las tildes; separador ; para Excel en español
+            const csv = '\uFEFF' + filas.join('\r\n');
+            const form = new FormData();
+            form.append('chat_id', String(chatId));
+            form.append('caption', `📄 Catálogo${pedido ? ' de ' + pedido : ''}: ${total} fichas`);
+            form.append('document', new Blob([csv], { type: 'text/csv' }), `catalogo${pedido ? '-' + pedido : ''}.csv`);
+            await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendDocument`, { method: 'POST', body: form });
+        } catch (e) {
+            await enviar(`❌ No pude armar el archivo: ${e.message}`);
         }
         return new Response('OK');
     }
